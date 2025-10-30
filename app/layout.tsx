@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import AppHeader from "@/components/shared/app-header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { useIsAppHeaderFixed } from "@/lib/hooks/use-app-header";
 
 const manrope = Manrope({
   subsets: ["latin"],

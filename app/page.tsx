@@ -7,18 +7,21 @@ const Hero = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "w-full min-h-[calc(100vh-68px)] m-auto p-4 grid content-center relative ",
+        "w-full min-h-screen m-auto p-4 grid content-center relative ",
         className
       )}
     >
       {/* Background video */}
       <video
-        src="/assets/videos/hero.mp4"
+        src="/assets/webms/hero.webm"
         autoPlay
         loop
         muted
-        className="w-full h-full absolute top-0 left-0 object-cover object-center z-1 brightness-50"
+        className="w-full h-full absolute top-0 left-0 object-cover object-center z-1"
       ></video>
+
+      {/* Overlay */}
+      <div className="w-full h-full absolute top-0 left-0 bg-black/50 z-1"></div>
 
       {/* Content */}
       <div className="w-full max-w-7xl m-auto space-y-7 z-2 flex flex-col items-center text-white">
@@ -28,7 +31,7 @@ const Hero = ({ className }: { className?: string }) => {
           <span className="text-primary"> xanh</span>
         </p>
         {/* Subtitle */}
-        <p className="text-white/70 max-w-2xl text-center">
+        <p className="text-white/70 max-w-lg text-center">
           Mỗi chiếc lá là một hơi thở trong lành, mỗi chậu cây là một niềm vui
           nhỏ giữa bộn bề cuộc sống.
         </p>
@@ -55,14 +58,14 @@ export default function Home() {
       <Hero />
 
       <div className="w-full bg-background">
-        <div className="w-full max-w-7xl m-auto p-4 space-y-5">
+        <div className="w-full max-w-7xl m-auto mt-10 p-4 space-y-5">
           {/* Head */}
           <p className="font-semibold text-xl uppercase pl-4 border-l-5 border-l-primary">
             Sản phẩm được nhiều người yêu thích
           </p>
 
           {/* Product cards */}
-          <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-3">
+          <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-4">
             <ProductCard
               imageSrc="/assets/images/product-1.jpg"
               productName="Cúc La Mã"

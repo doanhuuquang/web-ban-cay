@@ -23,7 +23,7 @@ export default function ProductCard({
   return (
     <div
       className={cn(
-        "w-full rounded-md overflow-hidden bg-background dark:bg-accent cursor-pointer group hover:border-primary",
+        "w-full rounded-md overflow-hidden cursor-pointer group hover:border-primary space-y-2",
         className
       )}
     >
@@ -45,9 +45,9 @@ export default function ProductCard({
           className="absolute top-0 left-0 object-center object-cover rounded-md"
         />
       </div>
-      <div className="w-full p-4 space-y-1">
+      <div className="w-full p-4 space-y-1 bg-primary/10 rounded-md">
         <p className="font-semibold truncate">{productName}</p>
-        <p className="text-xs text-muted-foreground min-h-10 line-clamp-2">
+        <p className="text-xs text-muted-foreground h-8 line-clamp-2">
           {productDescription}
         </p>
 

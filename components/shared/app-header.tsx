@@ -15,11 +15,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsAppHeaderFixed } from "@/lib/hooks/use-app-header";
 import { cn } from "@/lib/utils";
 import { Menu, Search, ShoppingBag, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import React from "react";
 
 const navigationLinks = [
   { name: "Trang chủ", href: "/" },
@@ -37,6 +39,8 @@ const NavBar = ({ className }: { className?: string }) => {
   */
   const currentPath = pathname?.replace(/\/+$/, "") || "/";
 
+  const isFixed = useIsAppHeaderFixed();
+
   return (
     <nav className={cn("flex items-center justify-center gap-6", className)}>
       {navigationLinks.map((link, index) => (
@@ -45,9 +49,13 @@ const NavBar = ({ className }: { className?: string }) => {
           href={link.href}
           className={cn(
             "uppercase text-sm",
+            currentPath === link.href && "font-semibold",
+            isFixed ? "text-white/50" : "text-muted-foreground",
             currentPath === link.href
-              ? "font-semibold"
-              : "text-muted-foreground hover:text-foreground transition-colors"
+              ? isFixed
+                ? "text-white"
+                : "text-foreground"
+              : ""
           )}
         >
           {link.name}
@@ -58,13 +66,28 @@ const NavBar = ({ className }: { className?: string }) => {
 };
 
 const Action = ({ className }: { className?: string }) => {
+  const isFixed = useIsAppHeaderFixed();
+
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant={"ghost"} size={"icon"} className="rounded-full">
-            <Search className="size-5" />
-          </Button>
+          <Link href="/search">
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              className="rounded-full group"
+            >
+              <Search
+                className={cn(
+                  "size-5",
+                  isFixed
+                    ? "text-white group-hover:text-foreground"
+                    : "text-foreground"
+                )}
+              />
+            </Button>
+          </Link>
         </TooltipTrigger>
         <TooltipContent>
           <p>Tìm kiếm</p>
@@ -73,8 +96,19 @@ const Action = ({ className }: { className?: string }) => {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant={"ghost"} size={"icon"} className="rounded-full">
-            <ShoppingBag className="size-5" />
+          <Button
+            variant={"ghost"}
+            size={"icon"}
+            className="rounded-full group"
+          >
+            <ShoppingBag
+              className={cn(
+                "size-5",
+                isFixed
+                  ? "text-white group-hover:text-foreground"
+                  : "text-foreground"
+              )}
+            />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -84,8 +118,19 @@ const Action = ({ className }: { className?: string }) => {
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant={"ghost"} size={"icon"} className="rounded-full">
-            <User className="size-5" />
+          <Button
+            variant={"ghost"}
+            size={"icon"}
+            className="rounded-full group"
+          >
+            <User
+              className={cn(
+                "size-5",
+                isFixed
+                  ? "text-white group-hover:text-foreground"
+                  : "text-foreground"
+              )}
+            />
           </Button>
         </TooltipTrigger>
         <TooltipContent>
@@ -105,11 +150,20 @@ const MenuMobile = ({ className }: { className?: string }) => {
   */
   const currentPath = pathname?.replace(/\/+$/, "") || "/";
 
+  const isFixed = useIsAppHeaderFixed();
+
   return (
     <Sheet>
       <SheetTrigger asChild className={className}>
         <Button variant={"ghost"} size={"icon"}>
-          <Menu className="size-5" />
+          <Menu
+            className={cn(
+              "size-5",
+              isFixed
+                ? "text-white group-hover:text-foreground"
+                : "text-foreground"
+            )}
+          />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-full max-w-md">
@@ -191,8 +245,16 @@ const MenuMobile = ({ className }: { className?: string }) => {
 };
 
 export default function AppHeader({ className }: { className?: string }) {
+  const isFixed = useIsAppHeaderFixed();
+
   return (
-    <header className={cn("w-full sticky top-0 z-50 bg-background", className)}>
+    <header
+      className={cn(
+        "w-full top-0 z-50 transtion-all fixed",
+        isFixed ? "bg-transparent" : "bg-background",
+        className
+      )}
+    >
       <div className="w-full max-w-7xl m-auto p-4 lg:grid lg:grid-cols-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <MenuMobile className="-ml-3 lg:hidden" />
