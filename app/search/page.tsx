@@ -1,3 +1,8 @@
 export default function SearchPage() {
-  return <div>Search Page</div>;
+  return (
+    <main>
+      <div className="h-16"></div>
+      <p>\djndsc</p>
+    </main>
+  );
 }

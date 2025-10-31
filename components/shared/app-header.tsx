@@ -15,7 +15,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useIsAppHeaderFixed } from "@/lib/hooks/use-app-header";
 import { cn } from "@/lib/utils";
 import { Menu, Search, ShoppingBag, User } from "lucide-react";
 import Image from "next/image";
@@ -30,17 +29,15 @@ const navigationLinks = [
   { name: "Liên hệ", href: "/contact" },
 ];
 
-const NavBar = ({ className }: { className?: string }) => {
-  const pathname = usePathname();
-  /*
-    "/products/"  → "/products"
-    "/products"   → "/products"
-    "/"           → "/"
-  */
-  const currentPath = pathname?.replace(/\/+$/, "") || "/";
-
-  const isFixed = useIsAppHeaderFixed();
-
+const NavBar = ({
+  className,
+  isHeaderFixed,
+  currentPath,
+}: {
+  className?: string;
+  isHeaderFixed: boolean;
+  currentPath: string;
+}) => {
   return (
     <nav className={cn("flex items-center justify-center gap-6", className)}>
       {navigationLinks.map((link, index) => (
@@ -50,9 +47,9 @@ const NavBar = ({ className }: { className?: string }) => {
           className={cn(
             "uppercase text-sm",
             currentPath === link.href && "font-semibold",
-            isFixed ? "text-white/50" : "text-muted-foreground",
+            isHeaderFixed ? "text-white/50" : "text-muted-foreground",
             currentPath === link.href
-              ? isFixed
+              ? isHeaderFixed
                 ? "text-white"
                 : "text-foreground"
               : ""
@@ -65,9 +62,13 @@ const NavBar = ({ className }: { className?: string }) => {
   );
 };
 
-const Action = ({ className }: { className?: string }) => {
-  const isFixed = useIsAppHeaderFixed();
-
+const Action = ({
+  className,
+  isHeaderFixed,
+}: {
+  className?: string;
+  isHeaderFixed: boolean;
+}) => {
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Tooltip>
@@ -81,7 +82,7 @@ const Action = ({ className }: { className?: string }) => {
               <Search
                 className={cn(
                   "size-5",
-                  isFixed
+                  isHeaderFixed
                     ? "text-white group-hover:text-foreground"
                     : "text-foreground"
                 )}
@@ -104,7 +105,7 @@ const Action = ({ className }: { className?: string }) => {
             <ShoppingBag
               className={cn(
                 "size-5",
-                isFixed
+                isHeaderFixed
                   ? "text-white group-hover:text-foreground"
                   : "text-foreground"
               )}
@@ -126,7 +127,7 @@ const Action = ({ className }: { className?: string }) => {
             <User
               className={cn(
                 "size-5",
-                isFixed
+                isHeaderFixed
                   ? "text-white group-hover:text-foreground"
                   : "text-foreground"
               )}
@@ -141,7 +142,13 @@ const Action = ({ className }: { className?: string }) => {
   );
 };
 
-const MenuMobile = ({ className }: { className?: string }) => {
+const MenuMobile = ({
+  className,
+  isHeaderFixed,
+}: {
+  className?: string;
+  isHeaderFixed: boolean;
+}) => {
   const pathname = usePathname();
   /*
     "/products/"  → "/products"
@@ -150,8 +157,6 @@ const MenuMobile = ({ className }: { className?: string }) => {
   */
   const currentPath = pathname?.replace(/\/+$/, "") || "/";
 
-  const isFixed = useIsAppHeaderFixed();
-
   return (
     <Sheet>
       <SheetTrigger asChild className={className}>
@@ -159,7 +164,7 @@ const MenuMobile = ({ className }: { className?: string }) => {
           <Menu
             className={cn(
               "size-5",
-              isFixed
+              isHeaderFixed
                 ? "text-white group-hover:text-foreground"
                 : "text-foreground"
             )}
@@ -245,7 +250,35 @@ const MenuMobile = ({ className }: { className?: string }) => {
 };
 
 export default function AppHeader({ className }: { className?: string }) {
-  const isFixed = useIsAppHeaderFixed();
+  const [isFixed, setIsFixed] = React.useState<boolean>(false);
+
+  const pathname = usePathname();
+  /*
+        "/products/"  → "/products"
+        "/products"   → "/products"
+        "/"           → "/"
+  */
+  const currentPath = pathname?.replace(/\/+$/, "") || "/";
+
+  React.useEffect(() => {
+    if (currentPath !== "/") {
+      setIsFixed(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setIsFixed(false);
+      } else {
+        setIsFixed(true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [currentPath]);
 
   return (
     <header
@@ -255,13 +288,17 @@ export default function AppHeader({ className }: { className?: string }) {
         className
       )}
     >
-      <div className="w-full max-w-7xl m-auto p-4 lg:grid lg:grid-cols-4 flex justify-between items-center">
+      <div className="w-full max-w-[1400px] m-auto p-4 lg:grid lg:grid-cols-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <MenuMobile className="-ml-3 lg:hidden" />
-          <AppLogo className="lg:text-3xl text-2xl" />
+          <MenuMobile isHeaderFixed={isFixed} className="-ml-3 lg:hidden" />
+          <AppLogo isHeaderFixed={isFixed} className="lg:text-3xl text-2xl" />
         </div>
-        <NavBar className="w-full col-span-2 lg:flex hidden" />
-        <Action className="justify-end -mr-3" />
+        <NavBar
+          isHeaderFixed={isFixed}
+          currentPath={currentPath}
+          className="w-full col-span-2 lg:flex hidden"
+        />
+        <Action isHeaderFixed={isFixed} className="justify-end -mr-3" />
       </div>
     </header>
   );

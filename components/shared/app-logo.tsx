@@ -1,23 +1,28 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Fjalla_One } from "next/font/google";
-import { useIsAppHeaderFixed } from "@/lib/hooks/use-app-header";
+import { Anton, Fjalla_One, Lobster_Two } from "next/font/google";
 
-const dancingScript = Fjalla_One({
+const dancingScript = Anton({
   weight: "400",
   subsets: ["latin"],
 });
 
-export default function AppLogo({ className }: { className?: string }) {
-  const isFixed = useIsAppHeaderFixed();
-
+export default function AppLogo({
+  className,
+  isHeaderFixed = false,
+}: {
+  className?: string;
+  isHeaderFixed?: boolean;
+}) {
   return (
     <Link
       href={"/"}
       className={cn("w-fit uppercase", dancingScript.className, className)}
     >
       <span className="text-primary">G</span>
-      <span className={isFixed ? "text-white" : "text-foreground"}>Plant</span>
+      <span className={isHeaderFixed ? "text-white" : "text-foreground"}>
+        Plant
+      </span>
     </Link>
   );
 }

@@ -4,18 +4,20 @@ import { Heart, ShoppingCart, Star } from "lucide-react";
 import Image from "next/image";
 
 type ProductCardProps = {
-  imageSrc: string;
+  imageSrcs: string[];
   productName: string;
   productDescription: string;
   price: number;
   discountPercentage: number;
+  rating: number;
 };
 
 export default function ProductCard({
-  imageSrc,
+  imageSrcs,
   productName,
   productDescription,
   price,
+  rating,
   className,
 }: ProductCardProps & {
   className?: string;
@@ -23,11 +25,11 @@ export default function ProductCard({
   return (
     <div
       className={cn(
-        "w-full rounded-md overflow-hidden cursor-pointer group hover:border-primary space-y-2",
+        "w-full rounded-xl overflow-hidden cursor-pointer group hover:border-primary space-y-2 aspect-3/4",
         className
       )}
     >
-      <div className="w-full aspect-3/4 relative">
+      <div className="w-full h-full relative">
         <div className="absolute top-0 right-0 z-1 p-2 gap-2 hidden group-hover:flex group-hover:flex-col">
           <Button variant={"outline"} size={"icon"} className="rounded-full">
             <Heart />
@@ -39,29 +41,37 @@ export default function ProductCard({
         </div>
 
         <Image
-          src={imageSrc}
+          src={imageSrcs[0]}
           alt="image"
           fill
-          className="absolute top-0 left-0 object-center object-cover rounded-md"
+          className="absolute top-0 left-0 z-1 object-center object-cover rounded-md"
         />
-      </div>
-      <div className="w-full p-4 space-y-1 bg-primary/10 rounded-md">
-        <p className="font-semibold truncate">{productName}</p>
-        <p className="text-xs text-muted-foreground h-8 line-clamp-2">
-          {productDescription}
-        </p>
 
-        <div className="w-full flex items-center justify-between">
-          <div className="space-x-1">
-            <span className="font-semibold">{price} VND</span>
-            <span className="font-semibold text-xs line-through text-primary">
-              {price} VND
+        <Image
+          src={imageSrcs[1]}
+          alt="image"
+          fill
+          className="absolute top-0 left-0 object-center object-cover rounded-md z-0 group-hover:z-2 transition-all"
+        />
+
+        <div className="w-full group-hover:translate-y-full transition-all p-4 space-y-1 flex flex-col justify-end bg-background/80 absolute bottom-0 left-0 z-3">
+          <p className="font-semibold truncate">{productName}</p>
+          <p className="text-muted-foreground text-xs h-8 line-clamp-2">
+            {productDescription}
+          </p>
+
+          <div className="w-full flex items-center justify-between">
+            <div className="space-x-1">
+              <span className="font-semibold">{price} VND</span>
+              <span className="font-semibold text-xs line-through text-primary">
+                {price} VND
+              </span>
+            </div>
+            <span className="flex items-center gap-1">
+              <Star size={12} className="text-primary" />
+              <p className="text-xs">{rating}</p>
             </span>
           </div>
-          <span className="flex items-center gap-1">
-            <Star size={12} className="text-primary" />
-            <p className="text-xs">3.5</p>
-          </span>
         </div>
       </div>
     </div>
