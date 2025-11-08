@@ -17,12 +17,13 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Menu, Search, ShoppingBag, User } from "lucide-react";
+import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
-const navigationLinks = [
+export const navigationLinks = [
   { name: "Trang chủ", href: "/" },
   { name: "Sản phẩm", href: "/products" },
   { name: "Về chúng tôi", href: "/about-us" },
@@ -45,9 +46,11 @@ const NavBar = ({
           key={index}
           href={link.href}
           className={cn(
-            "uppercase text-sm",
-            currentPath === link.href && "font-semibold",
-            isHeaderFixed ? "text-white/50" : "text-muted-foreground",
+            "uppercase transition-all duration-300 ease-in-out text-sm",
+            currentPath === link.href && "font-bold",
+            isHeaderFixed
+              ? "text-white/50 hover:text-white"
+              : "text-muted-foreground hover:text-foreground",
             currentPath === link.href
               ? isHeaderFixed
                 ? "text-white"
@@ -119,20 +122,22 @@ const Action = ({
 
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant={"ghost"}
-            size={"icon"}
-            className="rounded-full group"
-          >
-            <User
-              className={cn(
-                "size-5",
-                isHeaderFixed
-                  ? "text-white group-hover:text-foreground"
-                  : "text-foreground"
-              )}
-            />
-          </Button>
+          <Link href="/auth/login">
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              className="rounded-full group"
+            >
+              <User
+                className={cn(
+                  "size-5",
+                  isHeaderFixed
+                    ? "text-white group-hover:text-foreground"
+                    : "text-foreground"
+                )}
+              />
+            </Button>
+          </Link>
         </TooltipTrigger>
         <TooltipContent>
           <p>Đăng nhập</p>
@@ -150,6 +155,7 @@ const MenuMobile = ({
   isHeaderFixed: boolean;
 }) => {
   const pathname = usePathname();
+  const { theme } = useTheme();
   /*
     "/products/"  → "/products"
     "/products"   → "/products"
@@ -198,7 +204,11 @@ const MenuMobile = ({
           <div className="flex items-center justify-center gap-6 py-4">
             <Link href="/">
               <Image
-                src={"/assets/icons/facebook.svg"}
+                src={
+                  theme === "light"
+                    ? "/assets/icons/social-medias/facebook.png"
+                    : "/assets/icons/social-medias/facebook-dark.png"
+                }
                 alt="Facebook"
                 width={25}
                 height={25}
@@ -207,8 +217,12 @@ const MenuMobile = ({
 
             <Link href="/">
               <Image
-                src={"/assets/icons/instagram.svg"}
-                alt="Facebook"
+                src={
+                  theme === "light"
+                    ? "/assets/icons/social-medias/instagram.png"
+                    : "/assets/icons/social-medias/instagram-dark.png"
+                }
+                alt="Instagram"
                 width={25}
                 height={25}
               />
@@ -216,8 +230,12 @@ const MenuMobile = ({
 
             <Link href="/">
               <Image
-                src={"/assets/icons/threads.svg"}
-                alt="Facebook"
+                src={
+                  theme === "light"
+                    ? "/assets/icons/social-medias/threads.png"
+                    : "/assets/icons/social-medias/threads-dark.png"
+                }
+                alt="Threads"
                 width={25}
                 height={25}
               />
@@ -225,8 +243,12 @@ const MenuMobile = ({
 
             <Link href="/">
               <Image
-                src={"/assets/icons/youtube.svg"}
-                alt="Facebook"
+                src={
+                  theme === "light"
+                    ? "/assets/icons/social-medias/youtube.png"
+                    : "/assets/icons/social-medias/youtube-dark.png"
+                }
+                alt="Youtube"
                 width={25}
                 height={25}
               />
@@ -234,8 +256,12 @@ const MenuMobile = ({
 
             <Link href="/">
               <Image
-                src={"/assets/icons/tiktok.svg"}
-                alt="Facebook"
+                src={
+                  theme === "light"
+                    ? "/assets/icons/social-medias/tiktok.png"
+                    : "/assets/icons/social-medias/tiktok-dark.png"
+                }
+                alt="Tiktok"
                 width={25}
                 height={25}
               />
@@ -251,6 +277,7 @@ const MenuMobile = ({
 
 export default function AppHeader({ className }: { className?: string }) {
   const [isFixed, setIsFixed] = React.useState<boolean>(false);
+  const [isHiden, setIsHidden] = React.useState<boolean>(false);
 
   const pathname = usePathname();
   /*
@@ -280,11 +307,35 @@ export default function AppHeader({ className }: { className?: string }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [currentPath]);
 
+  React.useEffect(() => {
+    const lastY = { current: window.scrollY };
+
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+
+      if (currentY < 700) {
+        setIsHidden(false);
+      } else {
+        if (currentY > lastY.current) {
+          setIsHidden(true);
+        } else if (currentY < lastY.current) {
+          setIsHidden(false);
+        }
+      }
+
+      lastY.current = currentY;
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <header
       className={cn(
-        "w-full top-0 z-50 transtion-all fixed",
+        "w-full top-0 z-50 transtion-all duration-300 ease-in-out fixed",
         isFixed ? "bg-transparent" : "bg-background",
+        isHiden ? "-translate-y-full" : "translate-y-0",
         className
       )}
     >
@@ -298,7 +349,7 @@ export default function AppHeader({ className }: { className?: string }) {
           currentPath={currentPath}
           className="w-full col-span-2 lg:flex hidden"
         />
-        <Action isHeaderFixed={isFixed} className="justify-end -mr-3" />
+        <Action isHeaderFixed={isFixed} className="justify-end -mr-2.5" />
       </div>
     </header>
   );

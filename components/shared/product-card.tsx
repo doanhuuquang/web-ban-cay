@@ -25,53 +25,62 @@ export default function ProductCard({
   return (
     <div
       className={cn(
-        "w-full rounded-xl overflow-hidden cursor-pointer group hover:border-primary space-y-2 aspect-3/4",
+        "w-full lg:rounded-xl md:rounded-lg rounded-sm overflow-hidden cursor-pointer group hover:border-primary shadow-sm",
         className
       )}
     >
-      <div className="w-full h-full relative">
-        <div className="absolute top-0 right-0 z-1 p-2 gap-2 hidden group-hover:flex group-hover:flex-col">
-          <Button variant={"outline"} size={"icon"} className="rounded-full">
+      <div className="w-full relative group">
+        <div className="absolute top-0 right-0 z-3 p-4 gap-2 hidden group-hover:flex group-hover:flex-col">
+          <Button
+            variant={"default"}
+            size={"icon"}
+            className="rounded-full bg-white hover:bg-white text-black shadow-2xl"
+          >
             <Heart />
           </Button>
 
-          <Button variant={"outline"} size={"icon"} className="rounded-full">
+          <Button
+            variant={"default"}
+            size={"icon"}
+            className="rounded-full bg-white hover:bg-white text-black shadow-2xl"
+          >
             <ShoppingCart />
           </Button>
         </div>
 
-        <Image
-          src={imageSrcs[0]}
-          alt="image"
-          fill
-          className="absolute top-0 left-0 z-1 object-center object-cover rounded-md"
-        />
+        <div className="w-full h-full relative aspect-square">
+          <Image
+            src={imageSrcs[0]}
+            alt="image"
+            fill
+            className="absolute top-0 left-0 z-1 object-center object-cover"
+          />
 
-        <Image
-          src={imageSrcs[1]}
-          alt="image"
-          fill
-          className="absolute top-0 left-0 object-center object-cover rounded-md z-0 group-hover:z-2 transition-all"
-        />
+          <Image
+            src={imageSrcs[1]}
+            alt="image"
+            fill
+            className="absolute top-0 left-0 object-center object-cover z-2 opacity-0 group-hover:opacity-100 transition-all"
+          />
+        </div>
+      </div>
+      <div className="w-full md:p-4 p-2 space-y-2">
+        <p className="font-bold truncate md:text-lg text-sm">{productName}</p>
+        <p className="text-xs text-muted-foreground h-8 line-clamp-2">
+          {productDescription}
+        </p>
 
-        <div className="w-full group-hover:translate-y-full transition-all p-4 space-y-1 flex flex-col justify-end bg-background/80 absolute bottom-0 left-0 z-3">
-          <p className="font-semibold truncate">{productName}</p>
-          <p className="text-muted-foreground text-xs h-8 line-clamp-2">
-            {productDescription}
-          </p>
-
-          <div className="w-full flex items-center justify-between">
-            <div className="space-x-1">
-              <span className="font-semibold">{price} VND</span>
-              <span className="font-semibold text-xs line-through text-primary">
-                {price} VND
-              </span>
-            </div>
-            <span className="flex items-center gap-1">
-              <Star size={12} className="text-primary" />
-              <p className="text-xs">{rating}</p>
+        <div className="w-full flex flex-wrap-reverse items-center justify-between gap-1">
+          <div className="space-x-1 md:text-lg text-sm flex flex-wrap-reverse items-baseline">
+            <span className="font-semibold">{price} VND</span>
+            <span className="font-semibold md:text-xs text-[10px] line-through text-primary">
+              {price} VND
             </span>
           </div>
+          <span className="flex items-center gap-1">
+            <Star size={12} className="text-primary" />
+            <p className="text-xs">{rating}</p>
+          </span>
         </div>
       </div>
     </div>

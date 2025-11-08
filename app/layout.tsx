@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import AppHeader from "@/components/shared/app-header";
 import { ThemeProvider } from "@/components/theme-provider";
+import AppFooter from "@/components/shared/app-footer";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ export default function RootLayout({
         >
           <AppHeader />
           {children}
+          <AppFooter />
         </ThemeProvider>
       </body>
     </html>
