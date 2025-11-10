@@ -1,35 +1,20 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Anton, Fugaz_One } from "next/font/google";
+import { Anton } from "next/font/google";
 
-const dancingScript = Fugaz_One({
+const anton = Anton({
   weight: "400",
   subsets: ["latin"],
 });
 
-export default function AppLogo({
-  className,
-  isLogoDark = false,
-  isHeaderFixed = false,
-}: {
-  className?: string;
-  isLogoDark?: boolean;
-  isHeaderFixed?: boolean;
-}) {
+export default function AppLogo({ className }: { className?: string }) {
   return (
     <Link
       href={"/"}
-      className={cn("w-fit uppercase", dancingScript.className, className)}
+      className={cn("w-fit uppercase", anton.className, className)}
     >
       <span className="text-primary">G</span>
-      <span
-        className={cn(
-          isHeaderFixed ? "text-white" : "text-[#1e1e1e] dark:text-foreground",
-          isLogoDark && "text-white"
-        )}
-      >
-        Plant
-      </span>
+      <span className="text-foreground">Plant</span>
     </Link>
   );
 }

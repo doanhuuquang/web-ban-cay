@@ -24,6 +24,9 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 import { toast } from "sonner";
+import { FirebaseError } from "firebase/app";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import auth from "@/lib/firebase/firebase-auth";
 
 // Style cho input
 const inputClassName =
@@ -53,6 +56,9 @@ export default function LoginForm() {
     try {
       setLoading(true);
 
+      await signInWithEmailAndPassword(auth, value.email, value.password);
+
+      // Reset form after successful login
       form.reset();
 
       toast("Thành công", {
@@ -62,14 +68,27 @@ export default function LoginForm() {
           onClick: () => {},
         },
       });
-    } catch {
-      toast("Thất bại", {
-        description: "Đăng nhập thất bại. Vui lòng thử lại sau.",
-        action: {
-          label: "Ok",
-          onClick: () => {},
-        },
-      });
+    } catch (error) {
+      if (
+        error instanceof FirebaseError &&
+        error.code === "auth/invalid-credential"
+      ) {
+        toast("Thất bại", {
+          description: "Thông tin đăng nhập không đúng. Vui lòng kiểm tra lại.",
+          action: {
+            label: "Ok",
+            onClick: () => {},
+          },
+        });
+      } else {
+        toast("Thất bại", {
+          description: "Đăng nhập thất bại. Vui lòng thử lại sau.",
+          action: {
+            label: "Ok",
+            onClick: () => {},
+          },
+        });
+      }
     } finally {
       setLoading(false);
     }

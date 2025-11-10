@@ -25,30 +25,17 @@ export default function ProductCard({
   return (
     <div
       className={cn(
-        "w-full lg:rounded-xl md:rounded-lg rounded-sm overflow-hidden cursor-pointer group hover:border-primary shadow-sm",
+        "w-full lg:rounded-lg rounded-sm cursor-pointer group hover:border-primary border bg-background dark:bg-muted/50",
         className
       )}
     >
       <div className="w-full relative group">
-        <div className="absolute top-0 right-0 z-3 p-4 gap-2 hidden group-hover:flex group-hover:flex-col">
-          <Button
-            variant={"default"}
-            size={"icon"}
-            className="rounded-full bg-white hover:bg-white text-black shadow-2xl"
-          >
-            <Heart />
-          </Button>
-
-          <Button
-            variant={"default"}
-            size={"icon"}
-            className="rounded-full bg-white hover:bg-white text-black shadow-2xl"
-          >
-            <ShoppingCart />
-          </Button>
+        {/* Giảm giá */}
+        <div className="absolute top-2 right-2 py-1 px-2 bg-primary z-3 text-[9px] text-white rounded-xs font-light">
+          Giảm <span className="">10%</span>
         </div>
 
-        <div className="w-full h-full relative aspect-square">
+        <div className="w-full h-full relative aspect-square lg:rounded-t-lg rounded-t-sm overflow-hidden">
           <Image
             src={imageSrcs[0]}
             alt="image"
@@ -64,23 +51,28 @@ export default function ProductCard({
           />
         </div>
       </div>
-      <div className="w-full md:p-4 p-2 space-y-2">
-        <p className="font-bold truncate md:text-lg text-sm">{productName}</p>
-        <p className="text-xs text-muted-foreground h-8 line-clamp-2">
-          {productDescription}
+      <div className="w-full p-2 space-y-2">
+        <p className="font-medium text-sm line-clamp-2 min-h-10">
+          {productName}
         </p>
 
-        <div className="w-full flex flex-wrap-reverse items-center justify-between gap-1">
-          <div className="space-x-1 md:text-lg text-sm flex flex-wrap-reverse items-baseline">
-            <span className="font-semibold">{price} VND</span>
-            <span className="font-semibold md:text-xs text-[10px] line-through text-primary">
-              {price} VND
-            </span>
-          </div>
-          <span className="flex items-center gap-1">
-            <Star size={12} className="text-primary" />
-            <p className="text-xs">{rating}</p>
+        <div className="space-x-1 md:text-lg text-sm flex flex-wrap-reverse items-baseline">
+          <span className="font-semibold text-xs text-primary">{price}đ</span>
+          <span className="text-xs text-[10px] line-through text-muted-foreground">
+            {price}đ
           </span>
+        </div>
+
+        <div className="flex items-center flex-wrap justify-between gap-2">
+          <div className="flex items-center gap-1">
+            <Star size={16} className="fill-amber-400 text-transparent" />
+            <p className="text-sm">{rating}</p>
+          </div>
+
+          <Button variant={"ghost"} className="group-last text-blue-400">
+            <Heart className="group:hover:fill-blue-400" />
+            Yêu thích
+          </Button>
         </div>
       </div>
     </div>

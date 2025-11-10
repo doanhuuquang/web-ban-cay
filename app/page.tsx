@@ -1,7 +1,7 @@
 import ProductCard from "@/components/shared/product-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowUpRight, Mail, ScanSearch, Star } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Mail, Star } from "lucide-react";
 import Link from "next/link";
 import {
   Carousel,
@@ -18,58 +18,11 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-
-type carouselItemProps = {
-  title: string;
-  subtitle: string;
-  imageSrc: string;
-  href: string;
-};
-
-export const carouselItems: carouselItemProps[] = [
-  {
-    title: "Cây giống",
-    subtitle: "Khởi đầu cho khu vườn của bạn",
-    imageSrc: "/assets/images/categories/seedling.png",
-    href: "/",
-  },
-  {
-    title: "Cây nội thất",
-    subtitle: "Mang thiên nhiên vào không gian sống",
-    imageSrc: "/assets/images/categories/indoor-plants.png",
-    href: "/",
-  },
-  {
-    title: "Cây văn phòng",
-    subtitle: "Giúp làm việc tập trung và thư giãn",
-    imageSrc: "/assets/images/categories/office-tree.png",
-    href: "/",
-  },
-  {
-    title: "Chậu trồng cây",
-    subtitle: "Đa dạng kích thước và kiểu dáng",
-    imageSrc: "/assets/images/categories/plant-pots.png",
-    href: "/",
-  },
-  {
-    title: "Dụng cụ làm vườn",
-    subtitle: "Phụ kiện cần thiết cho mọi người làm vườn",
-    imageSrc: "/assets/images/categories/garden-tools.png",
-    href: "/",
-  },
-  {
-    title: "Phân bón & đất trồng",
-    subtitle: "Giúp cây phát triển khỏe mạnh",
-    imageSrc: "/assets/images/categories/fertilizer-&-soil.png",
-    href: "/",
-  },
-  {
-    title: "Rau gia vị",
-    subtitle: "Tươi ngon, dễ trồng cho mọi căn bếp",
-    imageSrc: "/assets/images/categories/spiced-vegetables.png",
-    href: "/",
-  },
-];
+import { carouselItems } from "@/lib/constants/crousel-items";
+import {
+  CarouselCustom,
+  CategoryCustomItem,
+} from "@/components/shared/carousel-custom";
 
 function Hero({ className }: { className?: string }) {
   return (
@@ -204,52 +157,36 @@ function MostPopularProducts({ className }: { className?: string }) {
   );
 }
 
-function CategoriesSection({ className }: { className?: string }) {
+function CategoriesSection() {
   return (
-    <div className={cn("w-full bg-background", className)}>
-      <div className="w-full max-w-[1400px] m-auto p-4 space-y-5">
-        {/* Head */}
-        <p className="font-semibold text-2xl uppercase pl-4 border-l-5 border-l-primary">
-          Danh mục hiện có
-        </p>
-
-        <Carousel>
-          <CarouselContent>
-            {carouselItems.map((item, index) => (
-              <CarouselItem key={index} className="lg:basis-1/3 p-1 group">
-                <Link href={item.href}>
-                  <div
-                    className={cn(
-                      "w-full aspect-3/4 lg:rounded-xl md:rounded-lg rounded-md relative overflow-hidden"
-                    )}
-                  >
-                    <Image
-                      src={item.imageSrc}
-                      alt="kjsdv"
-                      fill
-                      className="absolute top-0 left-0 z-0 object-cover object-center"
-                    />
-                    <div className="w-full h-full p-4 absolute z-1 space-y-2">
-                      <p className="text-black font-semibold text-2xl">
-                        {item.title}
-                      </p>
-                      <p className="text-black text-sm">{item.subtitle}</p>
-                    </div>
+    <div className="w-full max-w-[1400px] m-auto p-4">
+      <CarouselCustom>
+        {carouselItems.map((item, index) => (
+          <div key={index}>
+            <CategoryCustomItem>
+              <Link href={item.href}>
+                <div
+                  className={cn(
+                    "w-full aspect-square rounded-xs relative overflow-hidden"
+                  )}
+                >
+                  <Image
+                    src={item.imageSrc}
+                    alt="kjsdv"
+                    fill
+                    className="absolute top-0 left-0 z-0 object-cover object-center"
+                  />
+                  <div className="w-full h-fit p-4 pb-15 absolute top-0 z-1 space-y-2 bg-linear-to-b from-gray-200 to-transparent">
+                    <p className="text-black font-semibold text-lg hover:underline">
+                      {item.title}
+                    </p>
                   </div>
-                </Link>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious
-            variant={"default"}
-            className="z-2 bg-white hover:bg-white text-black"
-          />
-          <CarouselNext
-            variant={"default"}
-            className="z-2 bg-white hover:bg-white text-black"
-          />
-        </Carousel>
-      </div>
+                </div>
+              </Link>
+            </CategoryCustomItem>
+          </div>
+        ))}
+      </CarouselCustom>
     </div>
   );
 }
@@ -272,7 +209,7 @@ function NewArrivalProductsSection({ className }: { className?: string }) {
           </Link>
         </div>
 
-        <div className="w-full grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 md:gap-4 gap-2">
+        <div className="w-full grid lg:grid-cols-5 md:grid-cols-3 grid-cols-2 md:gap-4 gap-2">
           {Array.from({ length: 8 }).map((_, index) => (
             <ProductCard
               key={index}
@@ -437,8 +374,83 @@ function MarqueeItem({
 
 export default function Home() {
   return (
-    <main className="space-y-10">
-      <Hero />
+    <main className="flex flex-col gap-10">
+      {/* Danh mục */}
+      <CategoriesSection />
+
+      {/* Chào mừng */}
+      <div className="w-full max-w-[1400px] m-auto p-4 space-y-10">
+        <h1 className="lg:text-3xl text-2xl font-black uppercase">
+          Chào mừng đến với GPLANT
+        </h1>
+
+        <div className="w-full md:min-h-screen min-h-auto grid md:grid-cols-2 grid-cols-1 md:grid-rows-1 grid-rows-none gap-4">
+          <Link
+            href={""}
+            className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
+          >
+            <video
+              src="/assets/webms/hero.webm"
+              autoPlay
+              loop
+              muted
+              className="w-full h-full absolute top-0 left-0 object-cover object-center z-0"
+            ></video>
+
+            <div className="w-full h-full absolute p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group z-1">
+              <div className="w-fit bg-cyan-600 px-2 py-1 md:text-sm text-xs text-white">
+                GPANT mua nhiều giảm sâu
+              </div>
+              <p className="group-hover:underline md:text-xl">
+                Giảm 15% giá trị đơn hàng đầu tiên
+              </p>
+              <ArrowRight className="md:block hidden" />
+            </div>
+          </Link>
+          <div className="grid md:grid-rows-2 grid-rows-1 md:grid-cols-1 grid-cols-2 gap-4">
+            <Link
+              href={""}
+              className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
+            >
+              <Image
+                src={"/assets/images/decorations/orange-flower.jpg"}
+                alt="Orange flower"
+                fill
+                className="absolute top-0 left-0 object-cover object-center z-0"
+              />
+
+              <div className="w-full h-full absolute z-1 p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group">
+                <div className="w-fit bg-orange-600 px-2 py-1 md:text-sm text-xs text-white">
+                  Mới
+                </div>
+                <p className="group-hover:underline md:text-xl">
+                  Thêm điểm nhấn, thêm sắc màu
+                </p>
+                <ArrowRight className="md:block hidden" />
+              </div>
+            </Link>
+
+            <Link
+              href={""}
+              className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
+            >
+              <Image
+                src={"/assets/images/decorations/bedroom-with-plants.png"}
+                alt="Bedroom with plants"
+                fill
+                className="absolute top-0 left-0 object-cover object-center z-0"
+              />
+
+              <div className="w-full h-full absolute z-1 p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group">
+                <p className="group-hover:underline md:text-xl">
+                  Cây xanh cho không gian sống
+                </p>
+                <ArrowRight className="md:block hidden" />
+              </div>
+            </Link>
+          </div>
+        </div>
+      </div>
 
       {/* Gợi ý sản phẩm được yêu thích nhiều nhất*/}
       <MostPopularProducts className="mt-10" />
@@ -519,7 +531,7 @@ export default function Home() {
       </div>
 
       {/* Danh mục */}
-      <CategoriesSection className="mt-10" />
+      <CategoriesSection />
 
       {/* Chính sách bán hàng */}
       <div className="w-full max-w-[1400px] p-4 m-auto grid md:grid-cols-3 grid-cols-1 gap-10">

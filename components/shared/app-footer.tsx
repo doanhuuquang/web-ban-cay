@@ -2,7 +2,7 @@ import AppLogo from "@/components/shared/app-logo";
 import Link from "next/link";
 import SubscribeForm from "@/components/shared/subscribe-form";
 import Image from "next/image";
-import { carouselItems } from "@/app/page";
+import { carouselItems } from "@/lib/constants/crousel-items";
 
 export const navigationLinks = [
   { name: "Trang chủ", href: "/" },
@@ -16,7 +16,7 @@ export default function AppFooter() {
     <div className="w-full bg-[#0a0a0a] divide-y divide-white/10 border-t-white/10 border-t">
       <div className="w-full max-w-[1400px] mx-auto grid lg:grid-cols-3 grid-cols-1 divide-x divide-white/10">
         <div className="space-y-5 px-4 py-5">
-          <AppLogo isLogoDark={true} className="text-3xl text-white" />
+          <AppLogo className="text-3xl text-white" />
 
           <p className="text-sm text-white mt-2">
             Cửa hàng cây xanh cho mọi phong cách.

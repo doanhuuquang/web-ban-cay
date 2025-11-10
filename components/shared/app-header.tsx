@@ -1,7 +1,22 @@
 "use client";
 
+import Link from "next/link";
+import {
+  Search,
+  Heart,
+  Truck,
+  ShoppingBag,
+  UserRound,
+  Menu,
+  Store,
+} from "lucide-react";
 import AppLogo from "@/components/shared/app-logo";
 import { Button } from "@/components/ui/button";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   Sheet,
   SheetContent,
@@ -10,18 +25,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import { Menu, Search, ShoppingBag, User } from "lucide-react";
-import { useTheme } from "next-themes";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { LOGIN_PATH } from "@/lib/constants/path";
 import React from "react";
+import { cn } from "@/lib/utils";
 
 export const navigationLinks = [
   { name: "Trang chủ", href: "/" },
@@ -30,151 +36,28 @@ export const navigationLinks = [
   { name: "Liên hệ", href: "/contact" },
 ];
 
-const NavBar = ({
-  className,
-  isHeaderFixed,
-  currentPath,
-}: {
-  className?: string;
-  isHeaderFixed: boolean;
-  currentPath: string;
-}) => {
+function SearchBar() {
   return (
-    <nav className={cn("flex items-center justify-center gap-6", className)}>
-      {navigationLinks.map((link, index) => (
-        <Link
-          key={index}
-          href={link.href}
-          className={cn(
-            "uppercase transition-all duration-300 ease-in-out text-sm",
-            currentPath === link.href && "font-bold",
-            isHeaderFixed
-              ? "text-white/50 hover:text-white"
-              : "text-muted-foreground hover:text-foreground",
-            currentPath === link.href
-              ? isHeaderFixed
-                ? "text-white"
-                : "text-foreground"
-              : ""
-          )}
-        >
-          {link.name}
-        </Link>
-      ))}
-    </nav>
-  );
-};
-
-const Action = ({
-  className,
-  isHeaderFixed,
-}: {
-  className?: string;
-  isHeaderFixed: boolean;
-}) => {
-  return (
-    <div className={cn("flex items-center gap-2", className)}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link href="/search">
-            <Button
-              variant={"ghost"}
-              size={"icon"}
-              className="rounded-full group"
-            >
-              <Search
-                className={cn(
-                  "size-5",
-                  isHeaderFixed
-                    ? "text-white group-hover:text-foreground"
-                    : "text-foreground"
-                )}
-              />
-            </Button>
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Tìm kiếm</p>
-        </TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant={"ghost"}
-            size={"icon"}
-            className="rounded-full group"
-          >
-            <ShoppingBag
-              className={cn(
-                "size-5",
-                isHeaderFixed
-                  ? "text-white group-hover:text-foreground"
-                  : "text-foreground"
-              )}
-            />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Giỏ hàng</p>
-        </TooltipContent>
-      </Tooltip>
-
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Link href="/auth/login">
-            <Button
-              variant={"ghost"}
-              size={"icon"}
-              className="rounded-full group"
-            >
-              <User
-                className={cn(
-                  "size-5",
-                  isHeaderFixed
-                    ? "text-white group-hover:text-foreground"
-                    : "text-foreground"
-                )}
-              />
-            </Button>
-          </Link>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Đăng nhập</p>
-        </TooltipContent>
-      </Tooltip>
+    <div className="w-full">
+      <InputGroup className="bg-accent rounded-full h-12 px-3 border-none has-[[data-slot=input-group-control]:focus-visible]:border-primary has-[[data-slot=input-group-control]:focus-visible]:ring-primary has-[[data-slot=input-group-control]:focus-visible]:ring-2">
+        <InputGroupInput
+          placeholder="Bạn muốn tìm gì?"
+          className="placeholder:text-accent-foreground placeholder:text-[16px]"
+        />
+        <InputGroupAddon>
+          <Search className="size-4" />
+        </InputGroupAddon>
+      </InputGroup>
     </div>
   );
-};
+}
 
-const MenuMobile = ({
-  className,
-  isHeaderFixed,
-}: {
-  className?: string;
-  isHeaderFixed: boolean;
-}) => {
-  const pathname = usePathname();
-  const { theme } = useTheme();
-  /*
-    "/products/"  → "/products"
-    "/products"   → "/products"
-    "/"           → "/"
-  */
-  const currentPath = pathname?.replace(/\/+$/, "") || "/";
-
+function MenuMobile({ className }: { className?: string }) {
   return (
     <Sheet>
       <SheetTrigger asChild className={className}>
         <Button variant={"ghost"} size={"icon"}>
-          <Menu
-            className={cn(
-              "size-5",
-              isHeaderFixed
-                ? "text-white group-hover:text-foreground"
-                : "text-foreground"
-            )}
-          />
+          <Menu className="size-5 text-foreground" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-full max-w-md">
@@ -185,127 +68,22 @@ const MenuMobile = ({
         </SheetHeader>
         <div className="px-4 flex flex-col gap-6">
           {navigationLinks.map((link, index) => (
-            <Link
-              key={index}
-              href={link.href}
-              className={cn(
-                "uppercase text-lg",
-                currentPath === link.href
-                  ? "font-semibold"
-                  : "text-muted-foreground"
-              )}
-            >
+            <Link key={index} href={link.href} className="uppercase text-lg">
               {link.name}
             </Link>
           ))}
         </div>
 
         <SheetFooter>
-          <div className="flex items-center justify-center gap-6 py-4">
-            <Link href="/">
-              <Image
-                src={
-                  theme === "light"
-                    ? "/assets/icons/social-medias/facebook.png"
-                    : "/assets/icons/social-medias/facebook-dark.png"
-                }
-                alt="Facebook"
-                width={25}
-                height={25}
-              />
-            </Link>
-
-            <Link href="/">
-              <Image
-                src={
-                  theme === "light"
-                    ? "/assets/icons/social-medias/instagram.png"
-                    : "/assets/icons/social-medias/instagram-dark.png"
-                }
-                alt="Instagram"
-                width={25}
-                height={25}
-              />
-            </Link>
-
-            <Link href="/">
-              <Image
-                src={
-                  theme === "light"
-                    ? "/assets/icons/social-medias/threads.png"
-                    : "/assets/icons/social-medias/threads-dark.png"
-                }
-                alt="Threads"
-                width={25}
-                height={25}
-              />
-            </Link>
-
-            <Link href="/">
-              <Image
-                src={
-                  theme === "light"
-                    ? "/assets/icons/social-medias/youtube.png"
-                    : "/assets/icons/social-medias/youtube-dark.png"
-                }
-                alt="Youtube"
-                width={25}
-                height={25}
-              />
-            </Link>
-
-            <Link href="/">
-              <Image
-                src={
-                  theme === "light"
-                    ? "/assets/icons/social-medias/tiktok.png"
-                    : "/assets/icons/social-medias/tiktok-dark.png"
-                }
-                alt="Tiktok"
-                width={25}
-                height={25}
-              />
-            </Link>
-          </div>
-
           <Button variant={"outline"}>Quản lý tài khoản</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
   );
-};
+}
 
-export default function AppHeader({ className }: { className?: string }) {
-  const [isFixed, setIsFixed] = React.useState<boolean>(false);
+export function AppHeader() {
   const [isHiden, setIsHidden] = React.useState<boolean>(false);
-
-  const pathname = usePathname();
-  /*
-        "/products/"  → "/products"
-        "/products"   → "/products"
-        "/"           → "/"
-  */
-  const currentPath = pathname?.replace(/\/+$/, "") || "/";
-
-  React.useEffect(() => {
-    if (currentPath !== "/") {
-      setIsFixed(false);
-      return;
-    }
-
-    const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setIsFixed(false);
-      } else {
-        setIsFixed(true);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [currentPath]);
 
   React.useEffect(() => {
     const lastY = { current: window.scrollY };
@@ -313,7 +91,7 @@ export default function AppHeader({ className }: { className?: string }) {
     const handleScroll = () => {
       const currentY = window.scrollY;
 
-      if (currentY < 700) {
+      if (currentY < 400) {
         setIsHidden(false);
       } else {
         if (currentY > lastY.current) {
@@ -333,23 +111,97 @@ export default function AppHeader({ className }: { className?: string }) {
   return (
     <header
       className={cn(
-        "w-full top-0 z-50 transtion-all duration-300 ease-in-out fixed",
-        isFixed ? "bg-transparent" : "bg-background",
-        isHiden ? "-translate-y-full" : "translate-y-0",
-        className
+        "w-full sticky top-0 z-50 transition-all",
+        isHiden && "-translate-y-full"
       )}
     >
-      <div className="w-full max-w-[1400px] m-auto p-4 lg:grid lg:grid-cols-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <MenuMobile isHeaderFixed={isFixed} className="-ml-3 lg:hidden" />
-          <AppLogo isHeaderFixed={isFixed} className="lg:text-3xl text-2xl" />
+      {/* Top Bar */}
+      <div className="bg-[#121212] text-white dark:bg-muted lg:text-sm text-xs">
+        <div className="max-w-[1400px] mx-auto p-4 flex items-center justify-between gap-8">
+          {/* Left Section - Delivery Info */}
+          <div className="items-center gap-2 flex-1 hidden lg:flex">
+            <Truck size={16} />
+            <span className="hover:underline cursor-pointer">
+              Dịch vụ giao hàng miễn phí áp dụng cho các đơn hàng trên 150.000đ
+            </span>
+          </div>
+
+          {/* Right Section - Utilities */}
+          <div className="flex items-center lg:justify-end justify-between gap-4 flex-1">
+            <button className="flex items-center gap-2 hover:underline cursor-pointer">
+              <Truck size={16} />
+              <span>Nhập mã bưu điện</span>
+            </button>
+            <button className="flex items-center gap-2 hover:underline cursor-pointer">
+              <Store size={16} />
+              <span>Chọn cửa hàng</span>
+            </button>
+          </div>
         </div>
-        <NavBar
-          isHeaderFixed={isFixed}
-          currentPath={currentPath}
-          className="w-full col-span-2 lg:flex hidden"
-        />
-        <Action isHeaderFixed={isFixed} className="justify-end -mr-2.5" />
+      </div>
+
+      {/* Main Header */}
+      <div className="bg-background sticky top-0 z-50">
+        <div className="max-w-[1400px] mx-auto px-4 py-4 flex items-center justify-between gap-6">
+          {/* Logo */}
+          <AppLogo className="text-3xl" />
+
+          {/* Navigation Menu */}
+          <nav className="hidden lg:flex items-center gap-8 shrink-0">
+            {navigationLinks.map((link, index) => (
+              <Link
+                key={index}
+                href={link.href}
+                className="hover:underline text-foreground/80 hover:text-foreground"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Search Bar */}
+          <div className="w-full max-w-md lg:block hidden">
+            <SearchBar />
+          </div>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-2 w-fit">
+            {/* Account */}
+            <Link href={LOGIN_PATH}>
+              <Button variant={"ghost"} className="rounded-full">
+                <UserRound className="size-5" />
+                <span className="text-sm font-medium hidden lg:inline">
+                  Hej! Đăng nhập
+                </span>
+              </Button>
+            </Link>
+
+            {/* Wishlist */}
+            <Button variant={"ghost"} size={"icon"} className="rounded-full">
+              <Heart className="size-5" />
+            </Button>
+
+            {/* Cart */}
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              className="rounded-full relative"
+            >
+              <ShoppingBag className="size-5" />
+              <span className="text-xs font-semibold absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center">
+                0
+              </span>
+            </Button>
+
+            {/* Menu mobile */}
+            <MenuMobile className="lg:hidden" />
+          </div>
+        </div>
+
+        {/* Search bar mobile */}
+        <div className="w-full max-w-[1400px] px-4 pb-4 m-auto lg:hidden block">
+          <SearchBar />
+        </div>
       </div>
     </header>
   );

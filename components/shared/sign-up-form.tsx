@@ -24,6 +24,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { FirebaseError } from "firebase/app";
+import { createUser } from "@/lib/services/user-service";
 
 const inputClassName =
   "px-5 py-7 bg-background/60 rounded-md text-foreground border-1 w-full outline-none focus:border-primary";
@@ -71,6 +73,14 @@ export default function SignupForm() {
     try {
       setLoading(true);
 
+      // Tạo tài khoản và lưu thông tin người dùng Firebase Authentication
+      await createUser({
+        email: values.email,
+        password: values.password,
+        // user: user,
+      });
+
+      // Xóa trắng form
       form.reset();
 
       toast("Thành công", {
@@ -80,14 +90,28 @@ export default function SignupForm() {
           onClick: () => router.push("/"),
         },
       });
-    } catch {
-      toast("Thất bại", {
-        description: "Đăng ký tài khoản thất bại. Vui lòng thử lại sau.",
-        action: {
-          label: "Ok",
-          onClick: () => {},
-        },
-      });
+    } catch (error) {
+      console.error("Error signing up:", error);
+      if (
+        error instanceof FirebaseError &&
+        error.code === "auth/email-already-in-use"
+      ) {
+        toast("Thất bại", {
+          description: "Email đã được sử dụng. Vui lòng thử email khác.",
+          action: {
+            label: "Ok",
+            onClick: () => {},
+          },
+        });
+      } else {
+        toast("Thất bại", {
+          description: "Đăng ký tài khoản thất bại. Vui lòng thử lại sau.",
+          action: {
+            label: "Ok",
+            onClick: () => {},
+          },
+        });
+      }
     } finally {
       setLoading(false);
     }
