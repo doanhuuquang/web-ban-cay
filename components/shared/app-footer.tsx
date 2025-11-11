@@ -2,7 +2,7 @@ import AppLogo from "@/components/shared/app-logo";
 import Link from "next/link";
 import SubscribeForm from "@/components/shared/subscribe-form";
 import Image from "next/image";
-import { carouselItems } from "@/lib/constants/crousel-items";
+import { categoryItems } from "@/lib/constants/category-items";
 
 export const navigationLinks = [
   { name: "Trang chủ", href: "/" },
@@ -89,7 +89,7 @@ export default function AppFooter() {
           <div className="space-y-3 text-end">
             <p className="font-semibold text-white">Danh mục sản phẩm</p>
             <div className="flex flex-col space-y-2">
-              {carouselItems.map((item, index) => (
+              {categoryItems.map((item, index) => (
                 <Link
                   key={index}
                   href={"/"}

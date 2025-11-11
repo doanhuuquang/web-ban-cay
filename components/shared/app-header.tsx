@@ -9,6 +9,7 @@ import {
   UserRound,
   Menu,
   Store,
+  X,
 } from "lucide-react";
 import AppLogo from "@/components/shared/app-logo";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,8 @@ import {
 import { LOGIN_PATH } from "@/lib/constants/path";
 import React from "react";
 import { cn } from "@/lib/utils";
+import ProductCard from "@/components/shared/product-card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const navigationLinks = [
   { name: "Trang chủ", href: "/" },
@@ -37,17 +40,55 @@ export const navigationLinks = [
 ];
 
 function SearchBar() {
+  const [isShowDropdown, setIsShowDropdown] = React.useState<boolean>(false);
+  const [searchValue, setSearchValue] = React.useState<string>("");
+
   return (
-    <div className="w-full">
-      <InputGroup className="bg-accent rounded-full h-12 px-3 border-none has-[[data-slot=input-group-control]:focus-visible]:border-primary has-[[data-slot=input-group-control]:focus-visible]:ring-primary has-[[data-slot=input-group-control]:focus-visible]:ring-2">
+    <div className="w-full relative">
+      <InputGroup className="bg-accent rounded-full pl-3 pr-10 h-12  border-none has-[[data-slot=input-group-control]:focus-visible]:border-primary has-[[data-slot=input-group-control]:focus-visible]:ring-primary has-[[data-slot=input-group-control]:focus-visible]:ring-2">
         <InputGroupInput
+          onFocus={() => setIsShowDropdown(true)}
+          value={searchValue}
+          onChange={(e) => {
+            setSearchValue(e.target.value);
+          }}
           placeholder="Bạn muốn tìm gì?"
           className="placeholder:text-accent-foreground placeholder:text-[16px]"
         />
         <InputGroupAddon>
           <Search className="size-4" />
         </InputGroupAddon>
+
+        {isShowDropdown && (
+          <InputGroupAddon align={"inline-end"}>
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              className="rounded-full absolute top-2 right-2"
+              onClick={() => {
+                setSearchValue("");
+                setIsShowDropdown(false);
+              }}
+            >
+              <X className="size-5" />
+            </Button>
+          </InputGroupAddon>
+        )}
       </InputGroup>
+      {isShowDropdown && (
+        <div className="w-full lg:h-[calc(100vh-132px)] h-[calc(100vh-180px)] fixed bottom-0 left-0 z-200 bg-background/90 transition-all duration-500 ease-out">
+          <ScrollArea className="w-full h-full max-w-[1400px] m-auto p-4 text-muted-foreground">
+            {searchValue.trim() !== "" && (
+              <p>
+                Có <span className="text-foreground">0</span> từ khóa tìm kiếm
+                trùng khớp với
+                <span className="text-foreground"> {searchValue}</span>
+              </p>
+            )}
+          </ScrollArea>
+          <div className="w-full grid gap-4"></div>
+        </div>
+      )}
     </div>
   );
 }
@@ -122,7 +163,8 @@ export function AppHeader() {
           <div className="items-center gap-2 flex-1 hidden lg:flex">
             <Truck size={16} />
             <span className="hover:underline cursor-pointer">
-              Dịch vụ giao hàng miễn phí áp dụng cho các đơn hàng trên 150.000đ
+              Voucher giao hàng miễn phí áp dụng cho các đơn hàng có giá trị
+              trên 150.000đ
             </span>
           </div>
 

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { Heart, PackagePlus, Plus, ShoppingBasket, Star } from "lucide-react";
 import Image from "next/image";
 
 type ProductCardProps = {
@@ -25,17 +25,12 @@ export default function ProductCard({
   return (
     <div
       className={cn(
-        "w-full lg:rounded-lg rounded-sm cursor-pointer group hover:border-primary border bg-background dark:bg-muted/50",
+        "w-full rounded-xs cursor-pointer bg-background",
         className
       )}
     >
-      <div className="w-full relative group">
-        {/* Giảm giá */}
-        <div className="absolute top-2 right-2 py-1 px-2 bg-primary z-3 text-[9px] text-white rounded-xs font-light">
-          Giảm <span className="">10%</span>
-        </div>
-
-        <div className="w-full h-full relative aspect-square lg:rounded-t-lg rounded-t-sm overflow-hidden">
+      <div className="w-full relative">
+        <div className="w-full h-full relative aspect-square rounded-t-xs overflow-hidden">
           <Image
             src={imageSrcs[0]}
             alt="image"
@@ -47,31 +42,44 @@ export default function ProductCard({
             src={imageSrcs[1]}
             alt="image"
             fill
-            className="absolute top-0 left-0 object-center object-cover z-2 opacity-0 group-hover:opacity-100 transition-all"
+            className="absolute top-0 left-0 object-center object-cover z-2 opacity-0 hover:opacity-100 transition-all"
           />
         </div>
       </div>
-      <div className="w-full p-2 space-y-2">
-        <p className="font-medium text-sm line-clamp-2 min-h-10">
-          {productName}
+      <div className="w-full py-4 space-y-3">
+        <div className="w-fit py-1 px-2 bg-red-700 z-3 text-xs text-red-50 rounded-xs">
+          Giảm <span className="">10%</span>
+        </div>
+
+        <h1 className="font-bold truncate hover:underline">{productName}</h1>
+
+        <p className="line-clamp-2 min-h-10 text-sm text-muted-foreground">
+          {productDescription}
         </p>
 
-        <div className="space-x-1 md:text-lg text-sm flex flex-wrap-reverse items-baseline">
-          <span className="font-semibold text-xs text-primary">{price}đ</span>
-          <span className="text-xs text-[10px] line-through text-muted-foreground">
+        <div className="space-x-1 md:text-lg flex flex-wrap-reverse items-baseline">
+          <span className="font-semibold">{price}đ</span>
+          <span className="text-sm line-through text-muted-foreground">
             {price}đ
           </span>
         </div>
 
-        <div className="flex items-center flex-wrap justify-between gap-2">
-          <div className="flex items-center gap-1">
-            <Star size={16} className="fill-amber-400 text-transparent" />
-            <p className="text-sm">{rating}</p>
-          </div>
+        <div className="flex items-center gap-1">
+          <Star size={16} className="fill-amber-400 text-transparent" />
+          <p className="text-sm">{rating}</p>
+        </div>
 
-          <Button variant={"ghost"} className="group-last text-blue-400">
-            <Heart className="group:hover:fill-blue-400" />
-            Yêu thích
+        <div className="flex items-center flex-wrap gap-2">
+          <Button
+            variant={"ghost"}
+            size={"icon-lg"}
+            className="bg-cyan-600 rounded-full hover:bg-cyan-700 text-cyan-50 hover:text-text-cyan-50"
+          >
+            <Plus className="size-5" />
+          </Button>
+
+          <Button variant={"outline"} size={"icon-lg"} className="rounded-full">
+            <Heart className="size-5" />
           </Button>
         </div>
       </div>

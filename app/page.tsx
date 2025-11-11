@@ -1,7 +1,7 @@
 import ProductCard from "@/components/shared/product-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ArrowUpRight, Mail, Star } from "lucide-react";
+import { ArrowRight, Mail, Star } from "lucide-react";
 import Link from "next/link";
 import {
   Carousel,
@@ -18,60 +18,11 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { carouselItems } from "@/lib/constants/crousel-items";
+import { categoryItems } from "@/lib/constants/category-items";
 import {
   CarouselCustom,
   CategoryCustomItem,
 } from "@/components/shared/carousel-custom";
-
-function Hero({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "w-full min-h-screen m-auto p-4 grid content-center relative ",
-        className
-      )}
-    >
-      {/* Background video */}
-      <video
-        src="/assets/webms/hero.webm"
-        autoPlay
-        loop
-        muted
-        className="w-full h-full absolute top-0 left-0 object-cover object-center z-1"
-      ></video>
-
-      {/* Overlay */}
-      <div className="w-full h-full absolute top-0 left-0 bg-black/60 z-1"></div>
-
-      {/* Content */}
-      <div className="w-full max-w-7xl m-auto space-y-7 z-2 flex flex-col items-center text-white">
-        {/* Title */}{" "}
-        <p className="w-full max-w-2xl lg:text-5xl text-4xl uppercase font-black tracking-tight lg:leading-18 leading-12 text-center">
-          Nâng cấp không gian sống với một chút
-          <span className="text-primary"> xanh</span>
-        </p>
-        {/* Subtitle */}
-        <p className="text-white/70 max-w-lg text-center">
-          Mỗi chiếc lá là một hơi thở trong lành, mỗi chậu cây là một niềm vui
-          nhỏ giữa bộn bề cuộc sống.
-        </p>
-        <div className="flex items-center justify-center flex-wrap gap-6">
-          <Button className="px-15 py-6">Khám phá ngay</Button>
-          <div className="flex items-center gap-2">
-            <Button
-              size={"icon"}
-              className="rounded-full bg-white hover:bg-white p-6"
-            >
-              <ArrowUpRight className="text-black" />
-            </Button>
-            <p className="text-sm text-white/70">Bí kíp chăm cây</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function FavoriteProductCard({
   productImage,
@@ -161,7 +112,7 @@ function CategoriesSection() {
   return (
     <div className="w-full max-w-[1400px] m-auto p-4">
       <CarouselCustom>
-        {carouselItems.map((item, index) => (
+        {categoryItems.map((item, index) => (
           <div key={index}>
             <CategoryCustomItem>
               <Link href={item.href}>
@@ -176,10 +127,8 @@ function CategoriesSection() {
                     fill
                     className="absolute top-0 left-0 z-0 object-cover object-center"
                   />
-                  <div className="w-full h-fit p-4 pb-15 absolute top-0 z-1 space-y-2 bg-linear-to-b from-gray-200 to-transparent">
-                    <p className="text-black font-semibold text-lg hover:underline">
-                      {item.title}
-                    </p>
+                  <div className="w-full h-fit p-4 absolute bottom-0 z-1 space-y-2 text-center">
+                    <p className="text-black hover:underline">{item.title}</p>
                   </div>
                 </div>
               </Link>
@@ -187,6 +136,138 @@ function CategoriesSection() {
           </div>
         ))}
       </CarouselCustom>
+    </div>
+  );
+}
+
+function WelcomeSection() {
+  return (
+    <div className="w-full max-w-[1400px] m-auto p-4 space-y-10">
+      <h1 className="lg:text-3xl text-2xl font-black uppercase">
+        Chào mừng đến với GPLANT
+      </h1>
+
+      <div className="w-full md:min-h-screen min-h-auto grid md:grid-cols-2 grid-cols-1 md:grid-rows-1 grid-rows-none gap-4">
+        <Link
+          href={""}
+          className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
+        >
+          <video
+            src="/assets/webms/hero.webm"
+            autoPlay
+            loop
+            muted
+            className="w-full h-full absolute top-0 left-0 object-cover object-center z-0"
+          ></video>
+
+          <div className="w-full h-full absolute p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group z-1">
+            <div className="w-fit bg-cyan-600 px-2 py-1 md:text-sm text-xs text-white">
+              GPANT mua nhiều giảm sâu
+            </div>
+            <p className="group-hover:underline md:text-xl">
+              Giảm 15% giá trị đơn hàng đầu tiên
+            </p>
+            <ArrowRight className="md:block hidden" />
+          </div>
+        </Link>
+        <div className="grid md:grid-rows-2 grid-rows-1 md:grid-cols-1 grid-cols-2 gap-4">
+          <Link
+            href={""}
+            className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
+          >
+            <Image
+              src={"/assets/images/decorations/orange-flower.jpg"}
+              alt="Orange flower"
+              fill
+              className="absolute top-0 left-0 object-cover object-center z-0"
+            />
+
+            <div className="w-full h-full absolute z-1 p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group">
+              <div className="w-fit bg-orange-600 px-2 py-1 md:text-sm text-xs text-white">
+                Mới
+              </div>
+              <p className="group-hover:underline md:text-xl">
+                Thêm điểm nhấn, thêm sắc màu
+              </p>
+              <ArrowRight className="md:block hidden" />
+            </div>
+          </Link>
+
+          <Link
+            href={""}
+            className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
+          >
+            <Image
+              src={"/assets/images/decorations/bedroom-with-plants.png"}
+              alt="Bedroom with plants"
+              fill
+              className="absolute top-0 left-0 object-cover object-center z-0"
+            />
+
+            <div className="w-full h-full absolute z-1 p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group">
+              <p className="group-hover:underline md:text-xl">
+                Cây xanh cho không gian sống
+              </p>
+              <ArrowRight className="md:block hidden" />
+            </div>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ToDayBestDealsSection() {
+  return (
+    <div className="w-full h-fit">
+      <div className="w-full h-full max-w-[1400px] m-auto px-4 py-10 space-y-5">
+        <h1 className="font-bold text-2xl">Ưu đãi tốt nhất hôm nay</h1>
+
+        <div className="lg:grid lg:grid-cols-4 gap-6 max-md:space-y-5">
+          <div className="col-span-3">
+            <CarouselCustom itemSize={"lg"}>
+              {Array.from({ length: 10 }).map((_, index) => (
+                <div key={index}>
+                  <CategoryCustomItem>
+                    <ProductCard
+                      key={index}
+                      imageSrcs={[
+                        "/assets/images/products/product-4.jpg",
+                        "/assets/images/products/product-1.jpg",
+                      ]}
+                      productName="Cây Lưỡi Hổ"
+                      productDescription="Loài cây phong thủy giúp xua đuổi tà khí, mang lại may mắn và tài lộc cho gia chủ."
+                      price={99000}
+                      discountPercentage={5}
+                      rating={4.7}
+                    />
+                  </CategoryCustomItem>
+                </div>
+              ))}
+            </CarouselCustom>
+          </div>
+
+          <div className="w-full h-full bg-red-700">
+            <div className="w-full h-full p-8 text-red-50 flex flex-col justify-between gap-6">
+              <div className="space-y-4">
+                <p className="font-bold text-2xl">Giá mới thấp hơn</p>
+                <p className="text-sm">
+                  Chúng tôi đã giảm giá một số sản phẩm yêu thích của mình để
+                  chúng trở nên phải chăng hơn. Đây không phải là chương trình
+                  giảm giá, mà là trạng thái bình thường mới.
+                </p>
+              </div>
+              <Button
+                variant={"outline"}
+                size={"icon-lg"}
+                className="bg-transparent rounded-full p-6"
+              >
+                <ArrowRight className="size-6" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -379,78 +460,10 @@ export default function Home() {
       <CategoriesSection />
 
       {/* Chào mừng */}
-      <div className="w-full max-w-[1400px] m-auto p-4 space-y-10">
-        <h1 className="lg:text-3xl text-2xl font-black uppercase">
-          Chào mừng đến với GPLANT
-        </h1>
+      <WelcomeSection />
 
-        <div className="w-full md:min-h-screen min-h-auto grid md:grid-cols-2 grid-cols-1 md:grid-rows-1 grid-rows-none gap-4">
-          <Link
-            href={""}
-            className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
-          >
-            <video
-              src="/assets/webms/hero.webm"
-              autoPlay
-              loop
-              muted
-              className="w-full h-full absolute top-0 left-0 object-cover object-center z-0"
-            ></video>
-
-            <div className="w-full h-full absolute p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group z-1">
-              <div className="w-fit bg-cyan-600 px-2 py-1 md:text-sm text-xs text-white">
-                GPANT mua nhiều giảm sâu
-              </div>
-              <p className="group-hover:underline md:text-xl">
-                Giảm 15% giá trị đơn hàng đầu tiên
-              </p>
-              <ArrowRight className="md:block hidden" />
-            </div>
-          </Link>
-          <div className="grid md:grid-rows-2 grid-rows-1 md:grid-cols-1 grid-cols-2 gap-4">
-            <Link
-              href={""}
-              className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
-            >
-              <Image
-                src={"/assets/images/decorations/orange-flower.jpg"}
-                alt="Orange flower"
-                fill
-                className="absolute top-0 left-0 object-cover object-center z-0"
-              />
-
-              <div className="w-full h-full absolute z-1 p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group">
-                <div className="w-fit bg-orange-600 px-2 py-1 md:text-sm text-xs text-white">
-                  Mới
-                </div>
-                <p className="group-hover:underline md:text-xl">
-                  Thêm điểm nhấn, thêm sắc màu
-                </p>
-                <ArrowRight className="md:block hidden" />
-              </div>
-            </Link>
-
-            <Link
-              href={""}
-              className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
-            >
-              <Image
-                src={"/assets/images/decorations/bedroom-with-plants.png"}
-                alt="Bedroom with plants"
-                fill
-                className="absolute top-0 left-0 object-cover object-center z-0"
-              />
-
-              <div className="w-full h-full absolute z-1 p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group">
-                <p className="group-hover:underline md:text-xl">
-                  Cây xanh cho không gian sống
-                </p>
-                <ArrowRight className="md:block hidden" />
-              </div>
-            </Link>
-          </div>
-        </div>
-      </div>
+      {/* Best deals */}
+      <ToDayBestDealsSection />
 
       {/* Gợi ý sản phẩm được yêu thích nhiều nhất*/}
       <MostPopularProducts className="mt-10" />
