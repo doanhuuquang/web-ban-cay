@@ -6,9 +6,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
 const SIZE_MAP = {
-  sm: 40,
-  md: 60,
-  lg: 80,
+  sm: 160,
+  md: 240,
+  lg: 320,
 } as const;
 
 type CarouselCustomContextProps = {
@@ -31,10 +31,13 @@ function useCarouselCustom() {
 }
 function CategoryCustomItem({ children }: { children: React.ReactNode }) {
   const { itemSize } = useCarouselCustom();
+  const itemWidth = SIZE_MAP[itemSize];
 
-  const sizeClass = `w-${SIZE_MAP[itemSize]}`;
-
-  return <div className={cn(sizeClass, "group shrink-0")}>{children}</div>;
+  return (
+    <div className="group shrink-0" style={{ width: `${itemWidth}px` }}>
+      {children}
+    </div>
+  );
 }
 
 function CarouselCustomContent({ children }: { children: React.ReactNode }) {
@@ -68,7 +71,7 @@ function CarouselCustomContent({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const scrollAmount = itemWidth * 4 + 16;
+  const scrollAmount = itemWidth + 16;
 
   const handlePrev = () => {
     carouselRef.current?.scrollBy({ left: -scrollAmount, behavior: "smooth" });
