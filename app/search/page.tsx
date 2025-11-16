@@ -5,6 +5,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { productItemsSample } from "@/lib/constants/product-items";
 import { ArrowDownNarrowWide, ArrowDownWideNarrow, Search } from "lucide-react";
 
 export default function SearchPage() {
@@ -46,19 +47,8 @@ export default function SearchPage() {
         </div>
 
         <div className="w-full col-span-2 grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 md:gap-4 gap-2">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <ProductCard
-              key={index}
-              imageSrcs={[
-                "/assets/images/products/product-4.jpg",
-                "/assets/images/products/product-1.jpg",
-              ]}
-              productName="Cây Lưỡi Hổ"
-              productDescription="Loài cây phong thủy giúp xua đuổi tà khí, mang lại may mắn và tài lộc cho gia chủ."
-              price={99000}
-              discountPercentage={5}
-              rating={4.7}
-            />
+          {productItemsSample.map((product, index) => (
+            <ProductCard key={index} product={product} />
           ))}
         </div>
       </div>
