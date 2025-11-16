@@ -6,13 +6,14 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
 const SIZE_MAP = {
-  sm: 160,
+  xs: 140,
+  sm: 180,
   md: 240,
   lg: 320,
 } as const;
 
 type CarouselCustomContextProps = {
-  itemSize: "sm" | "md" | "lg";
+  itemSize: "xs" | "sm" | "md" | "lg";
 };
 
 const CarouselCustomContext =
@@ -29,6 +30,7 @@ function useCarouselCustom() {
 
   return context;
 }
+
 function CategoryCustomItem({ children }: { children: React.ReactNode }) {
   const { itemSize } = useCarouselCustom();
   const itemWidth = SIZE_MAP[itemSize];
@@ -128,7 +130,7 @@ function CarouselCustom({
   itemSize = "md",
 }: {
   children: React.ReactNode;
-  itemSize?: "sm" | "md" | "lg";
+  itemSize?: "xs" | "sm" | "md" | "lg";
 }) {
   return (
     <CarouselCustomContext.Provider value={{ itemSize: itemSize }}>

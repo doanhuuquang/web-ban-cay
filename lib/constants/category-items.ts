@@ -6,38 +6,53 @@ type categoryItemProps = {
 
 export const categoryItems: categoryItemProps[] = [
   {
-    title: "Hạt giống",
-    imageSrc: "/assets/images/categories/seeds.svg",
-    href: "/",
-  },
-  {
-    title: "Cây nội thất",
+    title: "Cây trong nhà",
     imageSrc: "/assets/images/categories/indoor-plants.svg",
-    href: "/",
+    href: "/category/indoor-plants",
   },
   {
-    title: "Cây văn phòng",
-    imageSrc: "/assets/images/categories/office-decor-plants.svg",
-    href: "/",
+    title: "Cây ngoài trời",
+    imageSrc: "/assets/images/categories/indoor-plants.svg",
+    href: "/category/outdoor-plants",
   },
   {
-    title: "Chậu trồng cây",
+    title: "Dụng cụ & vật tư làm vườn",
+    imageSrc: "/assets/images/categories/indoor-plants.svg",
+    href: "/category/home-garden-supply",
+  },
+  {
+    title: "Hạt giống & bộ trồng cây",
+    imageSrc: "/assets/images/categories/indoor-plants.svg",
+    href: "/category/seeds-grow-kits",
+  },
+  {
+    title: "Chậu cây",
     imageSrc: "/assets/images/categories/pots.svg",
-    href: "/",
+    href: "/category/pots",
   },
   {
-    title: "Dụng cụ làm vườn",
-    imageSrc: "/assets/images/categories/tools.svg",
-    href: "/",
+    title: "Cây giả trang trí",
+    imageSrc: "/assets/images/categories/indoor-plants.svg",
+    href: "/category/artificial-plants",
   },
   {
-    title: "Phân bón & đất trồng",
-    imageSrc: "/assets/images/categories/fertilizer.svg",
-    href: "/",
+    title: "Khuyến mãi",
+    imageSrc: "/assets/images/categories/indoor-plants.svg",
+    href: "/category/sale",
   },
   {
-    title: "Hoa",
-    imageSrc: "/assets/images/categories/flowers.svg",
-    href: "/",
+    title: "Góc chia sẻ kinh nghiệm trồng cây",
+    imageSrc: "/assets/images/categories/indoor-plants.svg",
+    href: "/category/plant-talk",
+  },
+  {
+    title: "Quà tặng doanh nghiệp",
+    imageSrc: "/assets/images/categories/indoor-plants.svg",
+    href: "/category/corporate-gifts",
+  },
+  {
+    title: "Cây trang trí bảo quản lâu",
+    imageSrc: "/assets/images/categories/indoor-plants.svg",
+    href: "/category/preserved",
   },
 ];
