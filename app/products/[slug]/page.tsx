@@ -7,6 +7,7 @@ import ProductImagesShow from "@/components/shared/product-images-show";
 import { Button } from "@/components/ui/button";
 import { productItemsSample } from "@/lib/constants/product-items";
 import { Product } from "@/lib/models/product";
+import { cn } from "@/lib/utils";
 import {
   ChevronRight,
   Heart,
@@ -18,6 +19,28 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
+
+function AddToCartButtons({ className }: { className?: string }) {
+  return (
+    <div className={cn("w-full flex items-center gap-2", className)}>
+      <div className="flex items-center bg-muted rounded-full gap-2">
+        <Button variant={"ghost"} size={"icon"} className="rounded-full p-6">
+          <Minus />
+        </Button>
+
+        <p>4</p>
+
+        <Button variant={"ghost"} size={"icon"} className="rounded-full p-6">
+          <Plus />
+        </Button>
+      </div>
+      <Button className="grow p-6 rounded-full bg-blue-ocean hover:bg-blue-ocean/90 text-white flex items-center justify-center gap-2">
+        <ShoppingBag />
+        <p>Thêm vào giỏ hàng</p>
+      </Button>
+    </div>
+  );
+}
 
 function ProductInfo({ product }: { product: Product }) {
   return (
@@ -99,30 +122,14 @@ function ProductInfo({ product }: { product: Product }) {
       </div>
 
       {/* Action */}
-      <div className="w-full flex items-center gap-2">
-        <div className="flex items-center bg-muted rounded-full gap-2">
-          <Button variant={"ghost"} size={"icon"} className="rounded-full p-6">
-            <Minus />
-          </Button>
-
-          <p>4</p>
-
-          <Button variant={"ghost"} size={"icon"} className="rounded-full p-6">
-            <Plus />
-          </Button>
-        </div>
-        <Button className="grow p-6 rounded-full bg-blue-ocean hover:bg-blue-ocean/90 text-white flex items-center justify-center gap-2">
-          <ShoppingBag />
-          <p>Thêm vào giỏ hàng</p>
-        </Button>
-      </div>
+      <AddToCartButtons className="" />
     </div>
   );
 }
 
 function PlantCare() {
   return (
-    <div className="w-full h-fit p-4 border space-y-4">
+    <div className="w-full h-fit p-4 border rounded-sm space-y-4">
       <h2 className="font-bold text-lg mb-4">Cách chăm sóc</h2>
 
       {/* Tưới nước */}
@@ -172,6 +179,38 @@ function PlantCare() {
   );
 }
 
+function RelatedProducts() {
+  return (
+    <div className="w-full h-full space-y-5">
+      <div className="flex items-center justify-between">
+        <h1 className="font-bold text-2xl">Sản phẩm liên quan</h1>
+
+        <Button variant={"outline"} className="rounded-full lg:block hidden">
+          Xem tất cả sản phẩm liên quan
+        </Button>
+      </div>
+
+      <CarouselCustom itemSize={"lg"}>
+        {productItemsSample.map((product, index) => (
+          <div key={index}>
+            <CategoryCustomItem>
+              <ProductCard product={product} />
+            </CategoryCustomItem>
+          </div>
+        ))}
+      </CarouselCustom>
+
+      <Link
+        href={""}
+        className="lg:hidden flex items-center justify-between border-b pb-4"
+      >
+        <p className="font-bold">Xem tất cả sản phẩm liên quan</p>
+        <ChevronRight />
+      </Link>
+    </div>
+  );
+}
+
 export default async function ProductDetailPage({
   params,
 }: {
@@ -199,36 +238,7 @@ export default async function ProductDetailPage({
         </div>
       </div>
       <div className="w-full max-w-[1400px] m-auto p-4 space-y-10">
-        <div className="w-full h-full space-y-5">
-          <div className="flex items-center justify-between">
-            <h1 className="font-bold text-2xl">Sản phẩm liên quan</h1>
-
-            <Button
-              variant={"outline"}
-              className="rounded-full lg:block hidden"
-            >
-              Xem tất cả sản phẩm liên quan
-            </Button>
-          </div>
-
-          <CarouselCustom itemSize={"lg"}>
-            {productItemsSample.map((product, index) => (
-              <div key={index}>
-                <CategoryCustomItem>
-                  <ProductCard product={product} />
-                </CategoryCustomItem>
-              </div>
-            ))}
-          </CarouselCustom>
-
-          <Link
-            href={""}
-            className="lg:hidden flex items-center justify-between border-b pb-4"
-          >
-            <p className="font-bold">Xem tất cả sản phẩm liên quan</p>
-            <ChevronRight />
-          </Link>
-        </div>
+        <RelatedProducts />
       </div>
     </div>
   );

@@ -7,7 +7,6 @@ import {
   ShoppingBag,
   UserRound,
   Menu,
-  X,
   Percent,
   ShieldCheck,
   Gift,
@@ -22,7 +21,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { LOGIN_PATH } from "@/lib/constants/path";
+import { ACCOUNT_PATH, CART_PATH } from "@/lib/constants/path";
 import React from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -126,7 +125,7 @@ function AppHeaderContent() {
       >
         {/* Top Bar */}
         <div className="bg-primary text-primary-foreground lg:text-sm text-xs">
-          <div className="max-w-[1400px] mx-auto p-4">
+          <div className="max-w-[1400px] mx-auto px-4 py-2">
             <Marquee speed={50}>
               <div className="flex items-center gap-2 mx-10">
                 <Truck size={16} />
@@ -172,13 +171,16 @@ function AppHeaderContent() {
 
             {/* Search Bar */}
             <div className="w-full max-w-md lg:block hidden">
-              <SearchBar onFocus={() => setIsShowSearchDropdown(true)} />
+              <SearchBar
+                onFocus={() => setIsShowSearchDropdown(true)}
+                onSubmit={() => setIsShowSearchDropdown(false)}
+              />
             </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-2 w-fit">
               {/* Account */}
-              <Link href={LOGIN_PATH}>
+              <Link href={ACCOUNT_PATH}>
                 <Button variant={"ghost"} className="rounded-full">
                   <UserRound className="size-5" />
                   <span className="text-sm font-medium hidden lg:inline">
@@ -193,16 +195,18 @@ function AppHeaderContent() {
               </Button>
 
               {/* Cart */}
-              <Button
-                variant={"ghost"}
-                size={"icon"}
-                className="rounded-full relative"
-              >
-                <ShoppingBag className="size-5" />
-                <span className="text-[9px] font-semibold absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center">
-                  8
-                </span>
-              </Button>
+              <Link href={CART_PATH}>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="rounded-full relative"
+                >
+                  <ShoppingBag className="size-5" />
+                  <span className="text-[9px] font-semibold absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center">
+                    8
+                  </span>
+                </Button>
+              </Link>
 
               {/* Menu mobile */}
               <MenuMobile className="lg:hidden" />
@@ -217,7 +221,7 @@ function AppHeaderContent() {
 
         {/* Search dropdown */}
         {isShowSearchDropdown && (
-          <div className="w-full min-h-full bg-background/80 flex-1 shadow-2xl flex flex-col">
+          <div className="w-full min-h-full bg-background/50 backdrop-blur-xs flex-1 shadow-2xl flex flex-col">
             <div className="w-full bg-background border-y overflow-hidden">
               <div className="w-full max-w-[1400px] mx-auto">
                 <div className="max-h-[55vh] overflow-y-scroll scrollbar-hide">

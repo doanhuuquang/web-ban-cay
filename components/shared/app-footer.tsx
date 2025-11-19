@@ -78,7 +78,7 @@ const paymentMethods = [
 
 export default function AppFooter() {
   return (
-    <div className="w-full h-fit bg-muted dark:bg-background">
+    <div className="w-full h-fit bg-background dark:bg-background">
       <div className="w-full h-full max-w-[1400px] m-auto px-4 py-10 space-y-10">
         {/* Head */}
         <div className="w-full grid lg:grid-cols-6 grid-cols-1 gap-6 max-md:divide-y">

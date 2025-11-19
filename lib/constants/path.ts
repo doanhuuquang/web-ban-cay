@@ -1,2 +1,8 @@
 export const LOGIN_PATH = "/auth/login";
 export const SIGN_UP_PATH = "/auth/sign-up";
+export const ACCOUNT_PATH = "/account";
+export const CART_PATH = "/cart";
+export const CHECKOUT_PATH = "/cart/checkout";
+export const ACCOUNT_ADDRESS_PATH = "/account/address";
+export const ACCOUNT_PAYMENT_METHODS_PATH = "/account/payment-methods";
+export const ACCOUNT_ORDERS_PATH = "/account/orders";

@@ -43,10 +43,10 @@ export class Product {
         ? this.price - (this.price * this.discount) / 100
         : this.price;
 
-    return new Intl.NumberFormat("vi-VN").format(price) + "đ";
+    return new Intl.NumberFormat("vi-VN").format(price) + "₫";
   }
 
   getPrice(): string {
-    return new Intl.NumberFormat("vi-VN").format(this.price) + "đ";
+    return new Intl.NumberFormat("vi-VN").format(this.price) + "₫";
   }
 }

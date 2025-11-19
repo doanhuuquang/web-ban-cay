@@ -7,6 +7,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { ArrowUpRight, Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React from "react";
 
 interface searchSuggestionProps {
@@ -33,21 +34,37 @@ function useAppSearch() {
   return context;
 }
 
-function SearchBar({ onFocus }: { onFocus?: () => void }) {
+function SearchBar({
+  onFocus,
+  onSubmit,
+}: {
+  onFocus?: () => void;
+  onSubmit?: () => void;
+}) {
   const { searchValue, setSearchValue } = useAppSearch();
+  const router = useRouter();
 
   return (
     <div className="w-full relative">
       <InputGroup className="bg-accent rounded-full pl-3 pr-10 h-12  border-none has-[[data-slot=input-group-control]:focus-visible]:border-primary has-[[data-slot=input-group-control]:focus-visible]:ring-primary has-[[data-slot=input-group-control]:focus-visible]:ring-2">
-        <InputGroupInput
-          onFocus={onFocus ? () => onFocus() : undefined}
-          value={searchValue}
-          onChange={(e) => {
-            setSearchValue(e.target.value);
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            router.push(`/search/${searchValue}`);
+            onSubmit?.();
           }}
-          placeholder="Bạn muốn tìm gì?"
-          className="placeholder:text-accent-foreground placeholder:text-[16px]"
-        />
+          className="w-full"
+        >
+          <InputGroupInput
+            onFocus={onFocus ? () => onFocus() : undefined}
+            value={searchValue}
+            onChange={(e) => {
+              setSearchValue(e.target.value);
+            }}
+            placeholder="Bạn muốn tìm gì?"
+            className="placeholder:text-accent-foreground placeholder:text-[16px]"
+          />
+        </form>
         <InputGroupAddon>
           <Search className="size-4" />
         </InputGroupAddon>

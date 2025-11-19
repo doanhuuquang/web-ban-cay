@@ -12,6 +12,9 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "Mua cây cảnh & dụng cụ làm vườn online | GPlant",
+  icons: {
+    icon: [{ url: "/assets/icons/gplant/gplant.svg" }],
+  },
 };
 
 export default function RootLayout({
