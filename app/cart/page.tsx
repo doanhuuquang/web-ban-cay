@@ -69,7 +69,7 @@ function CartEmpty() {
 
 function ChooseVoucher() {
   return (
-    <div className="w-full bg-red-500/10 p-4 border-l-5 border-red-500">
+    <div className="w-full bg-orange-500/10 p-4 border-l-5 border-orange-500">
       <div className="w-full flex items-center justify-between gap-4">
         <div className="space-y-1">
           <p className="font-bold">Mã giảm giá</p>
@@ -88,7 +88,7 @@ function ChooseVoucher() {
 
 function ChooseDeliveryVoucher() {
   return (
-    <div className="w-full bg-red-500/10 p-4 border-l-5 border-red-500">
+    <div className="w-full bg-orange-500/10 p-4 border-l-5 border-orange-500">
       <div className="w-full flex items-center justify-between gap-4">
         <div className="space-y-1">
           <p className="font-bold">Mã giảm giá vận chuyển</p>
@@ -197,7 +197,7 @@ function OrderSummary() {
   );
 }
 
-export default function ProductsPage() {
+export default function CartPage() {
   if (false) return <CartEmpty />;
 
   return (
@@ -216,7 +216,7 @@ export default function ProductsPage() {
             ))}
           </div>
 
-          <div className="space-y-3 md:col-span-2">
+          <div className="h-fit space-y-3 md:col-span-2">
             <ChooseVoucher />
             <ChooseDeliveryVoucher />
             <DeliveryInfo />

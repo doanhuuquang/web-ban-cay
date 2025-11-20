@@ -41,11 +41,6 @@ export const categoryItems: categoryItemProps[] = [
     href: "/category/sale",
   },
   {
-    title: "Góc chia sẻ kinh nghiệm trồng cây",
-    imageSrc: "/assets/images/categories/indoor-plants.svg",
-    href: "/category/plant-talk",
-  },
-  {
     title: "Quà tặng doanh nghiệp",
     imageSrc: "/assets/images/categories/indoor-plants.svg",
     href: "/category/corporate-gifts",

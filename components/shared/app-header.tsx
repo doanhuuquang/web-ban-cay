@@ -21,7 +21,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ACCOUNT_PATH, CART_PATH } from "@/lib/constants/path";
+import { ACCOUNT_PATH, CART_PATH, WHISHLIST_PATH } from "@/lib/constants/path";
 import React from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -97,7 +97,7 @@ function AppHeaderContent() {
     const handleScroll = () => {
       const currentY = window.scrollY;
 
-      if (currentY < 400) {
+      if (currentY < 100) {
         setIsHidden(false);
       } else {
         if (currentY > lastY.current) {
@@ -190,9 +190,15 @@ function AppHeaderContent() {
               </Link>
 
               {/* Wishlist */}
-              <Button variant={"ghost"} size={"icon"} className="rounded-full">
-                <Heart className="size-5" />
-              </Button>
+              <Link href={WHISHLIST_PATH}>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="rounded-full"
+                >
+                  <Heart className="size-5" />
+                </Button>
+              </Link>
 
               {/* Cart */}
               <Link href={CART_PATH}>

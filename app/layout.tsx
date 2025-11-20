@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import AppFooter from "@/components/shared/app-footer";
 import { Toaster } from "sonner";
 import { AppHeader } from "@/components/shared/app-header";
+import ScrollToTop from "@/components/shared/scroll-to-top";
+import ChatBotPopup from "@/components/shared/chat-bot-popup";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -25,17 +27,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${manrope.className} antialiased min-w-xs`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AppHeader />
-          {children}
-          <Toaster />
-          <AppFooter />
-        </ThemeProvider>
+        <ScrollToTop>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ChatBotPopup />
+            <AppHeader />
+            {children}
+            <Toaster />
+            <AppFooter />
+          </ThemeProvider>
+        </ScrollToTop>
       </body>
     </html>
   );

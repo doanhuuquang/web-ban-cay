@@ -6,3 +6,4 @@ export const CHECKOUT_PATH = "/cart/checkout";
 export const ACCOUNT_ADDRESS_PATH = "/account/address";
 export const ACCOUNT_PAYMENT_METHODS_PATH = "/account/payment-methods";
 export const ACCOUNT_ORDERS_PATH = "/account/orders";
+export const WHISHLIST_PATH = "/wishlist";

@@ -1,26 +1,113 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { SquarePen } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight, SquarePen } from "lucide-react";
+import React from "react";
+
+const address = [
+  "75 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP.HCM",
+  "123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM",
+  "456 Trần Hưng Đạo, Phường Cầu Ông Lãnh, Quận 1, TP.HCM",
+  "789 Phan Xích Long, Phường 2, Quận Phú Nhuận, TP.HCM",
+];
+
+function AddressList() {
+  const scrollSectionRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+  const [canScrollRight, setCanScrollRight] = React.useState(true);
+  const [currentAddress, setCurrentAddress] = React.useState(
+    "75 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP.HCM"
+  );
+
+  const checkScroll = () => {
+    if (scrollSectionRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollSectionRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
+    }
+  };
+
+  React.useEffect(() => {
+    checkScroll();
+    const carousel = scrollSectionRef.current;
+    if (!carousel) return;
+
+    carousel.addEventListener("scroll", checkScroll);
+    window.addEventListener("resize", checkScroll);
+
+    return () => {
+      carousel.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, []);
+
+  const scrollAmount = 300;
+
+  const handlePrev = () => {
+    scrollSectionRef.current?.scrollBy({
+      left: -scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  const handleNext = () => {
+    scrollSectionRef.current?.scrollBy({
+      left: scrollAmount,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <div className="w-full bg-background dark:bg-accent/50 relative">
+      {/* Prev button */}
+      {canScrollLeft && (
+        <Button
+          className="h-full absolute top-0 left-0 rounded-none bg-background dark:bg-accent text-foreground hover:bg-background hover:text-foreground border-r"
+          onClick={() => handlePrev()}
+        >
+          <ChevronLeft />
+        </Button>
+      )}
+
+      {/* Next button */}
+      {canScrollRight && (
+        <Button
+          className="h-full absolute top-0 right-0 rounded-none bg-background dark:bg-accent text-foreground hover:bg-background hover:text-foreground border-l"
+          onClick={() => handleNext()}
+        >
+          <ChevronRight />
+        </Button>
+      )}
+
+      <div
+        ref={scrollSectionRef}
+        className="w-full flex overflow-x-auto scrollbar-hide "
+      >
+        {address.map((address, index) => (
+          <Button
+            key={index}
+            variant={"ghost"}
+            className={cn(
+              "rounded-none p-8 hover:text-primary hover:bg-background",
+              currentAddress === address &&
+                "border-b-3 border-primary text-primary"
+            )}
+            onClick={() => setCurrentAddress(address)}
+          >
+            {currentAddress}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function CheckoutPage() {
   return (
     <main className="space-y-1">
       {/* Danh sách thông tin giao hàng */}
-      <div className="w-full flex items-center gap-4 flex-wrap bg-background dark:bg-accent/50 p-4">
-        <div className="p-2 hover:text-primary cursor-pointer border-l-3 bg-primary/10 border-primary text-primary">
-          75 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP.HCM
-          <span className="bg-primary text-primary-foreground px-3 py-1 text-xs ml-2">
-            Mặc định
-          </span>
-        </div>
-
-        <div className="p-2 hover:text-primary cursor-pointer">
-          75 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP.HCM
-        </div>
-
-        <div className="p-2 hover:text-primary cursor-pointer">
-          75 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP.HCM
-        </div>
-      </div>
+      <AddressList />
 
       {/* Địa chỉ giao hàng */}
       <div className="w-full h-full p-4 bg-background dark:bg-accent/50">

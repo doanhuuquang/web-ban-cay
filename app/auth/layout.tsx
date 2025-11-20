@@ -8,6 +8,7 @@ import auth from "@/lib/firebase/firebase-auth";
 import { useRouter } from "next/navigation";
 import AppLoading from "@/components/shared/app-loading";
 import React from "react";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -26,16 +27,27 @@ export default function AuthLayout({
 
   return (
     <div className="grid lg:grid-cols-2 grid-cols-1 w-full max-w-[1400px] max-h-[1500px] m-auto px-4 py-5 gap-10">
-      <div className="w-full h-full flex flex-col justify-between gap-10 bg-[url(/assets/images/decorations/bg-auth.jpg)] bg-center bg-cover max-h-[900px] rounded-xl p-5 my-auto">
+      <div className="w-full h-full flex flex-col justify-between gap-10 max-h-[900px] rounded-xl p-5 my-auto relative overflow-hidden">
+        <Image
+          src={"/assets/images/decorations/bg-auth.jpg"}
+          alt="Gplant"
+          fill
+          className="w-full h-full absolute top-0 left-0 z-0"
+        />
+
         <Link
           href={"/"}
-          className="w-fit rounded-full bg-black/20  text-white  py-2 px-3 text-xs flex items-center gap-2"
+          className="w-fit rounded-full bg-black/20  text-white  py-2 px-3 text-xs flex items-center gap-2 z-1"
         >
           <ArrowLeft className="size-4" />
           Quay lại
         </Link>
 
-        <p className={cn("text-4xl font-bold text-white uppercase leading-13")}>
+        <p
+          className={cn(
+            "text-4xl font-bold text-white uppercase leading-13 z-1"
+          )}
+        >
           Sống xanh, không khí trong lành
         </p>
       </div>
