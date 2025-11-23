@@ -23,26 +23,33 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
+import { loginWithEmailAndPassword } from "@/lib/services/auth-service";
 import { toast } from "sonner";
-import { FirebaseError } from "firebase/app";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import auth from "@/lib/firebase/firebase-auth";
+import {
+  DEFAULT_ERROR_MESSAGE,
+  ERROR_MESSAGES,
+} from "@/lib/constants/error-messages";
+import { LOGIN_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
+import { IS_LOGGED } from "@/lib/constants/local-storage-keys";
+import { useUser } from "@/lib/contexts/user-context";
+import { FORGET_PASSWORD_PATH } from "@/lib/constants/path";
 
 // Style cho input
 const inputClassName =
-  "px-5 py-7 bg-background/60 rounded-md text-foreground border-1 w-full outline-none focus:border-primary";
+  "px-5 py-7 bg-background/60 text-foreground border-1 w-full outline-none focus:border-primary";
 
 // Form schema
 const formSchema = z.object({
   email: email("Vui lòng nhập địa chỉ email hợp lệ."),
   password: z.string().min(6, {
-    message: "Mật khẩu phải có ít nhất 6 ký tự.",
+    message: "Mật khẩu phải có ít nhất 8 ký tự.",
   }),
 });
 
 export default function LoginForm() {
   const [loading, setLoading] = React.useState(false);
   const [isChecked, setIsChecked] = React.useState<boolean>(false);
+  const { setIsLoggedIn } = useUser();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,39 +63,25 @@ export default function LoginForm() {
     try {
       setLoading(true);
 
-      await signInWithEmailAndPassword(auth, value.email, value.password);
+      const code = await loginWithEmailAndPassword({
+        email: value.email,
+        password: value.password,
+      });
 
-      // Reset form after successful login
-      form.reset();
-
-      toast("Thành công", {
-        description: "Đăng nhập thành công. Chào mừng bạn trở lại!",
+      toast(code !== 200 ? "Thất bại" : "Thành công", {
+        description:
+          code !== 200
+            ? ERROR_MESSAGES[code]
+              ? ERROR_MESSAGES[code]
+              : DEFAULT_ERROR_MESSAGE
+            : LOGIN_SUCCESS_MESSAGE,
         action: {
-          label: "Ok",
+          label: "Oke",
           onClick: () => {},
         },
       });
-    } catch (error) {
-      if (
-        error instanceof FirebaseError &&
-        error.code === "auth/invalid-credential"
-      ) {
-        toast("Thất bại", {
-          description: "Thông tin đăng nhập không đúng. Vui lòng kiểm tra lại.",
-          action: {
-            label: "Ok",
-            onClick: () => {},
-          },
-        });
-      } else {
-        toast("Thất bại", {
-          description: "Đăng nhập thất bại. Vui lòng thử lại sau.",
-          action: {
-            label: "Ok",
-            onClick: () => {},
-          },
-        });
-      }
+
+      if (code === 200) setIsLoggedIn(true);
     } finally {
       setLoading(false);
     }
@@ -124,7 +117,15 @@ export default function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem className="grow">
-              <FormLabel>Mật khẩu</FormLabel>
+              <div className="w-full flex items-center justify-between gap-4">
+                <FormLabel>Mật khẩu</FormLabel>
+                <Link
+                  href={FORGET_PASSWORD_PATH}
+                  className="text-sm hover:underline"
+                >
+                  Quên mật khẩu
+                </Link>
+              </div>
               <FormControl>
                 <Input
                   type="password"
@@ -171,7 +172,7 @@ export default function LoginForm() {
           <Button
             disabled={loading || !isChecked}
             type="submit"
-            className="w-full py-5 rounded-sm hover:cursor-pointer"
+            className="w-full py-5 hover:cursor-pointer"
           >
             <p className="uppercase">
               {loading ? "Đang kiểm tra thông tin..." : "Đăng nhập"}
@@ -187,7 +188,7 @@ export default function LoginForm() {
 
           <Button
             variant={"outline"}
-            className="w-full py-5 rounded-sm hover:cursor-pointer flex items-center gap-3"
+            className="w-full py-5 hover:cursor-pointer flex items-center gap-3"
           >
             <Image
               src="/assets/icons/google/google.svg"

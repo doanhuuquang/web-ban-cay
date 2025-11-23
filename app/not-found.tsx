@@ -16,7 +16,7 @@ export default function NotFound() {
         </div>
 
         <div className="grid items-center text-center max-w-sm">
-          <p className="text-xl font-bold mb-2">Awww, Đừng khóc</p>
+          <p className="text-xl font-bold mb-2">Awww, Đừng lo nha</p>
 
           <p className="text-sm font-bold">Đó chỉ là lỗi 404 thôi!</p>
 

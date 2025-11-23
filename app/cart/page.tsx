@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { productItemsSample } from "@/lib/constants/product-items";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, House, SlashIcon, User } from "lucide-react";
+import { ChevronRight, CreditCard, House, SlashIcon, User } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -145,10 +145,10 @@ function DeliveryInfo() {
 
 function OrderSummary() {
   return (
-    <div className="p-4 space-y-4 bg-primary/10">
+    <div className="p-4 space-y-4 bg-background dark:bg-muted/50 shadow-md border">
       {/* Tổng quan */}
       <div className="space-y-2">
-        <div className="bg-primary/20 text-primary p-4 text-sm mb-5">
+        <div className="bg-blue-ocean/20 text-blue-ocean font-semibold p-4 text-sm mb-5">
           Đơn giá bên dưới đã bao gồm thuế VAT
         </div>
 
@@ -191,7 +191,10 @@ function OrderSummary() {
       </div>
 
       <Link href={CHECKOUT_PATH}>
-        <Button className="w-full p-6 text-lg">Đặt hàng</Button>
+        <Button className="w-full p-6 rounded-none uppercase">
+          <CreditCard />
+          Đến trang thanh toán
+        </Button>
       </Link>
     </div>
   );
@@ -201,25 +204,22 @@ export default function CartPage() {
   if (false) return <CartEmpty />;
 
   return (
-    <div className="w-full h-fit">
+    <div className="w-full h-fit bg-background">
       <div className="w-full max-w-[1400px] p-4 m-auto space-y-4">
-        <div className="space-y-1">
-          <p className="text-lg font-bold">Giỏ hàng của tôi</p>
+        <div className="space-y-2">
+          <p className="text-xl font-bold">Giỏ hàng của tôi</p>
 
           <BreadcrumbWithCustomSeparator />
         </div>
 
-        <div className="w-full md:grid grid-cols-5 gap-4 space-y-4">
-          <div className="w-full space-y-4 md:col-span-3">
+        <div className="w-full md:grid grid-cols-5 gap-4 max-md:space-y-4">
+          <div className="w-full grid grid-cols-1 gap-4 md:col-span-3">
             {productItemsSample.map((product, index) => (
               <CartProductCard key={index} product={product} />
             ))}
           </div>
 
           <div className="h-fit space-y-3 md:col-span-2">
-            <ChooseVoucher />
-            <ChooseDeliveryVoucher />
-            <DeliveryInfo />
             <OrderSummary />
           </div>
         </div>

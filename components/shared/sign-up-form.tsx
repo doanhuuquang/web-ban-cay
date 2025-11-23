@@ -22,29 +22,25 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { FirebaseError } from "firebase/app";
-import { createUser } from "@/lib/services/user-service";
+import {
+  DEFAULT_ERROR_MESSAGE,
+  ERROR_MESSAGES,
+} from "@/lib/constants/error-messages";
+import { SIGN_UP_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
+import { signUpWithEmailAndPassword } from "@/lib/services/auth-service";
 
 const inputClassName =
-  "px-5 py-7 bg-background/60 rounded-md text-foreground border-1 w-full outline-none focus:border-primary";
+  "px-5 py-7 bg-background/60 text-foreground border-1 w-full outline-none focus:border-primary";
 
 const formSchema = z
   .object({
-    firstName: z.string().min(2, {
-      message: "Vui lòng điền tên hợp lệ.",
-    }),
-    lastName: z.string().min(2, {
-      message: "Vui lòng điền họ hợp lệ.",
-    }),
     email: email("Vui lòng nhập địa chỉ email hợp lệ."),
-    birth_of_date: z.date("Ngày sinh không được để trống"),
     password: z.string().min(6, {
-      message: "Mật khẩu phải có ít nhất 6 ký tự.",
+      message: "Mật khẩu phải có ít nhất 8 ký tự.",
     }),
     confirm_password: z.string().min(6, {
-      message: "Xác nhận mật khẩu phải có ít nhất 6 ký tự.",
+      message: "Xác nhận mật khẩu phải có ít nhất 8 ký tự.",
     }),
   })
   .refine((data) => data.password === data.confirm_password, {
@@ -55,15 +51,11 @@ const formSchema = z
 export default function SignupForm() {
   const [loading, setLoading] = React.useState(false);
   const [isChecked, setIsChecked] = React.useState<boolean>(false);
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      firstName: "",
-      lastName: "",
-      birth_of_date: new Date(),
       password: "",
       confirm_password: "",
     },
@@ -73,45 +65,25 @@ export default function SignupForm() {
     try {
       setLoading(true);
 
-      // Tạo tài khoản và lưu thông tin người dùng Firebase Authentication
-      await createUser({
+      const code = await signUpWithEmailAndPassword({
         email: values.email,
         password: values.password,
-        // user: user,
       });
 
-      // Xóa trắng form
-      form.reset();
+      if (code === 200) form.reset();
 
-      toast("Thành công", {
-        description: "Đăng ký tài khoản thành công.",
+      toast(code !== 200 ? "Thất bại" : "Thành công", {
+        description:
+          code !== 200
+            ? ERROR_MESSAGES[code]
+              ? ERROR_MESSAGES[code]
+              : DEFAULT_ERROR_MESSAGE
+            : SIGN_UP_SUCCESS_MESSAGE,
         action: {
-          label: "Ok",
-          onClick: () => router.push("/"),
+          label: "Oke",
+          onClick: () => {},
         },
       });
-    } catch (error) {
-      console.error("Error signing up:", error);
-      if (
-        error instanceof FirebaseError &&
-        error.code === "auth/email-already-in-use"
-      ) {
-        toast("Thất bại", {
-          description: "Email đã được sử dụng. Vui lòng thử email khác.",
-          action: {
-            label: "Ok",
-            onClick: () => {},
-          },
-        });
-      } else {
-        toast("Thất bại", {
-          description: "Đăng ký tài khoản thất bại. Vui lòng thử lại sau.",
-          action: {
-            label: "Ok",
-            onClick: () => {},
-          },
-        });
-      }
     } finally {
       setLoading(false);
     }
@@ -123,43 +95,6 @@ export default function SignupForm() {
         onSubmit={form.handleSubmit(handleSignUp)}
         className={cn("col-span-4 space-y-5", loading && "disable")}
       >
-        <div className="flex gap-5 w-full">
-          <FormField
-            control={form.control}
-            name="lastName"
-            render={({ field }) => (
-              <FormItem className="grow">
-                <FormLabel>Họ</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Họ của bạn"
-                    {...field}
-                    className={inputClassName}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="firstName"
-            render={({ field }) => (
-              <FormItem className="grow">
-                <FormLabel>Tên</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Tên của bạn"
-                    {...field}
-                    className={inputClassName}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
         <FormField
           control={form.control}
           name="email"
@@ -171,37 +106,6 @@ export default function SignupForm() {
                   placeholder="example@gmail.com"
                   {...field}
                   className={inputClassName}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="birth_of_date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ngày sinh</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Ngày sinh"
-                  className={inputClassName}
-                  type="date"
-                  value={
-                    field.value
-                      ? new Date(field.value).toISOString().split("T")[0]
-                      : ""
-                  }
-                  onChange={(e) => {
-                    field.onChange(
-                      e.target.value ? new Date(e.target.value) : null
-                    );
-                  }}
-                  onBlur={field.onBlur}
-                  name={field.name}
-                  ref={field.ref}
                 />
               </FormControl>
               <FormMessage />
@@ -249,6 +153,11 @@ export default function SignupForm() {
           />
         </div>
 
+        <p className="text-xs text-muted-foreground">
+          <span className="text-red-500">*</span> Mật khẩu phải có ít nhất 8 ký
+          tự, bao gồm ký tự in hoa, số và ký tự đặc biệt
+        </p>
+
         <div className="flex gap-3">
           <Checkbox
             id="terms"
@@ -282,7 +191,7 @@ export default function SignupForm() {
           <Button
             disabled={loading || !isChecked}
             type="submit"
-            className="w-full py-5 rounded-sm hover:cursor-pointer"
+            className="w-full py-5 hover:cursor-pointer"
           >
             <p className="uppercase">
               {loading ? "Đang kiểm tra thông tin..." : "Xác nhận đăng ký"}
@@ -298,7 +207,7 @@ export default function SignupForm() {
 
           <Button
             variant={"outline"}
-            className="w-full py-5 rounded-sm hover:cursor-pointer flex items-center gap-3"
+            className="w-full py-5 hover:cursor-pointer flex items-center gap-3"
           >
             <Image
               src="/assets/icons/google/google.svg"

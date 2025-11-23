@@ -357,7 +357,7 @@ export function BuyNowPayLaterSection() {
             tháng, lãi suất 0% khi sử dụng thẻ tín dụng hoặc ghi nợ
           </p>
 
-          <div className="flex gap-4 items-center bg-green-50 w-fit px-5 py-2 rounded-lg shadow-2xl">
+          <div className="flex gap-4 items-center bg-green-50 w-fit px-5 py-2 shadow-2xl">
             <Image
               src={"/assets/icons/zalopay/zalopay-logo.svg"}
               alt="Buy now pay later"
@@ -443,13 +443,13 @@ export function TipsAndIdeasSection() {
 export function SubscribeSection() {
   return (
     <div className="w-full max-w-[1400px] m-auto p-4">
-      <div className="w-full flex lg:flex-row flex-col justify-between items-center bg-[#ebebeb]">
-        <div className="w-full space-y-5 flex flex-col lg:items-start items-center lg:p-10 px-7 pt-7">
-          <h1 className="lg:text-3xl text-2xl font-bold text-[#5a5a5a] lg:text-left text-center">
+      <div className="w-full flex lg:flex-row flex-col relative justify-between items-center bg-[#ebebeb]">
+        <div className="w-full space-y-5 flex flex-col lg:items-start items-center lg:p-10 px-7 py-7 z-1 bg-[#ebebeb]/50">
+          <h1 className="lg:text-3xl text-2xl font-bold text-[#363636] lg:text-left text-center">
             Tham gia ngay để nhận ưu đãi độc quyền!
           </h1>
 
-          <p className="text-[#7e7e7e] lg:text-left text-center max-w-lg">
+          <p className="text-[#484848] lg:text-left text-center max-w-lg">
             Đăng ký và nhận được giảm giá độc quyền cho tất cả các loại cây
             trồng và sản phẩm làm vườn yêu thích của bạn!
           </p>
@@ -457,17 +457,19 @@ export function SubscribeSection() {
           <div className="w-full max-w-xl flex lg:flex-row flex-col gap-4 items-center">
             <Input
               placeholder="Tên của bạn"
-              className="bg-white! border-none outline-none text-black p-6"
+              className="bg-white! border-none outline-none text-black p-6 rounded-none"
             />
             <Input
               placeholder="Địa chỉ Email"
-              className="bg-white! border-none outline-none text-black p-6"
+              className="bg-white! border-none outline-none text-black p-6 rounded-none"
             />
-            <Button className="lg:w-fit w-full py-6 px-10">Đăng ký</Button>
+            <Button className="lg:w-fit w-full py-6 px-10 rounded-none">
+              Đăng ký
+            </Button>
           </div>
         </div>
 
-        <div className="w-full max-w-sm h-full aspect-square relative">
+        <div className="w-full max-w-sm h-full aspect-square relative max-md:absolute z-0">
           <Image
             src={"/assets/images/decorations/cactus.jpg"}
             alt="Buy now pay later"

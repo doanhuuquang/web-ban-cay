@@ -10,6 +10,7 @@ import {
   Percent,
   ShieldCheck,
   Gift,
+  Bot,
 } from "lucide-react";
 import AppLogo from "@/components/shared/app-logo";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ACCOUNT_PATH, CART_PATH, WHISHLIST_PATH } from "@/lib/constants/path";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ACCOUNT_PATH,
+  CART_PATH,
+  LOGIN_PATH,
+  WHISHLIST_PATH,
+} from "@/lib/constants/path";
 import React from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -30,6 +37,7 @@ import {
   SearchSuggestionsList,
 } from "@/components/shared/app-search";
 import Marquee from "react-fast-marquee";
+import { useUser } from "@/lib/contexts/user-context";
 
 export const navigationLinks = [
   { name: "Trang chủ", href: "/" },
@@ -84,6 +92,24 @@ function MenuMobile({ className }: { className?: string }) {
         </SheetFooter>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function AccountButton() {
+  const { isLoading, isLoggedIn } = useUser();
+
+  if (isLoading)
+    return <Skeleton className="h-9 w-25 max-md:w-9 rounded-full" />;
+
+  return (
+    <Link href={isLoggedIn ? ACCOUNT_PATH : LOGIN_PATH}>
+      <Button variant={"ghost"} className="rounded-full">
+        <UserRound className="size-5" />
+        <span className="text-sm font-medium hidden lg:inline">
+          {isLoggedIn ? "Tài khoản của tôi" : "Hej! Đăng nhập"}
+        </span>
+      </Button>
+    </Link>
   );
 }
 
@@ -178,16 +204,9 @@ function AppHeaderContent() {
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-2 w-fit">
+            <div className="flex items-center gap-1 w-fit">
               {/* Account */}
-              <Link href={ACCOUNT_PATH}>
-                <Button variant={"ghost"} className="rounded-full">
-                  <UserRound className="size-5" />
-                  <span className="text-sm font-medium hidden lg:inline">
-                    Hej! Đăng nhập
-                  </span>
-                </Button>
-              </Link>
+              <AccountButton />
 
               {/* Wishlist */}
               <Link href={WHISHLIST_PATH}>
@@ -208,9 +227,20 @@ function AppHeaderContent() {
                   className="rounded-full relative"
                 >
                   <ShoppingBag className="size-5" />
-                  <span className="text-[9px] font-semibold absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center">
-                    8
-                  </span>
+                  <div className="text-[9px] font-semibold absolute bottom-0 right-0 bg-primary text-background rounded-full w-4 h-4 flex items-center justify-center border-2 border-background">
+                    <p className="leading-0">8</p>
+                  </div>
+                </Button>
+              </Link>
+
+              {/* Chat bot */}
+              <Link href={WHISHLIST_PATH}>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="rounded-full"
+                >
+                  <Bot className="size-5" />
                 </Button>
               </Link>
 

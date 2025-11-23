@@ -1,5 +1,6 @@
 export const LOGIN_PATH = "/auth/login";
 export const SIGN_UP_PATH = "/auth/sign-up";
+export const FORGET_PASSWORD_PATH = "/auth/forget-password";
 export const ACCOUNT_PATH = "/account";
 export const CART_PATH = "/cart";
 export const CHECKOUT_PATH = "/cart/checkout";

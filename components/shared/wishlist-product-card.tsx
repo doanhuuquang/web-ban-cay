@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function WishlistProductCard({ product }: { product: Product }) {
   return (
-    <div className="w-full h-fit pl-4 py-4 pr-10 border flex items-start gap-4 bg-muted/20 relative shadow-sm">
+    <div className="w-full h-fit pl-4 py-4 pr-10 border flex items-start gap-4 dark:bg-muted/50 relative shadow-sm">
       <Button
         variant={"ghost"}
         size={"icon"}

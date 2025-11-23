@@ -1,10 +1,27 @@
-import { Spinner } from "@/components/ui/spinner";
+import Image from "next/image";
 
-export default function AppLoading() {
+function AppLoadingBackground({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-16 min-h-[calc(100vh-68px)] flex flex-col items-center justify-center gap-4">
-      <Spinner className="size-8" />
-      <p className="text-sm text-muted-foreground">Sắp xong rồi, đợi chút!</p>
+    <div className="w-screen min-h-[50vh] flex items-center justify-center">
+      {children}
     </div>
   );
 }
+
+function AppLoadingIcon({ title }: { title?: string }) {
+  return (
+    <div className="flex flex-col justify-center items-center gap-1">
+      <Image
+        src={"/assets/icons/gplant/gplant.svg"}
+        alt="Gplant"
+        width={50}
+        height={50}
+        className="animate-[spin_3s_linear_infinite]"
+      />
+
+      {title && <p>{title}</p>}
+    </div>
+  );
+}
+
+export { AppLoadingBackground, AppLoadingIcon };
