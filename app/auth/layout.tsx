@@ -33,7 +33,7 @@ export default function AuthLayout({
 
   return (
     <div className="grid lg:grid-cols-2 grid-cols-1 w-full max-w-[1400px] max-h-[1500px] m-auto px-4 py-5 gap-10">
-      <div className="w-full h-full flex flex-col justify-between gap-10 max-h-[900px] rounded-xl p-5 my-auto relative overflow-hidden">
+      <div className="w-full h-full flex flex-col justify-between gap-10 max-h-[900px] min-h-[50vh] rounded-xl p-5 my-auto relative overflow-hidden">
         <Image
           src={"/assets/images/decorations/plants-and-the-girl.png"}
           alt="Gplant"
