@@ -1,8 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { icons } from "lucide-react";
 import { AppThemeModeToggle } from "@/components/shared/app-theme-mode-toggle";
+import { usePathname } from "next/navigation";
 
 export const navigationLinks = [
   { name: "Trang chủ", href: "/" },
@@ -77,6 +79,10 @@ const paymentMethods = [
 ];
 
 export default function AppFooter() {
+  const pathName = usePathname();
+
+  if (pathName?.startsWith("/admin")) return null;
+
   return (
     <div className="w-full h-fit bg-background dark:bg-background">
       <div className="w-full h-full max-w-[1400px] m-auto px-4 py-10 space-y-10">

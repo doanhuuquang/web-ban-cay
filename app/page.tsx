@@ -240,10 +240,12 @@ function ToDayBestDealsSection() {
           <div className="w-full h-full bg-red-700 flex flex-col">
             <div className="w-full h-auto aspect-square relative">
               <Image
-                src={"/assets/images/decorations/flower-on-red-table.svg"}
+                src={
+                  "/assets/images/decorations/decorative-house-plants-interior-design.jpg"
+                }
                 alt="Giá mới thấp hơn"
                 fill
-                className="absolute top-0 left-0 object-center object-cover"
+                className="absolute top-0 left-0 object-bottom object-cover"
               />
             </div>
             <div className="w-full grow p-8 text-red-50 flex flex-col justify-between gap-4">

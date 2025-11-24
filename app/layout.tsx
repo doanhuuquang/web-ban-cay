@@ -1,13 +1,14 @@
-import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
 import "./globals.css";
+import type { Metadata } from "next";
+import { Fira_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import AppFooter from "@/components/shared/app-footer";
 import { Toaster } from "sonner";
 import { AppHeader } from "@/components/shared/app-header";
-import UserProvider from "@/lib/contexts/user-context";
+import AuthProvider from "@/lib/contexts/auth-context";
 
-const manrope = Manrope({
+const firaSans = Fira_Sans({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
 });
 
@@ -25,19 +26,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${manrope.className} antialiased min-w-xs`}>
+      <body className={`${firaSans.className} antialiased min-w-xs`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <UserProvider>
+          <AuthProvider>
             <AppHeader />
             {children}
             <Toaster />
             <AppFooter />
-          </UserProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

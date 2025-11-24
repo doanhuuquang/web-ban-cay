@@ -10,7 +10,7 @@ import {
 } from "@/components/shared/app-loading";
 import React from "react";
 import Image from "next/image";
-import { useUser } from "@/lib/contexts/user-context";
+import { useUser } from "@/lib/contexts/auth-context";
 
 export default function AuthLayout({
   children,

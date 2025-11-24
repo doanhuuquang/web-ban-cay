@@ -2,19 +2,20 @@
 
 import { IS_LOGGED } from "@/lib/constants/local-storage-keys";
 import { User } from "@/lib/models/user";
+import { introspectToken } from "@/lib/services/auth-service";
 import React from "react";
 
-type UserContextProps = {
+type AuthContextProps = {
   isLoading: boolean;
   isLoggedIn: boolean;
   setIsLoggedIn: (loggedIn: boolean) => void;
   user: User | null;
 };
 
-const UserContext = React.createContext<UserContextProps | null>(null);
+const AuthContext = React.createContext<AuthContextProps | null>(null);
 
 export function useUser() {
-  const context = React.useContext(UserContext);
+  const context = React.useContext(AuthContext);
 
   if (!context) {
     throw new Error("useUser must be used within a <UserProvider />");
@@ -23,7 +24,7 @@ export function useUser() {
   return context;
 }
 
-export default function UserProvider({
+export default function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
@@ -31,7 +32,22 @@ export default function UserProvider({
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false);
   const [user, setUser] = React.useState<User | null>(null);
+  const [nextTokenRefreshTime, setNextTokenRefreshTime] =
+    React.useState<Date | null>(null);
 
+  // Cập nhật thời gian làm mới token
+  React.useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const getTokenRefreshTime = async () => {
+      const time = await introspectToken();
+      setNextTokenRefreshTime(time);
+    };
+
+    getTokenRefreshTime();
+  }, [isLoggedIn]);
+
+  // Kiểm tra trạng thái đăng nhập
   React.useEffect(() => {
     try {
       setIsLoggedIn(localStorage.getItem(IS_LOGGED) === "true");
@@ -41,7 +57,7 @@ export default function UserProvider({
   }, []);
 
   return (
-    <UserContext.Provider
+    <AuthContext.Provider
       value={{
         isLoading,
         isLoggedIn,
@@ -50,6 +66,6 @@ export default function UserProvider({
       }}
     >
       {children}
-    </UserContext.Provider>
+    </AuthContext.Provider>
   );
 }

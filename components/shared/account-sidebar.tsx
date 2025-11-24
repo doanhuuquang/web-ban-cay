@@ -36,7 +36,7 @@ import {
   ERROR_MESSAGES,
 } from "@/lib/constants/error-messages";
 import { LOGOUT_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
-import { useUser } from "@/lib/contexts/user-context";
+import { useUser } from "@/lib/contexts/auth-context";
 
 const sidebarItems = [
   {

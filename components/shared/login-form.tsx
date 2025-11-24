@@ -31,7 +31,7 @@ import {
 } from "@/lib/constants/error-messages";
 import { LOGIN_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
 import { IS_LOGGED } from "@/lib/constants/local-storage-keys";
-import { useUser } from "@/lib/contexts/user-context";
+import { useUser } from "@/lib/contexts/auth-context";
 import { FORGET_PASSWORD_PATH } from "@/lib/constants/path";
 
 // Style cho input

@@ -1,4 +1,5 @@
 import SignupForm from "@/components/shared/sign-up-form";
+import { LOGIN_PATH } from "@/lib/constants/path";
 import Link from "next/link";
 
 export default function SignupPage() {
@@ -10,7 +11,7 @@ export default function SignupPage() {
           Bạn đã có tài khoản trước đó rồi?
           <span>
             <Link
-              href={"/auth/login"}
+              href={LOGIN_PATH}
               className="text-primary underline underline-offset-2 ml-2"
             >
               Đăng nhập

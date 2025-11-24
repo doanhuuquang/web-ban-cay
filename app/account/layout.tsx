@@ -8,7 +8,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { LOGIN_PATH } from "@/lib/constants/path";
-import { useUser } from "@/lib/contexts/user-context";
+import { useUser } from "@/lib/contexts/auth-context";
 import { Receipt, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

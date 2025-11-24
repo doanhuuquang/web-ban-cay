@@ -3,6 +3,8 @@ import axios from "axios";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+const introspectTokenUrl = "/auth/introspect";
+const refreshTokenUrl = "/auth/refresh";
 const loginUrl = "/auth/login";
 const signUpUrl = "/users/registration";
 const logoutUrl = "/auth/logout";
@@ -16,6 +18,27 @@ const instance = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+const introspectToken = async (): Promise<Date | null> => {
+  try {
+    const response = await instance.post(introspectTokenUrl);
+    return new Date(response.data.data.exp);
+  } catch {
+    return null;
+  }
+};
+
+const refreshToken = async (): Promise<number> => {
+  try {
+    const response = await instance.post(refreshTokenUrl);
+    return response.data.code;
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return -1;
+  }
+};
 
 const loginWithEmailAndPassword = async (data: {
   email: string;
@@ -95,6 +118,8 @@ const changePassword = async (data: {
 };
 
 export {
+  introspectToken,
+  refreshToken,
   loginWithEmailAndPassword,
   signUpWithEmailAndPassword,
   logout,

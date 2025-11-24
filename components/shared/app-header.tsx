@@ -37,7 +37,8 @@ import {
   SearchSuggestionsList,
 } from "@/components/shared/app-search";
 import Marquee from "react-fast-marquee";
-import { useUser } from "@/lib/contexts/user-context";
+import { useUser } from "@/lib/contexts/auth-context";
+import { usePathname } from "next/navigation";
 
 export const navigationLinks = [
   { name: "Trang chủ", href: "/" },
@@ -47,6 +48,8 @@ export const navigationLinks = [
 ];
 
 type AppHeaderContextProps = {
+  isShowAppHeader: boolean;
+  setIShowAppHeader: (value: boolean) => void;
   isShowSearchDropdown: boolean;
   setIsShowSearchDropdown: (value: boolean) => void;
 };
@@ -114,8 +117,14 @@ function AccountButton() {
 }
 
 function AppHeaderContent() {
-  const [isHiden, setIsHidden] = React.useState<boolean>(false);
-  const { isShowSearchDropdown, setIsShowSearchDropdown } = useAppHeader();
+  const pathName = usePathname();
+
+  const {
+    isShowAppHeader,
+    setIShowAppHeader,
+    isShowSearchDropdown,
+    setIsShowSearchDropdown,
+  } = useAppHeader();
 
   React.useEffect(() => {
     const lastY = { current: window.scrollY };
@@ -124,12 +133,12 @@ function AppHeaderContent() {
       const currentY = window.scrollY;
 
       if (currentY < 100) {
-        setIsHidden(false);
+        setIShowAppHeader(true);
       } else {
         if (currentY > lastY.current) {
-          setIsHidden(true);
+          setIShowAppHeader(false);
         } else if (currentY < lastY.current) {
-          setIsHidden(false);
+          setIShowAppHeader(true);
         }
       }
 
@@ -138,14 +147,16 @@ function AppHeaderContent() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [setIShowAppHeader]);
+
+  if (pathName?.startsWith("/admin")) return null;
 
   return (
     <AppSearch>
       <header
         className={cn(
           "w-full h-fit sticky top-0 z-50 transition-all flex flex-col",
-          !isShowSearchDropdown && isHiden && "-translate-y-full",
+          !isShowSearchDropdown && !isShowAppHeader && "-translate-y-full",
           isShowSearchDropdown && "min-h-screen fixed"
         )}
       >
@@ -277,14 +288,22 @@ function AppHeaderContent() {
   );
 }
 
-export function AppHeader() {
+function AppHeader() {
+  const [isShowAppHeader, setIShowAppHeader] = React.useState(true);
   const [isShowSearchDropdown, setIsShowSearchDropdown] = React.useState(false);
 
   return (
     <AppHeaderContext.Provider
-      value={{ isShowSearchDropdown, setIsShowSearchDropdown }}
+      value={{
+        isShowAppHeader,
+        setIShowAppHeader,
+        isShowSearchDropdown,
+        setIsShowSearchDropdown,
+      }}
     >
       <AppHeaderContent />
     </AppHeaderContext.Provider>
   );
 }
+
+export { useAppHeader, AppHeader };
