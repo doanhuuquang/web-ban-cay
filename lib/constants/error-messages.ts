@@ -2,7 +2,7 @@ export const ERROR_MESSAGES: Record<number, string> = {
   // ===== SYSTEM =====
   9999: "Lỗi không xác định. Vui lòng thử lại sau.",
   1000: "Khoá không hợp lệ.",
-  1028: "Lỗi hệ thống (Redis). Vui lòng thử lại sau.",
+  1028: "Lỗi hệ thống. Vui lòng thử lại sau.",
 
   // ===== AUTH =====
   1001: "Vui lòng đăng nhập để tiếp tục.",

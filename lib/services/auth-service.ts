@@ -1,4 +1,3 @@
-import { IS_LOGGED } from "@/lib/constants/local-storage-keys";
 import axios from "axios";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -19,12 +18,18 @@ const instance = axios.create({
   },
 });
 
-const introspectToken = async (): Promise<Date | null> => {
+const introspectToken = async (): Promise<{ code: number; exp?: Date }> => {
   try {
     const response = await instance.post(introspectTokenUrl);
-    return new Date(response.data.data.exp);
-  } catch {
-    return null;
+    return {
+      code: response.data.code,
+      exp: new Date(response.data.data.exp),
+    };
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return { code: error.response?.data.code };
+    }
+    return { code: -1 };
   }
 };
 
@@ -46,7 +51,6 @@ const loginWithEmailAndPassword = async (data: {
 }): Promise<number> => {
   try {
     const response = await instance.post(loginUrl, data);
-    if (response.data.code === 200) localStorage.setItem(IS_LOGGED, "true");
 
     return response.data.code;
   } catch (error) {
@@ -66,7 +70,6 @@ const signUpWithEmailAndPassword = async (data: {
     return response.data.code;
   } catch (error) {
     if (error instanceof axios.AxiosError) {
-      console.log("Error response code:", error.response?.data.code);
       return error.response?.data.code;
     }
     return -1;
@@ -76,9 +79,6 @@ const signUpWithEmailAndPassword = async (data: {
 const logout = async (): Promise<number> => {
   try {
     const response = await instance.post(logoutUrl);
-
-    if (response.data.code === 200) localStorage.removeItem(IS_LOGGED);
-
     return response.data.code;
   } catch (error) {
     if (error instanceof axios.AxiosError) {

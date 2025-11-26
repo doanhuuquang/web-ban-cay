@@ -36,6 +36,7 @@ import {
   CHANGE_PASSWORD_SUCCESS_MESSAGE,
   SEND_OTP_SUCCESS_MESSAGE,
 } from "@/lib/constants/success-messages";
+import { API_SUCCESS_CODE } from "@/lib/constants/api-success-code";
 
 const inputClassName =
   "px-5 py-7 bg-background/60 text-foreground border-1 w-full outline-none focus:border-primary";
@@ -83,22 +84,26 @@ export default function ForgetPasswordForm() {
 
     try {
       setIsSendingOTP(true);
-      console.log("Gửi OTP đến email:", form.getValues("email"));
 
       const code = await getOTP(form.getValues("email"));
 
-      toast(code !== 200 ? "Thất bại" : "Thành công", {
-        description:
-          code !== 200
-            ? ERROR_MESSAGES[code]
+      toast(
+        code !== API_SUCCESS_CODE.FORGET_PASSWORD_SUCCESS
+          ? "Thất bại"
+          : "Thành công",
+        {
+          description:
+            code !== API_SUCCESS_CODE.FORGET_PASSWORD_SUCCESS
               ? ERROR_MESSAGES[code]
-              : DEFAULT_ERROR_MESSAGE
-            : SEND_OTP_SUCCESS_MESSAGE,
-        action: {
-          label: "Oke",
-          onClick: () => {},
-        },
-      });
+                ? ERROR_MESSAGES[code]
+                : DEFAULT_ERROR_MESSAGE
+              : SEND_OTP_SUCCESS_MESSAGE,
+          action: {
+            label: "Oke",
+            onClick: () => {},
+          },
+        }
+      );
     } finally {
       setIsSendingOTP(false);
     }
@@ -116,18 +121,23 @@ export default function ForgetPasswordForm() {
 
       if (code === 200) form.reset();
 
-      toast(code !== 200 ? "Thất bại" : "Thành công", {
-        description:
-          code !== 200
-            ? ERROR_MESSAGES[code]
+      toast(
+        code !== API_SUCCESS_CODE.RESET_PASSWORD_SUCCESS
+          ? "Thất bại"
+          : "Thành công",
+        {
+          description:
+            code !== API_SUCCESS_CODE.RESET_PASSWORD_SUCCESS
               ? ERROR_MESSAGES[code]
-              : DEFAULT_ERROR_MESSAGE
-            : CHANGE_PASSWORD_SUCCESS_MESSAGE,
-        action: {
-          label: "Oke",
-          onClick: () => {},
-        },
-      });
+                ? ERROR_MESSAGES[code]
+                : DEFAULT_ERROR_MESSAGE
+              : CHANGE_PASSWORD_SUCCESS_MESSAGE,
+          action: {
+            label: "Oke",
+            onClick: () => {},
+          },
+        }
+      );
     } finally {
       setLoading(false);
     }

@@ -37,7 +37,7 @@ import {
   SearchSuggestionsList,
 } from "@/components/shared/app-search";
 import Marquee from "react-fast-marquee";
-import { useUser } from "@/lib/contexts/auth-context";
+import { useAuth } from "@/lib/contexts/auth-context";
 import { usePathname } from "next/navigation";
 
 export const navigationLinks = [
@@ -99,7 +99,7 @@ function MenuMobile({ className }: { className?: string }) {
 }
 
 function AccountButton() {
-  const { isLoading, isLoggedIn } = useUser();
+  const { isLoading, isLoggedIn } = useAuth();
 
   if (isLoading)
     return <Skeleton className="h-9 w-25 max-md:w-9 rounded-full" />;

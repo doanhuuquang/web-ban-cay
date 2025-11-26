@@ -1,39 +1,35 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import auth from "@/lib/firebase/firebase-auth";
+import { User } from "@/lib/models/user";
+import axios from "axios";
 
-const createUser = async ({
-  email,
-  password,
-}: // user,
-{
-  email: string;
-  password: string;
-  // user: User;
-}) => {
-  await createUserWithEmailAndPassword(auth, email, password);
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  // await setDoc(doc(firestore, "users", credential.user.uid), {
-  //   avatarBase64: user.avatarBase64,
-  //   firstName: user.firstName,
-  //   lastName: user.lastName,
-  //   email: user.email,
-  //   birthOfDate: user.birthOfDate,
-  //   createdAt: user.createdAt,
-  //   updatedAt: user.updatedAt,
-  //   isVerified: user.isVerified,
-  //   isOnline: user.isOnline,
-  // });
+const getCurrentUserProfileUrl = "/users/myInfo";
+
+const instance = axios.create({
+  baseURL: apiBaseUrl,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+const getCurrentUserProfile = async (): Promise<{
+  code: number;
+  userProfile: User | null;
+}> => {
+  try {
+    const response = await instance.get(getCurrentUserProfileUrl);
+
+    return {
+      code: response.data.code,
+      userProfile: response.data.data as User,
+    };
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return { code: -1, userProfile: null };
+  }
 };
 
-// const getUserById = async (userId: string): Promise<User | null> => {
-//   const friendsRef = collection(firestore, "users");
-//   const docSnap = await getDoc(doc(friendsRef, userId));
-
-//   if (docSnap.exists()) {
-//     return { id: docSnap.id, ...docSnap.data() } as User;
-//   }
-
-//   return null;
-// };
-
-export { createUser /*, getUserById*/ };
+export { getCurrentUserProfile };
