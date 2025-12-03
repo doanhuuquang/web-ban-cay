@@ -150,29 +150,34 @@ export default function ForgetPasswordForm() {
         className={cn("col-span-4 space-y-5", loading && "disable")}
       >
         <FormField
+          disabled={isSendingOTP}
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
               <div className="w-full flex items-center justify-between">
                 <FormLabel>Email</FormLabel>
-                <Button
-                  disabled={isSendingOTP}
-                  variant={"link"}
-                  type="button"
-                  onClick={() => handleGetOTP()}
-                  className="text-primary hover:underline hover:cursor-pointer text-sm font-semibold p-0!"
-                >
-                  {isSendingOTP && <LoaderCircle className="animate-spin" />}
-                  {isSendingOTP ? "Đang gửi" : "Gửi OTP"}
-                </Button>
               </div>
               <FormControl>
-                <Input
-                  placeholder="example@gmail.com"
-                  {...field}
-                  className={inputClassName}
-                />
+                <div className="flex">
+                  <Input
+                    placeholder="example@gmail.com"
+                    {...field}
+                    className={inputClassName}
+                  />
+                  <Button
+                    type="button"
+                    variant={"outline"}
+                    disabled={isSendingOTP}
+                    onClick={() => (isSendingOTP ? null : handleGetOTP())}
+                    className="h-full border-l-0"
+                  >
+                    {isSendingOTP && (
+                      <LoaderCircle className="animate-spin size-4" />
+                    )}
+                    {isSendingOTP ? "Đang gửi" : "Gửi OTP"}
+                  </Button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -17,11 +17,12 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAuth } from "@/lib/contexts/auth-context";
-import { Address, AddressType } from "@/lib/models/address";
+import { Address, AddressTypeLabel } from "@/lib/models/address";
 import {
   createAddressByProfileId,
   deleteAddressByAddressIdAndProfileId,
   updateAddressByAddressIdAndProfileId,
+  updateDefaultAddressByAddressIdAndProfileId,
 } from "@/lib/services/address-service";
 import { cn } from "@/lib/utils";
 import {
@@ -29,7 +30,7 @@ import {
   ChevronRight,
   Ellipsis,
   LoaderCircle,
-  PenSquare,
+  PenLine,
   Plus,
   Settings2,
   SquarePen,
@@ -54,6 +55,7 @@ import {
 import {
   CREATED_ADDRESS_SUCCESS_MESSAGE,
   DELETE_ADDRESS_SUCCESS_MESSAGE,
+  SET_DEFAULT_ADDRESS_SUCCESS_MESSAGE,
   UPDATE_ADDRESS_SUCCESS_MESSAGE,
 } from "@/lib/constants/success-messages";
 import {
@@ -66,6 +68,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Province } from "@/lib/models/province";
+import { District } from "@/lib/models/district";
+import { Ward } from "@/lib/models/ward";
 
 function AddressList({
   addresses,
@@ -160,12 +165,6 @@ function AddressList({
               onClick={() => setCurrentAddress(address)}
             >
               {address.label ?? address.shortAddress}
-
-              {address.isDefault && (
-                <p className="px-1 py-0.5 bg-primary text-primary-foreground text-[7px] font-light">
-                  Mặc định
-                </p>
-              )}
             </Button>
           ))
         )}
@@ -177,6 +176,7 @@ function AddressList({
 function CreateNewAddress() {
   const { user } = useAuth();
   const {
+    isFormValid,
     selectedProvince,
     selectedDistrict,
     selectedWard,
@@ -192,40 +192,9 @@ function CreateNewAddress() {
   } = useAddressSelector();
   const [isShowSheet, setIsShowSheet] = React.useState<boolean>(false);
   const [isCreating, setIsCreating] = React.useState<boolean>(false);
-  const [isValid, setIsValid] = React.useState<boolean>(false);
-
-  React.useEffect(() => {
-    if (
-      selectedProvince &&
-      selectedDistrict &&
-      selectedWard &&
-      street &&
-      fullName &&
-      phone &&
-      addressType &&
-      postalCode &&
-      label &&
-      additionalInfo
-    ) {
-      setIsValid(true);
-    }
-  }, [
-    selectedProvince,
-    selectedDistrict,
-    selectedWard,
-    street,
-    fullName,
-    phone,
-    additionalInfo,
-    addressType,
-    postalCode,
-    label,
-    isValid,
-    isDefault,
-  ]);
 
   const handleCreateAddress = async () => {
-    if (!user || !user.userProfile || !isValid) return;
+    if (!user || !user.userProfile || !isFormValid) return;
 
     try {
       setIsCreating(true);
@@ -236,9 +205,12 @@ function CreateNewAddress() {
           fullName: fullName,
           phone: phone,
           street: street,
-          ward: selectedWard!,
-          district: selectedDistrict!,
-          province: selectedProvince!,
+          provinceID: selectedProvince!.provinceID,
+          province: selectedProvince!.provinceName,
+          districtID: selectedDistrict!.districtID,
+          district: selectedDistrict!.districtName,
+          wardCode: selectedWard!.wardCode,
+          ward: selectedWard!.wardName,
           postalCode: postalCode,
           additionalInfo: additionalInfo,
           isDefault: isDefault,
@@ -294,7 +266,7 @@ function CreateNewAddress() {
         <SheetFooter>
           <Button
             type="submit"
-            disabled={isCreating || !isValid}
+            disabled={isCreating || !isFormValid}
             onClick={() => handleCreateAddress()}
           >
             {isCreating ? <LoaderCircle className="animate-spin" /> : <Plus />}
@@ -347,10 +319,10 @@ function UpdateAddress({
   setIsShowUpdateSheet: (value: boolean) => void;
 }) {
   const [isUpdating, setIsUpdating] = React.useState<boolean>(false);
-  const [isValid, setIsValid] = React.useState<boolean>(false);
 
   const { user } = useAuth();
   const {
+    isFormValid,
     selectedProvince,
     selectedDistrict,
     selectedWard,
@@ -362,41 +334,55 @@ function UpdateAddress({
     isDefault,
     postalCode,
     label,
+    setSelectedProvince,
+    setSelectedDistrict,
+    setSelectedWard,
+    setStreet,
+    setFullName,
+    setPhone,
+    setAdditionalInfo,
+    setIsDefault,
+    setAddressType,
+    setLabel,
+    setPostalCode,
     resetForm,
   } = useAddressSelector();
 
   React.useEffect(() => {
-    if (
-      selectedProvince &&
-      selectedDistrict &&
-      selectedWard &&
-      street &&
-      fullName &&
-      phone &&
-      addressType &&
-      postalCode &&
-      label &&
-      additionalInfo
-    ) {
-      setIsValid(true);
+    if (address) {
+      setSelectedProvince(new Province(address.provinceID, address.province));
+      setSelectedDistrict(
+        new District(address.districtID, address.provinceID, address.district)
+      );
+      setSelectedWard(
+        new Ward(address.wardCode, address.districtID, address.ward)
+      );
+      setStreet(address.street);
+      setFullName(address.fullName);
+      setPhone(address.phone);
+      setAdditionalInfo(address.additionalInfo);
+      setIsDefault(address.isDefault);
+      setAddressType(address.type);
+      setLabel(address.label);
+      setPostalCode(address.postalCode);
     }
   }, [
-    selectedProvince,
-    selectedDistrict,
-    selectedWard,
-    street,
-    fullName,
-    phone,
-    additionalInfo,
-    addressType,
-    postalCode,
-    label,
-    isValid,
-    isDefault,
+    address,
+    setAdditionalInfo,
+    setAddressType,
+    setFullName,
+    setIsDefault,
+    setLabel,
+    setPhone,
+    setPostalCode,
+    setSelectedDistrict,
+    setSelectedProvince,
+    setSelectedWard,
+    setStreet,
   ]);
 
   const handleUpdateAddress = async () => {
-    if (!user || !user.userProfile || !isValid) return;
+    if (!user || !user.userProfile || !isFormValid) return;
 
     try {
       setIsUpdating(true);
@@ -408,9 +394,12 @@ function UpdateAddress({
           fullName: fullName,
           phone: phone,
           street: street,
-          ward: selectedWard!,
-          district: selectedDistrict!,
-          province: selectedProvince!,
+          provinceID: selectedProvince!.provinceID,
+          province: selectedProvince!.provinceName,
+          districtID: selectedDistrict!.districtID,
+          district: selectedDistrict!.districtName,
+          wardCode: selectedWard!.wardCode,
+          ward: selectedWard!.wardName,
           postalCode: postalCode,
           additionalInfo: additionalInfo,
           isDefault: isDefault,
@@ -451,12 +440,12 @@ function UpdateAddress({
           </SheetDescription>
         </SheetHeader>
         <div className="flex-1 px-4 overflow-y-auto scrollbar-hide">
-          <AddressForm address={address} formType={"UPDATE"} />
+          <AddressForm />
         </div>
         <SheetFooter>
           <Button
             type="submit"
-            disabled={isUpdating || !isValid}
+            disabled={isUpdating || !isFormValid}
             onClick={() => {
               handleUpdateAddress();
             }}
@@ -508,8 +497,42 @@ function UpdateAddress({
 function DeliveryAddress({ address }: { address: Address }) {
   const { user } = useAuth();
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
+  const [isUpdating, setIsUpdating] = React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   const [isShowUpdateSheet, setIsShowUpdateSheet] = React.useState(false);
+
+  const handleSetAddressAsDefault = async () => {
+    if (!user || !user.userProfile) return;
+
+    try {
+      setIsUpdating(true);
+
+      const code = await updateDefaultAddressByAddressIdAndProfileId({
+        addressId: address.addressId,
+        profileId: user!.userProfile!.profileId,
+      });
+
+      toast(
+        code !== API_SUCCESS_CODE.SET_DEFAULT_ADDRESS_SUCCESS
+          ? "Thất bại"
+          : "Thành công",
+        {
+          description:
+            code !== API_SUCCESS_CODE.SET_DEFAULT_ADDRESS_SUCCESS
+              ? ERROR_MESSAGES[code]
+                ? ERROR_MESSAGES[code]
+                : DEFAULT_ERROR_MESSAGE
+              : SET_DEFAULT_ADDRESS_SUCCESS_MESSAGE,
+          action: {
+            label: "Oke",
+            onClick: () => {},
+          },
+        }
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const handleDeleteAddress = async () => {
     if (!user || !user.userProfile) return;
@@ -523,7 +546,7 @@ function DeliveryAddress({ address }: { address: Address }) {
       });
 
       toast(
-        code !== API_SUCCESS_CODE.CREATE_ADDRESS_SUCCESS
+        code !== API_SUCCESS_CODE.DELETE_ADDRESS_SUCCESS
           ? "Thất bại"
           : "Thành công",
         {
@@ -549,7 +572,7 @@ function DeliveryAddress({ address }: { address: Address }) {
       <div className="w-full p-4 bg-background dark:bg-accent/50 space-y-3">
         {/* Title */}
         <div className="flex items-center justify-between">
-          <p className="text-lg font-bold">Địa chỉ giao hàng</p>
+          <p className="font-bold">Địa chỉ giao hàng</p>
 
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
@@ -560,17 +583,24 @@ function DeliveryAddress({ address }: { address: Address }) {
             <DropdownMenuContent className="w-56" align="end">
               <DropdownMenuLabel>Lựa chọn</DropdownMenuLabel>
               <DropdownMenuGroup>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={address.isDefault}
+                  onClick={() => handleSetAddressAsDefault()}
+                >
                   Đặt làm mặc định
                   <DropdownMenuShortcut>
-                    <Settings2 />
+                    {isUpdating ? (
+                      <LoaderCircle className="animate-spin" />
+                    ) : (
+                      <Settings2 />
+                    )}
                   </DropdownMenuShortcut>
                 </DropdownMenuItem>
 
                 <DropdownMenuItem onClick={() => setIsShowUpdateSheet(true)}>
                   Chỉnh sửa
                   <DropdownMenuShortcut>
-                    <PenSquare />
+                    <PenLine />
                   </DropdownMenuShortcut>
                 </DropdownMenuItem>
 
@@ -598,14 +628,16 @@ function DeliveryAddress({ address }: { address: Address }) {
             value={address.additionalInfo}
           />
           <InforField label="Mã bưu điện" value={address.postalCode} />
-          <InforField label="Loại địa chỉ" value={AddressType[address.type]} />
+          <InforField
+            label="Loại địa chỉ"
+            value={AddressTypeLabel[address.type]}
+          />
           <InforField label="Tên người nhận" value={address.fullName} />
           <InforField label="Số điện thoại" value={address.phone} />
         </div>
       </div>
       {/* Xóa địa chỉ */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogTrigger asChild></DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Xác nhận xóa</DialogTitle>
@@ -649,33 +681,45 @@ export default function AddressesPage() {
     null
   );
 
+  React.useEffect(() => {
+    if (!user) return;
+    if (user.userProfile?.addressResponse.length === 0) return;
+
+    setCurrentAddress(
+      user.userProfile?.addressResponse.find((address) => address.isDefault) ||
+        null
+    );
+  }, [user]);
+
   return (
-    <AddressSelectorProvider>
-      <main className="h-full space-y-2">
-        {/* Danh sách thông tin giao hàng */}
-        <AddressList
-          addresses={
-            user?.userProfile?.addressResponse.map(Address.fromJson) || []
-          }
-          currentAddress={currentAddress}
-          setCurrentAddress={setCurrentAddress}
-        />
+    <main className="h-full space-y-2">
+      {/* Danh sách thông tin giao hàng */}
+      <AddressList
+        addresses={
+          user?.userProfile?.addressResponse.map(Address.fromJson) || []
+        }
+        currentAddress={currentAddress}
+        setCurrentAddress={setCurrentAddress}
+      />
 
+      <AddressSelectorProvider>
         <CreateNewAddress />
+      </AddressSelectorProvider>
 
-        {!currentAddress ? (
-          <div className="w-full h-full bg-background p-4">
-            <p className="text-muted-foreground text-sm">
-              Vui lòng chọn địa chỉ để xem
-            </p>
-          </div>
-        ) : (
-          <>
-            {/* Địa chỉ giao hàng */}
+      {!currentAddress ? (
+        <div className="w-full h-full bg-background p-4">
+          <p className="text-muted-foreground text-sm">
+            Vui lòng chọn địa chỉ để xem
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* Địa chỉ giao hàng */}
+          <AddressSelectorProvider>
             <DeliveryAddress address={currentAddress} />
-          </>
-        )}
-      </main>
-    </AddressSelectorProvider>
+          </AddressSelectorProvider>
+        </>
+      )}
+    </main>
   );
 }

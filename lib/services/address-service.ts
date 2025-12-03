@@ -1,14 +1,5 @@
+import instance from "@/lib/services/axios-config";
 import axios from "axios";
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-const instance = axios.create({
-  baseURL: apiBaseUrl,
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
 const createAddressByProfileId = async ({
   userProfileId,
@@ -19,9 +10,12 @@ const createAddressByProfileId = async ({
     fullName: string;
     phone: string;
     street: string;
-    ward: string;
-    district: string;
+    provinceID: string;
     province: string;
+    district: string;
+    districtID: string;
+    ward: string;
+    wardCode: string;
     postalCode: string;
     additionalInfo: string;
     isDefault: boolean;
@@ -52,9 +46,12 @@ const updateAddressByAddressIdAndProfileId = async ({
     fullName: string;
     phone: string;
     street: string;
-    ward: string;
-    district: string;
+    provinceID: string;
     province: string;
+    district: string;
+    districtID: string;
+    ward: string;
+    wardCode: string;
     postalCode: string;
     additionalInfo: string;
     isDefault: boolean;
@@ -70,6 +67,34 @@ const updateAddressByAddressIdAndProfileId = async ({
         profileId,
       },
     });
+    return response.data.code;
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return -1;
+  }
+};
+
+const updateDefaultAddressByAddressIdAndProfileId = async ({
+  addressId,
+  profileId,
+}: {
+  addressId: string;
+  profileId: string;
+}): Promise<number> => {
+  try {
+    const updateAddressUrl = `/address/update`;
+    const response = await instance.put(
+      updateAddressUrl,
+      { isDefault: true },
+      {
+        params: {
+          addressId,
+          profileId,
+        },
+      }
+    );
     return response.data.code;
   } catch (error) {
     if (error instanceof axios.AxiosError) {
@@ -104,4 +129,5 @@ export {
   createAddressByProfileId,
   updateAddressByAddressIdAndProfileId,
   deleteAddressByAddressIdAndProfileId,
+  updateDefaultAddressByAddressIdAndProfileId,
 };

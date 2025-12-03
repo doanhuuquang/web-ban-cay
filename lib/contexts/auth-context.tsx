@@ -9,8 +9,8 @@ import React from "react";
 type AuthContextProps = {
   isLoading: boolean;
   isLoggedIn: boolean;
-  setIsLoggedIn: (loggedIn: boolean) => void;
   user: User | null;
+  setIsLoggedIn: (loggedIn: boolean) => void;
 };
 
 const AuthContext = React.createContext<AuthContextProps | null>(null);
@@ -49,10 +49,12 @@ export default function AuthProvider({
         const { code, exp } = await introspectToken();
 
         if (code === API_SUCCESS_CODE.INTROSPECT_TOKEN_SUCCESS && exp) {
+          setIsLoggedIn(true);
           setNextTokenRefreshTime(exp);
+        } else {
+          setNextTokenRefreshTime(null);
+          setIsLoggedIn(false);
         }
-
-        setIsLoggedIn(code === API_SUCCESS_CODE.INTROSPECT_TOKEN_SUCCESS);
       };
 
       checkLoggedInStatus();
@@ -81,13 +83,17 @@ export default function AuthProvider({
 
     const now = new Date();
     const timeToExpiry = nextTokenRefreshTime.getTime() - now.getTime();
-    const refreshThreshold = 2 * 60 * 1000; // 2 phút
+    const refreshThreshold = 2 * 60 * 1000;
 
     const timeoutDuration =
-      timeToExpiry > refreshThreshold ? timeToExpiry - refreshThreshold : 0;
+      timeToExpiry > refreshThreshold ? timeToExpiry - refreshThreshold : 1000;
 
-    const timeoutId = setTimeout(() => {
-      refreshAndUpdate();
+    const timeoutId = setTimeout(async () => {
+      try {
+        await refreshAndUpdate();
+      } catch {
+        setIsLoggedIn(false);
+      }
     }, timeoutDuration);
 
     return () => clearTimeout(timeoutId);

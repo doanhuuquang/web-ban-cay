@@ -177,10 +177,10 @@ export default function LoginForm() {
             type="submit"
             className="w-full py-5 hover:cursor-pointer"
           >
+            {loading ? <LoaderCircle className="animate-spin" /> : <></>}
             <p className="uppercase">
               {loading ? "Đang kiểm tra thông tin..." : "Đăng nhập"}
             </p>
-            {loading ? <LoaderCircle className="animate-spin" /> : <></>}
           </Button>
 
           <div className="w-full flex items-center gap-5 text-muted-foreground text-sm">

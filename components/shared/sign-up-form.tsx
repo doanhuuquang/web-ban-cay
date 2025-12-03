@@ -198,9 +198,9 @@ export default function SignupForm() {
             className="w-full py-5 hover:cursor-pointer"
           >
             <p className="uppercase">
+              {loading && <LoaderCircle className="animate-spin" />}
               {loading ? "Đang kiểm tra thông tin..." : "Xác nhận đăng ký"}
             </p>
-            {loading ? <LoaderCircle className="animate-spin" /> : <></>}
           </Button>
 
           <div className="w-full flex items-center gap-5 text-muted-foreground text-sm">

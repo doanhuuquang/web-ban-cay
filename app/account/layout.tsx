@@ -7,6 +7,7 @@ import {
 } from "@/components/shared/app-loading";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { LOGIN_PATH } from "@/lib/constants/path";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { Receipt, ShoppingBag } from "lucide-react";
@@ -52,9 +53,14 @@ export default function AccountLayout({
 
   if (isLoading) {
     return (
-      <AppLoadingBackground>
-        <AppLoadingIcon title="Đang kiểm tra" />
-      </AppLoadingBackground>
+      <div className="w-full max-w-[1400px] m-auto h-full space-y-4 p-4">
+        <Skeleton className="w-full h-25 rounded-none" />
+
+        <div className="flex gap-4">
+          <Skeleton className="w-1/3 h-60 rounded-none" />
+          <Skeleton className="w-2/3 h-60 rounded-none" />
+        </div>
+      </div>
     );
   }
 
@@ -66,16 +72,22 @@ export default function AccountLayout({
         <div className="w-full overflow-hidden px-4 py-6 grid md:grid-cols-3 grid-cols-1 gap-6 md:divide-x-3 divide-blue-ocean bg-background dark:bg-accent/50">
           <div className="flex items-center gap-4">
             <Avatar className="size-15">
-              <AvatarImage src="https://github.com/shadcn.png" />
+              <AvatarImage
+                src={
+                  user?.userProfile?.gender
+                    ? "/assets/images/user-avatars/male-avatar.svg"
+                    : "/assets/images/user-avatars/female-avatar.svg"
+                }
+              />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
 
             <div>
               <p className="font-bold text-lg">
-                {user?.userProfile?.userName || "Chưa cập nhật"}
+                {user?.userProfile?.username || "Chưa cập nhật"}
               </p>
               <p className="text-sm text-muted-foreground">
-                {user?.userProfile?.mobileNumber || "Chưa cập nhật"}
+                {user?.email || "Chưa cập nhật"}
               </p>
             </div>
           </div>

@@ -1,4 +1,6 @@
-export const AddressType: Record<string, string> = {
+export type AddressType = "HOME" | "WORK" | "SCHOOL" | "OTHER";
+
+export const AddressTypeLabel: Record<AddressType, string> = {
   HOME: "Nhà riêng",
   WORK: "Cơ quan",
   SCHOOL: "Trường học",
@@ -11,12 +13,15 @@ export class Address {
     public fullName: string,
     public phone: string,
     public street: string,
-    public ward: string,
-    public district: string,
+    public provinceID: string,
     public province: string,
+    public districtID: string,
+    public district: string,
+    public wardCode: string,
+    public ward: string,
     public postalCode: string,
     public additionalInfo: string,
-    public type: "HOME" | "WORK" | "SCHOOL" | "OTHER",
+    public type: AddressType,
     public label: string,
     public shortAddress: string,
     public fullAddress: string,
@@ -30,12 +35,15 @@ export class Address {
     fullName: string;
     phone: string;
     street: string;
-    ward: string;
-    district: string;
+    provinceID: string;
     province: string;
+    districtID: string;
+    district: string;
+    wardCode: string;
+    ward: string;
     postalCode: string;
     additionalInfo: string;
-    type: "HOME" | "WORK" | "SCHOOL" | "OTHER";
+    type: AddressType;
     label: string;
     shortAddress: string;
     fullAddress: string;
@@ -48,9 +56,12 @@ export class Address {
       json.fullName,
       json.phone,
       json.street,
-      json.ward,
-      json.district,
+      json.provinceID,
       json.province,
+      json.districtID,
+      json.district,
+      json.wardCode,
+      json.ward,
       json.postalCode,
       json.additionalInfo,
       json.type,

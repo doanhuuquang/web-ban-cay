@@ -11,15 +11,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { VIETNAM_PROVINCES } from "@/lib/constants/vietnam-provinces";
-import { Address } from "@/lib/models/address";
+import { AddressTypeLabel } from "@/lib/models/address";
+import { District } from "@/lib/models/district";
+import { Province } from "@/lib/models/province";
+import { Ward } from "@/lib/models/ward";
+import {
+  getDistricts,
+  getProvinces,
+  getWards,
+} from "@/lib/services/ghn-service";
 import React from "react";
-import { set } from "react-hook-form";
 
 type AddressSelctorContextProps = {
-  selectedProvince: string | null;
-  selectedDistrict: string | null;
-  selectedWard: string | null;
+  isFormValid: boolean;
+  selectedProvince: Province | null;
+  selectedDistrict: District | null;
+  selectedWard: Ward | null;
   street: string;
   fullName: string;
   phone: string;
@@ -28,9 +35,9 @@ type AddressSelctorContextProps = {
   addressType: string;
   label: string;
   postalCode: string;
-  setSelectedProvince: (province: string | null) => void;
-  setSelectedDistrict: (district: string | null) => void;
-  setSelectedWard: (ward: string | null) => void;
+  setSelectedProvince: (province: Province | null) => void;
+  setSelectedDistrict: (district: District | null) => void;
+  setSelectedWard: (ward: Ward | null) => void;
   setStreet: (street: string) => void;
   setFullName: (name: string) => void;
   setPhone: (phoneNumber: string) => void;
@@ -56,12 +63,34 @@ function useAddressSelector(): AddressSelctorContextProps {
 }
 
 function ProvinceSelector() {
-  const { selectedProvince, setSelectedProvince } = useAddressSelector();
+  const [provinces, setProvinces] = React.useState<Province[]>([]);
+
+  const {
+    selectedProvince,
+    setSelectedProvince,
+    setSelectedDistrict,
+    setSelectedWard,
+  } = useAddressSelector();
+
+  React.useEffect(() => {
+    const fetchProvinces = async () => {
+      const response = await getProvinces();
+      setProvinces(response.provinces);
+    };
+
+    fetchProvinces();
+  }, []);
 
   return (
     <Select
-      value={selectedProvince || undefined}
-      onValueChange={(value) => setSelectedProvince(value)}
+      value={selectedProvince?.provinceID || ""}
+      onValueChange={(value) => {
+        setSelectedProvince(
+          provinces.find((province) => province.provinceID === value) || null
+        );
+        setSelectedDistrict(null);
+        setSelectedWard(null);
+      }}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Tỉnh/Thành phố" />
@@ -69,9 +98,9 @@ function ProvinceSelector() {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Tỉnh/Thành phố</SelectLabel>
-          {VIETNAM_PROVINCES.map((province, index) => (
-            <SelectItem key={index} value={province.name}>
-              {province.name}
+          {provinces.map((province, index) => (
+            <SelectItem key={index} value={province.provinceID}>
+              {province.provinceName}
             </SelectItem>
           ))}
         </SelectGroup>
@@ -81,13 +110,39 @@ function ProvinceSelector() {
 }
 
 function DistrictSelector() {
-  const { selectedDistrict, selectedProvince, setSelectedDistrict } =
-    useAddressSelector();
+  const [districts, setDistricts] = React.useState<District[]>([]);
+  const {
+    selectedProvince,
+    selectedDistrict,
+    setSelectedDistrict,
+    setSelectedWard,
+  } = useAddressSelector();
+
+  React.useEffect(() => {
+    if (!selectedProvince) {
+      setDistricts([]);
+      return;
+    }
+
+    const fetchDistricts = async () => {
+      const response = await getDistricts({
+        provinceId: selectedProvince.provinceID,
+      });
+      setDistricts(response.districts);
+    };
+
+    fetchDistricts();
+  }, [selectedProvince]);
 
   return (
     <Select
-      value={selectedDistrict || undefined}
-      onValueChange={(value) => setSelectedDistrict(value)}
+      value={selectedDistrict?.districtID || ""}
+      onValueChange={(value) => {
+        setSelectedDistrict(
+          districts.find((district) => district.districtID === value) || null
+        );
+        setSelectedWard(null);
+      }}
       disabled={!selectedProvince}
     >
       <SelectTrigger className="w-full">
@@ -96,15 +151,11 @@ function DistrictSelector() {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Quận/Huyện</SelectLabel>
-          {VIETNAM_PROVINCES.map(
-            (province) =>
-              province.name === selectedProvince &&
-              province.districts.map((district, index) => (
-                <SelectItem key={index} value={district.name}>
-                  {district.name}
-                </SelectItem>
-              ))
-          )}
+          {districts.map((district, index) => (
+            <SelectItem key={index} value={district.districtID}>
+              {district.districtName}
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>
@@ -112,34 +163,47 @@ function DistrictSelector() {
 }
 
 function WardSelector() {
-  const { selectedWard, selectedProvince, selectedDistrict, setSelectedWard } =
+  const [wards, setWards] = React.useState<Ward[]>([]);
+  const { selectedProvince, selectedDistrict, selectedWard, setSelectedWard } =
     useAddressSelector();
+
+  React.useEffect(() => {
+    if (!selectedProvince || !selectedDistrict) {
+      setWards([]);
+      return;
+    }
+
+    const fetchWards = async () => {
+      const response = await getWards({
+        districtId: selectedDistrict.districtID,
+      });
+      setWards(response.wards);
+    };
+
+    fetchWards();
+  }, [selectedProvince, selectedDistrict]);
 
   return (
     <Select
-      value={selectedWard || undefined}
-      onValueChange={(value) => setSelectedWard(value)}
+      value={selectedWard?.wardCode.toString() || ""}
+      onValueChange={(value) =>
+        setSelectedWard(wards.find((ward) => ward.wardCode === value) || null)
+      }
       disabled={!selectedDistrict}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Phường/Xã" />
       </SelectTrigger>
+
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Phường/Xã</SelectLabel>
-          {VIETNAM_PROVINCES.map(
-            (province) =>
-              province.name === selectedProvince &&
-              province.districts.map(
-                (district) =>
-                  district.name === selectedDistrict &&
-                  district.wards.map((ward, index) => (
-                    <SelectItem key={index} value={ward.name}>
-                      {ward.name}
-                    </SelectItem>
-                  ))
-              )
-          )}
+
+          {wards.map((ward, index) => (
+            <SelectItem key={index} value={ward.wardCode}>
+              {ward.wardName}
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>
@@ -218,11 +282,9 @@ function IsDefaultCheckbox() {
   return (
     <div className="flex items-center gap-3">
       <Checkbox
-        id="default"
         checked={isDefault}
-        onCheckedChange={(checked) => {
-          setIsDefault(checked === true);
-        }}
+        id="default"
+        onCheckedChange={(checked) => setIsDefault(Boolean(checked))}
       />
       <Label htmlFor="default">Đặt làm địa chỉ mặc định</Label>
     </div>
@@ -234,7 +296,7 @@ function AddressTypes() {
 
   return (
     <Select
-      value={addressType || undefined}
+      value={addressType}
       onValueChange={(value) => setAddressType(value)}
     >
       <SelectTrigger className="w-full">
@@ -243,74 +305,18 @@ function AddressTypes() {
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Loại địa chỉ</SelectLabel>
-          <SelectItem value="HOME">Nhà riêng</SelectItem>
-          <SelectItem value="WORK">Cơ quan</SelectItem>
-          <SelectItem value="SCHOOL">Trường học</SelectItem>
-          <SelectItem value="OTHER">Khác</SelectItem>
+          {Object.entries(AddressTypeLabel).map(([type, label]) => (
+            <SelectItem key={type} value={type}>
+              {label}
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>
   );
 }
 
-export default function AddressForm({
-  formType = "CREATE",
-  address,
-}: {
-  formType?: "CREATE" | "UPDATE";
-  address?: Address;
-}) {
-  const {
-    setIsDefault,
-    setAddressType,
-    setSelectedProvince,
-    setSelectedDistrict,
-    setSelectedWard,
-    setStreet,
-    setAdditionalInfo,
-    setLabel,
-    setPostalCode,
-    setFullName,
-    setPhone,
-    resetForm,
-  } = useAddressSelector();
-
-  React.useEffect(() => {
-    if (formType === "CREATE" && !address) {
-      resetForm();
-      return;
-    }
-
-    if (formType === "UPDATE" && address) {
-      setIsDefault(address.isDefault);
-      setAddressType(address.type);
-      setSelectedProvince(address.province);
-      setSelectedDistrict(address.district);
-      setSelectedWard(address.ward);
-      setStreet(address.street);
-      setAdditionalInfo(address.additionalInfo);
-      setLabel(address.label);
-      setPostalCode(address.postalCode);
-      setFullName(address.fullName);
-      setPhone(address.phone);
-    }
-  }, [
-    address,
-    formType,
-    setAdditionalInfo,
-    setAddressType,
-    setFullName,
-    setIsDefault,
-    setLabel,
-    setPhone,
-    setPostalCode,
-    setSelectedDistrict,
-    setSelectedProvince,
-    setSelectedWard,
-    setStreet,
-    resetForm,
-  ]);
-
+export default function AddressForm() {
   return (
     <div className="w-full grid gap-6 overflow-y-auto scrollbar-hide">
       <IsDefaultCheckbox />
@@ -329,13 +335,12 @@ export default function AddressForm({
 }
 
 function AddressSelectorProvider({ children }: { children: React.ReactNode }) {
-  const [selectedProvince, setSelectedProvince] = React.useState<string | null>(
-    null
-  );
-  const [selectedDistrict, setSelectedDistrict] = React.useState<string | null>(
-    null
-  );
-  const [selectedWard, setSelectedWard] = React.useState<string | null>(null);
+  const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
+  const [selectedProvince, setSelectedProvince] =
+    React.useState<Province | null>(null);
+  const [selectedDistrict, setSelectedDistrict] =
+    React.useState<District | null>(null);
+  const [selectedWard, setSelectedWard] = React.useState<Ward | null>(null);
   const [street, setStreet] = React.useState<string>("");
   const [fullName, setFullName] = React.useState<string>("");
   const [phone, setPhone] = React.useState<string>("");
@@ -359,9 +364,38 @@ function AddressSelectorProvider({ children }: { children: React.ReactNode }) {
     setPostalCode("");
   };
 
+  React.useEffect(() => {
+    if (
+      selectedProvince &&
+      selectedDistrict &&
+      selectedWard &&
+      street &&
+      fullName &&
+      phone &&
+      addressType &&
+      postalCode &&
+      label &&
+      additionalInfo
+    ) {
+      setIsFormValid(true);
+    }
+  }, [
+    selectedProvince,
+    selectedDistrict,
+    selectedWard,
+    street,
+    fullName,
+    phone,
+    additionalInfo,
+    addressType,
+    postalCode,
+    label,
+  ]);
+
   return (
     <AddressSelectorContext.Provider
       value={{
+        isFormValid,
         selectedProvince,
         selectedDistrict,
         selectedWard,

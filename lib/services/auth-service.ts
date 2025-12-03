@@ -1,6 +1,5 @@
+import instance from "@/lib/services/axios-config";
 import axios from "axios";
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const introspectTokenUrl = "/auth/introspect";
 const refreshTokenUrl = "/auth/refresh";
@@ -9,14 +8,6 @@ const signUpUrl = "/users/registration";
 const logoutUrl = "/auth/logout";
 const forgetPasswordUrl = "auth/forgot-password";
 const resetPasswordUrl = "auth/reset-password";
-
-const instance = axios.create({
-  baseURL: apiBaseUrl,
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
 const introspectToken = async (): Promise<{ code: number; exp?: Date }> => {
   try {

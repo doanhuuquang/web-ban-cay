@@ -1,23 +1,13 @@
 import { User } from "@/lib/models/user";
+import instance from "@/lib/services/axios-config";
 import axios from "axios";
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-const getCurrentUserProfileUrl = "/users/myInfo";
-
-const instance = axios.create({
-  baseURL: apiBaseUrl,
-  withCredentials: true,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
 
 const getCurrentUserProfile = async (): Promise<{
   code: number;
   userProfile: User | null;
 }> => {
   try {
+    const getCurrentUserProfileUrl = "/users/myInfo";
     const response = await instance.get(getCurrentUserProfileUrl);
 
     return {
@@ -32,4 +22,28 @@ const getCurrentUserProfile = async (): Promise<{
   }
 };
 
-export { getCurrentUserProfile };
+const changePassword = async ({
+  userId,
+  data,
+}: {
+  userId: string;
+  data: {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  };
+}): Promise<number> => {
+  try {
+    const changePasswordUrl = `users/${userId}/change-password`;
+    const response = await instance.put(changePasswordUrl, data);
+
+    return response.data.code;
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return -1;
+  }
+};
+
+export { getCurrentUserProfile, changePassword };

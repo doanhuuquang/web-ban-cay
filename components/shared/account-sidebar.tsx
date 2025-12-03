@@ -126,33 +126,6 @@ export default function AccountSidebar({ className }: { className?: string }) {
           />
         );
       })}
-
-      <Dialog>
-        <form>
-          <DialogTrigger asChild>
-            <Button className="w-full items-center flex gap-4 bg-transparent text-foreground hover:bg-muted/50 px-4! h-[56.8px]!">
-              <LogOut className="size-6" />
-              <p className="text-[16px] font-normal">Đăng xuất</p>
-              <ChevronRight className="ml-auto size-4 opacity-50" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] rounded-none!">
-            <DialogHeader>
-              <DialogTitle>Xác nhận</DialogTitle>
-              <DialogDescription>
-                Bạn có chắc chắn muốn đăng xuất khỏi tài khoản không?
-              </DialogDescription>
-            </DialogHeader>
-
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">Hủy</Button>
-              </DialogClose>
-              <Button onClick={() => handleLogout()}>Đăng xuất</Button>
-            </DialogFooter>
-          </DialogContent>
-        </form>
-      </Dialog>
     </div>
   );
 }

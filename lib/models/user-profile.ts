@@ -3,7 +3,7 @@ import { Cart } from "@/lib/models/cart";
 
 export class UserProfile {
   profileId: string;
-  userName: string;
+  username: string;
   mobileNumber: string;
   gender: boolean;
   birthDate: Date;
@@ -12,7 +12,7 @@ export class UserProfile {
 
   constructor(
     profileId: string,
-    userName: string,
+    username: string,
     mobileNumber: string,
     gender: boolean,
     birthDate: Date,
@@ -20,7 +20,7 @@ export class UserProfile {
     cartResponse: Cart[]
   ) {
     this.profileId = profileId;
-    this.userName = userName;
+    this.username = username;
     this.mobileNumber = mobileNumber;
     this.gender = gender;
     this.birthDate = birthDate;

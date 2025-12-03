@@ -54,10 +54,8 @@ function CategoriesSection() {
 
 function WelcomeSection() {
   return (
-    <div className="w-full max-w-[1400px] m-auto p-4 space-y-10">
-      <h1 className="lg:text-3xl text-2xl font-black uppercase">
-        Chào mừng đến với GPLANT
-      </h1>
+    <div className="w-full max-w-[1400px] m-auto p-4 space-y-5">
+      <h1 className="font-bold text-2xl">Chào mừng đến với GPLANT</h1>
 
       <div className="w-full md:min-h-screen min-h-auto grid md:grid-cols-2 grid-cols-1 md:grid-rows-1 grid-rows-none gap-4">
         <Link
@@ -446,7 +444,7 @@ export function SubscribeSection() {
   return (
     <div className="w-full max-w-[1400px] m-auto p-4">
       <div className="w-full flex lg:flex-row flex-col relative justify-between items-center bg-[#ebebeb]">
-        <div className="w-full space-y-5 flex flex-col lg:items-start items-center lg:p-10 px-7 py-7 z-1 bg-[#ebebeb]/50">
+        <div className="w-full space-y-5 flex flex-col lg:items-start items-center lg:p-10 px-7 py-7 z-1 bg-[#ebebeb]/90">
           <h1 className="lg:text-3xl text-2xl font-bold text-[#363636] lg:text-left text-center">
             Tham gia ngay để nhận ưu đãi độc quyền!
           </h1>
