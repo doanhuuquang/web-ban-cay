@@ -151,9 +151,9 @@ const columns: ColumnDef<Product>[] = [
           <div>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" className="p-1 rounded-md w-fit h-fit">
+                <div className="p-1 rounded-md w-fit h-fit">
                   <DeleteProduct />
-                </Button>
+                </div>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Xoá sản phẩm</p>
