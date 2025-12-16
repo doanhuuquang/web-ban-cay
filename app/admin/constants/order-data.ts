@@ -1,7 +1,8 @@
-type OrderItemProps = {
+export type OrderItemProps = {
   id: string;
   name: string;
   customer: string;
+  customerID: string;
   date: string;
   quantity: string;
   price: string;
@@ -14,78 +15,105 @@ type OrderItemProps = {
     | "Chờ lấy hàng";
 };
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-// export const OrderList: OrderItemProps[] = [{}];
-function generateOrders(count: number): OrderItemProps[] {
-  const statuses: OrderItemProps["status"][] = [
-    "Thành công",
-    "Thất bại",
-    "Chờ xử lý",
-    "Đã huỷ",
-    "Đang giao hàng",
-    "Chờ lấy hàng",
-  ];
-
-  const products = [
-    "Cây lưỡi hổ mini",
-    "Cây hoa giấy bonsai",
-    "Bình tưới cây áp suất",
-    "Hạt giống rau cải ngọt",
-    "Chậu gốm tròn trắng 20cm",
-    "Cây giả bonsai mini",
-    "Cây kim tiền phong thủy",
-    "Cây cau cảnh",
-    "Đất sạch hữu cơ 5kg",
-    "Hạt giống hoa hướng dương",
-  ];
-
-  const customers = [
-    "Nguyễn Văn A",
-    "Trần Thị B",
-    "Phạm Văn C",
-    "Lê Thị D",
-    "Ngô Văn E",
-    "Hoàng Thị F",
-    "Đỗ Văn G",
-    "Nguyễn Thị H",
-    "Phan Văn I",
-    "Nguyễn Văn J",
-  ];
-
-  const prices: Record<string, number> = {
-    "Cây lưỡi hổ mini": 120000,
-    "Cây hoa giấy bonsai": 350000,
-    "Bình tưới cây áp suất": 90000,
-    "Hạt giống rau cải ngọt": 25000,
-    "Chậu gốm tròn trắng 20cm": 150000,
-    "Cây giả bonsai mini": 100000,
-    "Cây kim tiền phong thủy": 450000,
-    "Cây cau cảnh": 280000,
-    "Đất sạch hữu cơ 5kg": 70000,
-    "Hạt giống hoa hướng dương": 30000,
-  };
-
-  return Array.from({ length: count }, (_, i) => {
-    const name = products[i % products.length];
-    const quantity = (i % 5) + 1;
-
-    return {
-      id: `ORD-${String(i + 1).padStart(3, "0")}`,
-      name,
-      customer: customers[i % customers.length],
-      date: formatDate(new Date(2025, 0, i + 1)),
-      quantity: String(quantity),
-      price: String(prices[name] * quantity), // lấy giá từ prices theo tên sản phẩm
-      status: statuses[i % statuses.length],
-    };
-  });
-}
-
-export const orders: OrderItemProps[] = generateOrders(50);
+export const orders: OrderItemProps[] = [
+  {
+    id: "ORD001",
+    name: "Cây kim tiền",
+    customer: "Nguyễn Văn A",
+    customerID: "CUS001",
+    date: "2025-09-01",
+    quantity: "2",
+    price: "600.000đ",
+    status: "Thành công",
+  },
+  {
+    id: "ORD002",
+    name: "Chậu sứ trồng cây",
+    customer: "Trần Thị B",
+    customerID: "CUS002",
+    date: "2025-09-02",
+    quantity: "1",
+    price: "180.000đ",
+    status: "Chờ xử lý",
+  },
+  {
+    id: "ORD003",
+    name: "Hạt giống rau cải",
+    customer: "Lê Văn C",
+    customerID: "CUS003",
+    date: "2025-09-02",
+    quantity: "5",
+    price: "125.000đ",
+    status: "Thành công",
+  },
+  {
+    id: "ORD004",
+    name: "Cây lưỡi hổ",
+    customer: "Phạm Thị D",
+    customerID: "CUS004",
+    date: "2025-09-03",
+    quantity: "1",
+    price: "350.000đ",
+    status: "Đang giao hàng",
+  },
+  {
+    id: "ORD005",
+    name: "Bình tưới cây 5L",
+    customer: "Hoàng Văn E",
+    customerID: "CUS005",
+    date: "2025-09-03",
+    quantity: "2",
+    price: "240.000đ",
+    status: "Chờ lấy hàng",
+  },
+  {
+    id: "ORD006",
+    name: "Đất trồng cây hữu cơ",
+    customer: "Vũ Thị F",
+    customerID: "CUS006",
+    date: "2025-09-04",
+    quantity: "3",
+    price: "210.000đ",
+    status: "Thành công",
+  },
+  {
+    id: "ORD007",
+    name: "Cây sen đá",
+    customer: "Đặng Văn G",
+    customerID: "CUS007",
+    date: "2025-09-04",
+    quantity: "4",
+    price: "320.000đ",
+    status: "Thất bại",
+  },
+  {
+    id: "ORD008",
+    name: "Kéo cắt cành",
+    customer: "Bùi Thị H",
+    customerID: "CUS008",
+    date: "2025-09-05",
+    quantity: "1",
+    price: "150.000đ",
+    status: "Đã huỷ",
+  },
+  {
+    id: "ORD009",
+    name: "Cây trầu bà",
+    customer: "Ngô Văn I",
+    customerID: "CUS009",
+    date: "2025-09-05",
+    quantity: "2",
+    price: "420.000đ",
+    status: "Đang giao hàng",
+  },
+  {
+    id: "ORD010",
+    name: "Phân bón lá",
+    customer: "Phan Thị K",
+    customerID: "CUS010",
+    date: "2025-09-06",
+    quantity: "3",
+    price: "195.000đ",
+    status: "Chờ xử lý",
+  },
+];

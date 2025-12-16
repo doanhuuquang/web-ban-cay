@@ -52,14 +52,10 @@ const data = {
       items: [
         {
           title: "Danh sách sản phẩm",
-          url: "/admin/product/productList",
+          url: "/admin/product",
         },
         {
           title: "Số lượng tồn kho",
-          url: "#",
-        },
-        {
-          title: "Trạng thái sản phẩm",
           url: "#",
         },
       ],
@@ -71,7 +67,7 @@ const data = {
       items: [
         {
           title: "Danh sách danh mục",
-          url: "/admin/product/categories",
+          url: "/admin/categories",
         },
       ],
     },
@@ -82,11 +78,11 @@ const data = {
       items: [
         {
           title: "Danh sách đơn hàng",
-          url: "/admin/product/order",
+          url: "/admin/orders",
         },
         {
           title: "Chi tiết đơn hàng",
-          url: "#",
+          url: "/admin/orders/detail",
         },
         {
           title: "Trạng thái đơn hàng",
@@ -99,17 +95,17 @@ const data = {
       ],
     },
     {
-      title: "Khách hàng",
+      title: "Người dùng",
       url: "#",
       icon: User,
       items: [
         {
-          title: "Danh sách khách hàng",
-          url: "#",
+          title: "Nhân viên",
+          url: "/admin/users/staff",
         },
         {
-          title: "Thông tin khách hàng",
-          url: "#",
+          title: "Khách hàng",
+          url: "/admin/users/customer",
         },
         {
           title: "Lịch sử mua hàng",
