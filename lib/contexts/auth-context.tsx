@@ -11,6 +11,7 @@ type AuthContextProps = {
   isLoggedIn: boolean;
   user: User | null;
   setIsLoggedIn: (loggedIn: boolean) => void;
+  refreshUserProfile: () => Promise<void>;
 };
 
 const AuthContext = React.createContext<AuthContextProps | null>(null);
@@ -108,13 +109,8 @@ export default function AuthProvider({
     try {
       setIsLoading(true);
 
-      const fetchUserProfile = async () => {
-        const user = (await getCurrentUserProfile()).userProfile;
-        setUser(user);
-      };
-
       if (isLoggedIn && !user) {
-        fetchUserProfile();
+        refreshUserProfile();
         return;
       }
     } finally {
@@ -134,13 +130,19 @@ export default function AuthProvider({
     }
   }, [isLoggedIn]);
 
+  const refreshUserProfile = async () => {
+    const user = (await getCurrentUserProfile()).userProfile;
+    setUser(user);
+  };
+
   return (
     <AuthContext.Provider
       value={{
         isLoading,
         isLoggedIn,
-        setIsLoggedIn,
         user,
+        setIsLoggedIn,
+        refreshUserProfile,
       }}
     >
       {children}

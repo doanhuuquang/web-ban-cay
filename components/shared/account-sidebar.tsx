@@ -4,40 +4,12 @@ import {
   ACCOUNT_ADDRESS_PATH,
   ACCOUNT_ORDERS_PATH,
   ACCOUNT_PATH,
-  ACCOUNT_PAYMENT_METHODS_PATH,
+  COUPONS_PATH,
 } from "@/lib/constants/path";
 import { cn } from "@/lib/utils";
-import {
-  ChevronRight,
-  CreditCard,
-  LogOut,
-  MapPin,
-  Truck,
-  User,
-} from "lucide-react";
+import { ChevronRight, MapPin, Tickets, Truck, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { logout } from "@/lib/services/auth-service";
-import { toast } from "sonner";
-import {
-  DEFAULT_ERROR_MESSAGE,
-  ERROR_MESSAGES,
-} from "@/lib/constants/error-messages";
-import { LOGOUT_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
-import { useAuth } from "@/lib/contexts/auth-context";
-import { API_SUCCESS_CODE } from "@/lib/constants/api-success-code";
 
 const sidebarItems = [
   {
@@ -51,9 +23,9 @@ const sidebarItems = [
     icon: MapPin,
   },
   {
-    title: "Thông tin thanh toán",
-    url: ACCOUNT_PAYMENT_METHODS_PATH,
-    icon: CreditCard,
+    title: "Mã giảm giá",
+    url: COUPONS_PATH,
+    icon: Tickets,
   },
   {
     title: "Theo dõi đơn hàng",
@@ -90,30 +62,6 @@ function SidebarItem({
 }
 
 export default function AccountSidebar({ className }: { className?: string }) {
-  const { setIsLoggedIn } = useAuth();
-
-  const handleLogout = async () => {
-    const code = await logout();
-
-    if (code === API_SUCCESS_CODE.LOGOUT_SUCCESS) setIsLoggedIn(false);
-
-    toast(
-      code !== API_SUCCESS_CODE.LOGOUT_SUCCESS ? "Thất bại" : "Thành công",
-      {
-        description:
-          code !== API_SUCCESS_CODE.LOGOUT_SUCCESS
-            ? ERROR_MESSAGES[code]
-              ? ERROR_MESSAGES[code]
-              : DEFAULT_ERROR_MESSAGE
-            : LOGOUT_SUCCESS_MESSAGE,
-        action: {
-          label: "Oke",
-          onClick: () => {},
-        },
-      }
-    );
-  };
-
   return (
     <div className={cn("w-full h-fit overflow-hidden divide-y", className)}>
       {sidebarItems.map((item, index) => {

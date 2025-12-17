@@ -16,3 +16,11 @@ export const UPDATE_ADDRESS_SUCCESS_MESSAGE =
 export const DELETE_ADDRESS_SUCCESS_MESSAGE = "Địa chỉ đã được xóa thành công";
 export const SET_DEFAULT_ADDRESS_SUCCESS_MESSAGE =
   "Đã đặt địa chỉ này làm mặc định";
+
+export const ADD_ITEM_TO_CART_SUCCESS_MESSAGE = "Đã thêm sản phẩm vào giỏ hàng";
+export const REMOVE_ITEM_FROM_CART_SUCCESS_MESSAGE =
+  "Sản phẩm đã được gỡ khỏi giỏ hàng";
+
+export const PLACE_ORDER_SUCCESS_MESSAGE =
+  "Đặt hàng thành công! Cảm ơn bạn đã mua sắm tại cửa hàng của chúng tôi.";
+export const CANCEL_ORDER_SUCCESS_MESSAGE = "Hủy đơn hàng thành công!";

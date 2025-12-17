@@ -125,56 +125,63 @@ function AddressList({
   };
 
   return (
-    <div className="w-full bg-background dark:bg-accent/50 relative">
-      {/* Prev button */}
-      {canScrollLeft && (
-        <Button
-          className="h-full absolute top-0 left-0 rounded-none bg-background dark:bg-accent/90 text-foreground hover:bg-background hover:text-foreground border-r"
-          onClick={() => handlePrev()}
-        >
-          <ChevronLeft />
-        </Button>
-      )}
-
-      {/* Next button */}
-      {canScrollRight && (
-        <Button
-          className="h-full absolute top-0 right-0 rounded-none bg-background dark:bg-accent/90 text-foreground hover:bg-background hover:text-foreground border-l"
-          onClick={() => handleNext()}
-        >
-          <ChevronRight />
-        </Button>
-      )}
-
-      <div
-        ref={scrollSectionRef}
-        className="w-full flex overflow-x-auto scrollbar-hide"
-      >
-        {addresses.length === 0 ? (
-          <p className="px-4 py-6 text-muted-foreground">Chưa có địa chỉ nào</p>
-        ) : (
-          addresses.map((address, index) => (
-            <Button
-              key={index}
-              variant={"ghost"}
-              className={cn(
-                "rounded-none px-4 py-8 hover:text-primary hover:bg-background shrink-0",
-                currentAddress?.addressId === address.addressId &&
-                  "border-b-3 border-primary text-primary"
-              )}
-              onClick={() => setCurrentAddress(address)}
-            >
-              {address.label ?? address.shortAddress}
-            </Button>
-          ))
+    <div className="w-full flex items-center gap-2">
+      <div className="w-full bg-background dark:bg-accent/50 relative">
+        {/* Prev button */}
+        {canScrollLeft && (
+          <Button
+            className="h-full absolute top-0 left-0 rounded-none bg-background dark:bg-accent/90 text-foreground hover:bg-background hover:text-foreground border-r"
+            onClick={() => handlePrev()}
+          >
+            <ChevronLeft />
+          </Button>
         )}
+
+        {/* Next button */}
+        {canScrollRight && (
+          <Button
+            className="h-full absolute top-0 right-0 rounded-none bg-background dark:bg-accent/90 text-foreground hover:bg-background hover:text-foreground border-l"
+            onClick={() => handleNext()}
+          >
+            <ChevronRight />
+          </Button>
+        )}
+
+        <div
+          ref={scrollSectionRef}
+          className="w-full flex overflow-x-auto scrollbar-hide"
+        >
+          {addresses.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-muted-foreground">
+              Chưa có địa chỉ nào
+            </p>
+          ) : (
+            addresses.map((address, index) => (
+              <Button
+                key={index}
+                variant={"ghost"}
+                className={cn(
+                  "rounded-none px-4 py-8 hover:text-primary hover:bg-background shrink-0",
+                  currentAddress?.addressId === address.addressId &&
+                    "border-b-3 border-primary text-primary"
+                )}
+                onClick={() => setCurrentAddress(address)}
+              >
+                {address.label ?? address.shortAddress}
+              </Button>
+            ))
+          )}
+        </div>
       </div>
+      <AddressSelectorProvider>
+        <CreateNewAddress />
+      </AddressSelectorProvider>
     </div>
   );
 }
 
 function CreateNewAddress() {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const {
     isFormValid,
     selectedProvince,
@@ -238,6 +245,7 @@ function CreateNewAddress() {
       );
 
       if (code === API_SUCCESS_CODE.CREATE_ADDRESS_SUCCESS) {
+        refreshUserProfile();
         resetForm();
       }
     } finally {
@@ -248,9 +256,12 @@ function CreateNewAddress() {
   return (
     <Sheet open={isShowSheet} onOpenChange={setIsShowSheet}>
       <SheetTrigger asChild>
-        <Button className="w-full bg-background text-foreground py-6 hover:bg-background/50 hover:text-foreground">
+        <Button
+          variant={"outline"}
+          className="rounded-none px-6! py-8 shrink-0 border-none bg-background dark:bg-accent/50 hover:bg-background hover:text-foreground"
+        >
           <Plus />
-          Thêm địa chỉ mới
+          <p className="md:block hidden">Thêm địa chỉ mới</p>
         </Button>
       </SheetTrigger>
       <SheetContent isShowXButton={false} className="sm:max-w-lg w-full">
@@ -320,7 +331,7 @@ function UpdateAddress({
 }) {
   const [isUpdating, setIsUpdating] = React.useState<boolean>(false);
 
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const {
     isFormValid,
     selectedProvince,
@@ -425,6 +436,8 @@ function UpdateAddress({
           },
         }
       );
+
+      refreshUserProfile();
     } finally {
       setIsUpdating(false);
     }
@@ -495,7 +508,7 @@ function UpdateAddress({
 }
 
 function DeliveryAddress({ address }: { address: Address }) {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [isUpdating, setIsUpdating] = React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
@@ -529,6 +542,7 @@ function DeliveryAddress({ address }: { address: Address }) {
           },
         }
       );
+      refreshUserProfile();
     } finally {
       setIsUpdating(false);
     }
@@ -562,6 +576,9 @@ function DeliveryAddress({ address }: { address: Address }) {
           },
         }
       );
+
+      setShowDeleteDialog(false);
+      refreshUserProfile();
     } finally {
       setIsDeleting(false);
     }
@@ -572,7 +589,7 @@ function DeliveryAddress({ address }: { address: Address }) {
       <div className="w-full p-4 bg-background dark:bg-accent/50 space-y-3">
         {/* Title */}
         <div className="flex items-center justify-between">
-          <p className="font-bold">Địa chỉ giao hàng</p>
+          <p className="text-lg font-bold">Địa chỉ giao hàng</p>
 
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
@@ -702,12 +719,8 @@ export default function AddressesPage() {
         setCurrentAddress={setCurrentAddress}
       />
 
-      <AddressSelectorProvider>
-        <CreateNewAddress />
-      </AddressSelectorProvider>
-
       {!currentAddress ? (
-        <div className="w-full h-full bg-background p-4">
+        <div className="w-full h-full bg-background dark:bg-muted/50 p-4">
           <p className="text-muted-foreground text-sm">
             Vui lòng chọn địa chỉ để xem
           </p>

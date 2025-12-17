@@ -1,11 +1,21 @@
-export class Cart {
-  id: string;
-  cartItems: undefined[];
-  totalPrice: number;
+import { CartItem } from "@/lib/models/cart-item";
 
-  constructor(id: string, cartItems: undefined[], totalPrice: number) {
-    this.id = id;
-    this.cartItems = cartItems;
-    this.totalPrice = totalPrice;
+export class Cart {
+  constructor(
+    public cartId: string,
+    public items: CartItem[],
+    public totalPrice: number
+  ) {}
+
+  static fromJson(json: {
+    cartId: string;
+    items: CartItem[];
+    totalPrice: number;
+  }): Cart {
+    return new Cart(
+      json.cartId,
+      json.items.map(CartItem.fromJson),
+      json.totalPrice
+    );
   }
 }

@@ -1,5 +1,6 @@
-import { CouponResponse } from "@/lib/models/coupon-response";
-import { OrderItemResponse } from "@/lib/models/order-item-response";
+import { Coupon } from "@/lib/models/coupon";
+import { OrderItem } from "@/lib/models/order-item";
+import { OrderStatusType } from "@/lib/type/order-status";
 
 export class Order {
   constructor(
@@ -10,9 +11,37 @@ export class Order {
     public shippingFee: number,
     public discountAmount: number,
     public totalAmount: number,
-    public orderStatus: string,
+    public orderStatus: OrderStatusType,
     public orderDate: Date,
-    public orderItemResponses: OrderItemResponse[],
-    public couponResponse: CouponResponse
+    public orderItemResponses: OrderItem[],
+    public couponResponse: Coupon
   ) {}
+
+  static fromJson(json: {
+    orderId: string;
+    paymentId: string;
+    profileId: string;
+    deliveryAddressId: string;
+    shippingFee: number;
+    discountAmount: number;
+    totalAmount: number;
+    orderStatus: OrderStatusType;
+    orderDate: string;
+    orderItemResponses: OrderItem[];
+    couponResponse: Coupon;
+  }): Order {
+    return new Order(
+      json.orderId,
+      json.paymentId,
+      json.profileId,
+      json.deliveryAddressId,
+      json.shippingFee,
+      json.discountAmount,
+      json.totalAmount,
+      json.orderStatus,
+      new Date(json.orderDate),
+      json.orderItemResponses,
+      json.couponResponse
+    );
+  }
 }

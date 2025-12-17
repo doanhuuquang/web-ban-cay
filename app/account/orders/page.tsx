@@ -1,5 +1,6 @@
 "use client";
 
+import OrderCard from "@/components/shared/order-card";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -7,21 +8,12 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useAuth } from "@/lib/contexts/auth-context";
-import { Order } from "@/lib/models/order";
+import type { Order } from "@/lib/models/order";
 import { getOrdersByProfileId } from "@/lib/services/order-service";
+import { OrderStatusTypeLabel } from "@/lib/type/order-status";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import React from "react";
-
-const filterButtons = [
-  { label: "Tất cả", value: "all" },
-  { label: "Chờ xác nhận", value: "pending" },
-  { label: "Vận chuyển", value: "shipping" },
-  { label: "Chờ giao hàng", value: "delivering" },
-  { label: "Hoàn thành", value: "completed" },
-  { label: "Đã hủy", value: "canceled" },
-  { label: "Trả hàng/Hoàn tiền", value: "returned" },
-];
 
 function FilterButtons({
   currentFilter,
@@ -98,18 +90,28 @@ function FilterButtons({
         ref={scrollSectionRef}
         className="w-full flex overflow-x-auto scrollbar-hide "
       >
-        {filterButtons.map((button, index) => (
+        <Button
+          variant={"ghost"}
+          className={cn(
+            "rounded-none p-8 hover:text-primary hover:bg-background",
+            currentFilter === "" && "border-b-3 border-primary text-primary"
+          )}
+          onClick={() => setCurrentFilter("")}
+        >
+          Tất cả
+        </Button>
+        {Object.entries(OrderStatusTypeLabel).map(([value, label], index) => (
           <Button
             key={index}
             variant={"ghost"}
             className={cn(
               "rounded-none p-8 hover:text-primary hover:bg-background",
-              currentFilter === button.value &&
+              currentFilter === value &&
                 "border-b-3 border-primary text-primary"
             )}
-            onClick={() => setCurrentFilter(button.value)}
+            onClick={() => setCurrentFilter(value)}
           >
-            {button.label}
+            {label}
           </Button>
         ))}
       </div>
@@ -127,33 +129,63 @@ function OrderItems({ orders }: { orders: Order[] }) {
   }
 
   return (
-    <div className="w-full h-full bg-background dark:bg-accent/50 p-4">
-      <p className="text-lg font-bold">Theo dõi đơn hàng</p>
+    <div className="w-full h-fit grid grid-cols-1 gap-2">
+      {orders.map((order, index) => (
+        <OrderCard key={index} order={order} />
+      ))}
     </div>
   );
 }
 
 export default function OrderPage() {
   const { user } = useAuth();
-  const [currentFilter, setCurrentFilter] = React.useState("all");
+  const [currentFilter, setCurrentFilter] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [orders, setOrders] = React.useState<Order[]>([]);
+  const [ordersFiltered, setOrdersFiltered] = React.useState<Order[]>([]);
 
   React.useEffect(() => {
     if (!user) return;
 
     const fetchOrders = async () => {
-      const ordersResponse = await getOrdersByProfileId({
+      const response = await getOrdersByProfileId({
         profileId: user.userProfile!.profileId,
       });
 
-      setOrders(ordersResponse.orders);
+      setOrders(response.orders);
     };
 
     fetchOrders();
   }, [user]);
 
+  React.useEffect(() => {
+    if (orders.length === 0) {
+      setOrdersFiltered([]);
+      return;
+    }
+
+    let filtered = orders;
+
+    if (currentFilter !== "") {
+      filtered = filtered.filter((order) => {
+        return order.orderStatus === currentFilter;
+      });
+    }
+
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((order) => {
+        if (order.orderId.toString().toLowerCase().includes(query)) {
+          return true;
+        }
+      });
+    }
+
+    setOrdersFiltered(filtered);
+  }, [orders, currentFilter, searchQuery]);
+
   return (
-    <main className="h-full space-y-1">
+    <main className="h-full space-y-2">
       {/* Lọc đơn hàng */}
       <FilterButtons
         currentFilter={currentFilter}
@@ -162,13 +194,17 @@ export default function OrderPage() {
 
       {/* Tìm kiếm đơn hàng */}
       <InputGroup className="bg-background dark:bg-accent/50 py-8 rounded-none ring-0! border-0!">
-        <InputGroupInput placeholder="Bạn có thể tìm kiếm theo ID đơn hàng hoặc Tên Sản phẩm" />
+        <InputGroupInput
+          placeholder="Bạn có thể tìm kiếm theo ID đơn hàng"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
         <InputGroupAddon>
           <Search />
         </InputGroupAddon>
       </InputGroup>
 
-      <OrderItems orders={orders} />
+      <OrderItems orders={ordersFiltered} />
     </main>
   );
 }

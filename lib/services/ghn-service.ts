@@ -185,10 +185,10 @@ const calculateFee = async ({
   data: {
     toDistrictId: string;
     toWardCode: string;
-    height: number;
-    length: number;
-    width: number;
-    weight: number;
+    height?: number;
+    length?: number;
+    width?: number;
+    weight?: number;
     service: GHNService;
   };
 }): Promise<{
@@ -202,10 +202,10 @@ const calculateFee = async ({
       service_type_id: data.service.serviceTypeId,
       to_district_id: data.toDistrictId,
       to_ward_code: data.toWardCode.toString(),
-      height: data.height,
-      length: data.length,
-      weight: data.weight,
-      width: data.width,
+      height: data.height || 50,
+      length: data.length || 20,
+      weight: data.weight || 200,
+      width: data.width || 20,
     });
 
     return {

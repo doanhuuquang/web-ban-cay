@@ -99,7 +99,7 @@ function MenuMobile({ className }: { className?: string }) {
 }
 
 function AccountButton() {
-  const { isLoading, isLoggedIn } = useAuth();
+  const { isLoading, isLoggedIn, user } = useAuth();
 
   if (isLoading)
     return <Skeleton className="h-9 w-25 max-md:w-9 rounded-full" />;
@@ -109,7 +109,9 @@ function AccountButton() {
       <Button variant={"ghost"} className="rounded-full">
         <UserRound className="size-5" />
         <span className="text-sm font-medium hidden lg:inline">
-          {isLoggedIn ? "Tài khoản của tôi" : "Hej! Đăng nhập"}
+          {isLoggedIn && user && user.userProfile
+            ? user.userProfile.username || "Hello! Người lạ"
+            : "Hej! Đăng nhập"}
         </span>
       </Button>
     </Link>
@@ -118,6 +120,7 @@ function AccountButton() {
 
 function AppHeaderContent() {
   const pathName = usePathname();
+  const { user } = useAuth();
 
   const {
     isShowAppHeader,
@@ -174,7 +177,7 @@ function AppHeaderContent() {
       >
         {/* Top Bar */}
         <div className="bg-primary text-primary-foreground lg:text-sm text-xs">
-          <div className="max-w-[1400px] mx-auto px-4 py-2">
+          <div className="mx-auto py-2">
             <Marquee speed={50}>
               <div className="flex items-center gap-2 mx-10">
                 <Truck size={16} />
@@ -251,7 +254,9 @@ function AppHeaderContent() {
                 >
                   <ShoppingBag className="size-5" />
                   <div className="text-[9px] font-semibold absolute bottom-0 right-0 bg-primary text-background rounded-full w-4 h-4 flex items-center justify-center border-2 border-background">
-                    <p className="leading-0">8</p>
+                    <p className="leading-0">
+                      {user?.userProfile?.cartResponse.items.length || 0}
+                    </p>
                   </div>
                 </Button>
               </Link>
