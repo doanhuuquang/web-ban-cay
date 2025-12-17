@@ -2,7 +2,6 @@
 
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {
   AppLoadingBackground,
@@ -10,12 +9,12 @@ import {
 } from "@/components/shared/app-loading";
 import React from "react";
 import Image from "next/image";
-import { useUser } from "@/lib/contexts/auth-context";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 export default function AuthLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const { isLoading, isLoggedIn } = useUser();
+  const { isLoading, isLoggedIn } = useAuth();
   const router = useRouter();
 
   React.useEffect(() => {

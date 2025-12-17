@@ -29,6 +29,7 @@ import {
 } from "@/lib/constants/error-messages";
 import { SIGN_UP_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
 import { signUpWithEmailAndPassword } from "@/lib/services/auth-service";
+import { API_SUCCESS_CODE } from "@/lib/constants/api-success-code";
 
 const inputClassName =
   "px-5 py-7 bg-background/60 text-foreground border-1 w-full outline-none focus:border-primary";
@@ -70,20 +71,23 @@ export default function SignupForm() {
         password: values.password,
       });
 
-      if (code === 200) form.reset();
+      if (code === API_SUCCESS_CODE.SIGN_UP_SUCCESS) form.reset();
 
-      toast(code !== 200 ? "Thất bại" : "Thành công", {
-        description:
-          code !== 200
-            ? ERROR_MESSAGES[code]
+      toast(
+        code !== API_SUCCESS_CODE.SIGN_UP_SUCCESS ? "Thất bại" : "Thành công",
+        {
+          description:
+            code !== API_SUCCESS_CODE.SIGN_UP_SUCCESS
               ? ERROR_MESSAGES[code]
-              : DEFAULT_ERROR_MESSAGE
-            : SIGN_UP_SUCCESS_MESSAGE,
-        action: {
-          label: "Oke",
-          onClick: () => {},
-        },
-      });
+                ? ERROR_MESSAGES[code]
+                : DEFAULT_ERROR_MESSAGE
+              : SIGN_UP_SUCCESS_MESSAGE,
+          action: {
+            label: "Oke",
+            onClick: () => {},
+          },
+        }
+      );
     } finally {
       setLoading(false);
     }
@@ -194,9 +198,9 @@ export default function SignupForm() {
             className="w-full py-5 hover:cursor-pointer"
           >
             <p className="uppercase">
+              {loading && <LoaderCircle className="animate-spin" />}
               {loading ? "Đang kiểm tra thông tin..." : "Xác nhận đăng ký"}
             </p>
-            {loading ? <LoaderCircle className="animate-spin" /> : <></>}
           </Button>
 
           <div className="w-full flex items-center gap-5 text-muted-foreground text-sm">

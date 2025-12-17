@@ -6,6 +6,9 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { useAuth } from "@/lib/contexts/auth-context";
+import { Order } from "@/lib/models/order";
+import { getOrdersByProfileId } from "@/lib/services/order-service";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import React from "react";
@@ -20,11 +23,16 @@ const filterButtons = [
   { label: "Trả hàng/Hoàn tiền", value: "returned" },
 ];
 
-function FilterButtons() {
+function FilterButtons({
+  currentFilter,
+  setCurrentFilter,
+}: {
+  currentFilter: string;
+  setCurrentFilter: (filter: string) => void;
+}) {
   const scrollSectionRef = React.useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(true);
-  const [currentFilter, setCurrentFilter] = React.useState("all");
 
   const checkScroll = () => {
     if (scrollSectionRef.current) {
@@ -109,11 +117,48 @@ function FilterButtons() {
   );
 }
 
-export default function CheckoutPage() {
+function OrderItems({ orders }: { orders: Order[] }) {
+  if (orders.length === 0) {
+    return (
+      <div className="w-full h-full bg-background dark:bg-accent/50 p-4 text-sm text-muted-foreground">
+        Chưa có đơn hàng nào trong mục này.
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full bg-background dark:bg-accent/50 p-4">
+      <p className="text-lg font-bold">Theo dõi đơn hàng</p>
+    </div>
+  );
+}
+
+export default function OrderPage() {
+  const { user } = useAuth();
+  const [currentFilter, setCurrentFilter] = React.useState("all");
+  const [orders, setOrders] = React.useState<Order[]>([]);
+
+  React.useEffect(() => {
+    if (!user) return;
+
+    const fetchOrders = async () => {
+      const ordersResponse = await getOrdersByProfileId({
+        profileId: user.userProfile!.profileId,
+      });
+
+      setOrders(ordersResponse.orders);
+    };
+
+    fetchOrders();
+  }, [user]);
+
   return (
     <main className="h-full space-y-1">
       {/* Lọc đơn hàng */}
-      <FilterButtons />
+      <FilterButtons
+        currentFilter={currentFilter}
+        setCurrentFilter={setCurrentFilter}
+      />
 
       {/* Tìm kiếm đơn hàng */}
       <InputGroup className="bg-background dark:bg-accent/50 py-8 rounded-none ring-0! border-0!">
@@ -123,9 +168,7 @@ export default function CheckoutPage() {
         </InputGroupAddon>
       </InputGroup>
 
-      <div className="w-full h-full bg-background dark:bg-accent/50 p-4">
-        <p className="text-lg font-bold">Theo dõi đơn hàng</p>
-      </div>
+      <OrderItems orders={orders} />
     </main>
   );
 }

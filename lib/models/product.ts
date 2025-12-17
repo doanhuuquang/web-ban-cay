@@ -10,6 +10,10 @@ export class Product {
   imageUrls: string[];
   rating: number;
   ratingCount: number;
+  height: number;
+  length: number;
+  weight: number;
+  width: number;
 
   constructor(data: {
     id: string;
@@ -23,6 +27,10 @@ export class Product {
     imageUrls: string[];
     rating: number;
     ratingCount: number;
+    height: number;
+    length: number;
+    weight: number;
+    width: number;
   }) {
     this.id = data.id;
     this.slug = data.slug;
@@ -35,6 +43,10 @@ export class Product {
     this.imageUrls = data.imageUrls;
     this.rating = data.rating;
     this.ratingCount = data.ratingCount;
+    this.height = data.height;
+    this.length = data.length;
+    this.weight = data.weight;
+    this.width = data.width;
   }
 
   getDiscountedPrice(): string {

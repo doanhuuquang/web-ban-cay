@@ -10,7 +10,7 @@ import {
   Percent,
   ShieldCheck,
   Gift,
-  Bot,
+  MessageSquareShare,
 } from "lucide-react";
 import AppLogo from "@/components/shared/app-logo";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ import {
   SearchSuggestionsList,
 } from "@/components/shared/app-search";
 import Marquee from "react-fast-marquee";
-import { useUser } from "@/lib/contexts/auth-context";
+import { useAuth } from "@/lib/contexts/auth-context";
 import { usePathname } from "next/navigation";
 
 export const navigationLinks = [
@@ -99,7 +99,7 @@ function MenuMobile({ className }: { className?: string }) {
 }
 
 function AccountButton() {
-  const { isLoading, isLoggedIn } = useUser();
+  const { isLoading, isLoggedIn } = useAuth();
 
   if (isLoading)
     return <Skeleton className="h-9 w-25 max-md:w-9 rounded-full" />;
@@ -148,6 +148,18 @@ function AppHeaderContent() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [setIShowAppHeader]);
+
+  React.useEffect(() => {
+    if (isShowSearchDropdown) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isShowSearchDropdown]);
 
   if (pathName?.startsWith("/admin")) return null;
 
@@ -251,7 +263,7 @@ function AppHeaderContent() {
                   size={"icon"}
                   className="rounded-full"
                 >
-                  <Bot className="size-5" />
+                  <MessageSquareShare className="size-5" />
                 </Button>
               </Link>
 
@@ -268,7 +280,7 @@ function AppHeaderContent() {
 
         {/* Search dropdown */}
         {isShowSearchDropdown && (
-          <div className="w-full min-h-full bg-background/50 backdrop-blur-xs flex-1 shadow-2xl flex flex-col">
+          <div className="w-full min-h-full bg-background/60 backdrop-blur-xs flex-1 shadow-2xl flex flex-col">
             <div className="w-full bg-background border-y overflow-hidden">
               <div className="w-full max-w-[1400px] mx-auto">
                 <div className="max-h-[55vh] overflow-y-scroll scrollbar-hide">
@@ -288,7 +300,7 @@ function AppHeaderContent() {
   );
 }
 
-function AppHeader() {
+function AppHeaderProvider({ children }: { children: React.ReactNode }) {
   const [isShowAppHeader, setIShowAppHeader] = React.useState(true);
   const [isShowSearchDropdown, setIsShowSearchDropdown] = React.useState(false);
 
@@ -301,9 +313,9 @@ function AppHeader() {
         setIsShowSearchDropdown,
       }}
     >
-      <AppHeaderContent />
+      {children}
     </AppHeaderContext.Provider>
   );
 }
 
-export { useAppHeader, AppHeader };
+export { useAppHeader, AppHeaderProvider, AppHeaderContent };

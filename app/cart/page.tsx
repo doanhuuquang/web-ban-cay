@@ -1,9 +1,11 @@
+"use client";
+
 import CartProductCard from "@/components/shared/cart-product-card";
 import { Button } from "@/components/ui/button";
 import { productItemsSample } from "@/lib/constants/product-items";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, CreditCard, House, SlashIcon, User } from "lucide-react";
+import { Package, PackageOpen, SlashIcon } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -11,7 +13,27 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { CHECKOUT_PATH } from "@/lib/constants/path";
+import React from "react";
+import {
+  AddressSelectorProvider,
+  DistrictSelector,
+  ProvinceSelector,
+  useAddressSelector,
+  WardSelector,
+} from "@/components/shared/address-selector";
+import { useAppHeader } from "@/components/shared/app-header";
+import { cn } from "@/lib/utils";
+import { calculateFee, getServices } from "@/lib/services/ghn-service";
+import { GHNService } from "@/lib/models/ghn-service";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 export function BreadcrumbWithCustomSeparator() {
   return (
@@ -67,133 +89,158 @@ function CartEmpty() {
   );
 }
 
-function ChooseVoucher() {
+function EstimateShipping() {
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+  const [isFormValid, setIsFormValid] = React.useState<boolean>(false);
+  const [shippingFee, setShippingFee] = React.useState<number>(0);
+  const [ghnServices, setGhnServices] = React.useState<GHNService[]>([]);
+  const [selectedService, setSelectedService] =
+    React.useState<GHNService | null>(null);
+
+  const { selectedProvince, selectedDistrict, selectedWard } =
+    useAddressSelector();
+
+  React.useEffect(() => {
+    if (!selectedProvince || !selectedDistrict || !selectedWard) {
+      setIsFormValid(false);
+    } else {
+      setIsFormValid(true);
+    }
+  }, [selectedProvince, selectedDistrict, selectedWard]);
+
+  React.useEffect(() => {
+    if (!isFormValid) return;
+
+    const fetchGhnServices = async () => {
+      if (!selectedDistrict) {
+        setGhnServices([]);
+        setSelectedService(null);
+        return;
+      }
+
+      const response = await getServices({
+        toDitrictId: selectedDistrict.districtID,
+      });
+
+      setGhnServices(response.services);
+    };
+
+    fetchGhnServices();
+  }, [isFormValid, selectedDistrict]);
+
+  React.useEffect(() => {
+    if (selectedService === null) return;
+
+    const calculateShippingFee = async () => {
+      if (!selectedDistrict || !selectedWard) return;
+
+      const response = await calculateFee({
+        data: {
+          toDistrictId: selectedDistrict.districtID,
+          toWardCode: selectedWard.wardCode.toString(),
+          height: 100,
+          length: 50,
+          width: 50,
+          weight: 1000,
+          service: selectedService,
+        },
+      });
+
+      setShippingFee(response.total);
+    };
+
+    calculateShippingFee();
+  }, [selectedService, selectedProvince, selectedDistrict, selectedWard]);
+
   return (
-    <div className="w-full bg-orange-500/10 p-4 border-l-5 border-orange-500">
-      <div className="w-full flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <p className="font-bold">Mã giảm giá</p>
-          <p className="text-sm text-muted-foreground">
-            Giảm 20% tối đa 20.000đ
-          </p>
-        </div>
-
-        <Button variant={"ghost"} size={"icon"} className="rounded-full">
-          <ChevronRight />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function ChooseDeliveryVoucher() {
-  return (
-    <div className="w-full bg-orange-500/10 p-4 border-l-5 border-orange-500">
-      <div className="w-full flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <p className="font-bold">Mã giảm giá vận chuyển</p>
-          <p className="text-sm text-muted-foreground">
-            Giảm 10.000đ cho đơn tối thiểu 0đ
-          </p>
-        </div>
-
-        <Button variant={"ghost"} size={"icon"} className="rounded-full">
-          <ChevronRight />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function DeliveryInfo() {
-  return (
-    <div className="p-4 space-y-4 bg-blue-ocean/10">
-      {/* Địa chỉ */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-start gap-2">
-          <House size={18} />
+    <Accordion
+      type="single"
+      collapsible
+      className="w-full border px-4 bg-background dark:bg-muted/50"
+    >
+      <AccordionItem value="item-1">
+        <AccordionTrigger
+          className="lg:text-lg hover:cursor-pointer items-center"
+          onClick={() => setIsOpen(!isOpen)}
+        >
           <div>
-            <p className="font-bold">Địa chỉ giao hàng</p>
-            <p className="text-xs text-muted-foreground">
-              75 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP.HCM
-            </p>
+            <div className="flex gap-4 items-center">
+              {isOpen ? <PackageOpen /> : <Package />}
+              <p className="-leading-2">Ước tính phí vận chuyển</p>
+            </div>
           </div>
-        </div>
+        </AccordionTrigger>
 
-        <ChevronRight size={20} />
-      </div>
-
-      <div className="w-full h-[0.2px] bg-muted-foreground/20"></div>
-
-      {/* Thông tin người nhận */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-start gap-2">
-          <User size={18} />
-          <div>
-            <p className="font-bold">Thông tin người nhận</p>
-            <p className="text-xs text-muted-foreground">
-              75 Nguyễn Thị Minh Khai, Phường 6, Quận 3, TP.HCM
-            </p>
+        <AccordionContent className="space-y-4 mt-4">
+          <div className="flex lg:flex-row flex-col items-center gap-4">
+            <ProvinceSelector />
+            <DistrictSelector />
+            <WardSelector />
           </div>
-        </div>
 
-        <ChevronRight size={20} />
-      </div>
-    </div>
+          {isFormValid && (
+            <RadioGroup
+              defaultValue=""
+              onValueChange={(value) =>
+                setSelectedService(
+                  ghnServices.find((service) => service.serviceId === value)!
+                )
+              }
+              className="flex items-center gap-5"
+            >
+              {ghnServices.map((service, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <RadioGroupItem
+                    value={service.serviceId}
+                    id={service.serviceId}
+                  />
+                  <Label htmlFor={service.serviceId}>{service.shortName}</Label>
+                </div>
+              ))}
+            </RadioGroup>
+          )}
+
+          <div className="mt-6">
+            {!selectedService ? (
+              <p className="text-muted-foreground">
+                Chọn địa chỉ để xem phí vận chuyển ước tính
+              </p>
+            ) : (
+              <div>
+                Phí vận chuyển ước tính đến địa chỉ bạn chọn là:{" "}
+                <span className="font-semibold">
+                  {Intl.NumberFormat("vi-VN").format(shippingFee) + "₫"}
+                </span>
+              </div>
+            )}
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }
 
 function OrderSummary() {
   return (
-    <div className="p-4 space-y-4 bg-background dark:bg-muted/50 shadow-md border">
+    <div className="p-4 space-y-4 bg-background dark:bg-muted/50 border">
       {/* Tổng quan */}
       <div className="space-y-2">
-        <div className="bg-blue-ocean/20 text-blue-ocean font-semibold p-4 text-sm mb-5">
-          Đơn giá bên dưới đã bao gồm thuế VAT
-        </div>
-
-        <p className="font-bold">Tổng quan đơn hàng</p>
+        <p className="font-bold text-lg">Tạm tính</p>
         <div className="flex gap-4 items-baseline justify-between">
-          <p className="text-xs text-muted-foreground">Tổng tiền hàng</p>
-          <span className="font-bold text-sm text-muted-foreground">
-            1.200.000₫
-          </span>
+          <p className="text-muted-foreground">Tổng tiền hàng</p>
+          <span className="font-bold text-muted-foreground">1.400.000₫</span>
         </div>
 
         <div className="flex gap-4 items-baseline justify-between">
-          <p className="text-xs text-muted-foreground">Phí vận chuyển</p>
-          <span className="font-bold text-sm text-muted-foreground">
-            20.000₫
-          </span>
+          <p className="text-muted-foreground">Voucher sản phẩm</p>
+          <span className="font-bold text-muted-foreground">-200.000₫</span>
         </div>
-
-        <div className="flex gap-4 items-baseline justify-between">
-          <p className="text-xs text-muted-foreground">Giảm giá sản phẩm</p>
-          <span className="font-bold text-sm text-muted-foreground">
-            200.000₫
-          </span>
-        </div>
-
-        <div className="flex gap-4 items-baseline justify-between">
-          <p className="text-xs text-muted-foreground">Giảm giá vận chuyển</p>
-          <span className="font-bold text-sm text-muted-foreground">
-            20.000₫
-          </span>
-        </div>
-      </div>
-
-      <div className="w-full h-[0.2px] bg-muted-foreground/20"></div>
-
-      {/* Tổng tiền */}
-      <div className="flex gap-4 items-baseline justify-between">
-        <p className="text-xs text-muted-foreground">Tổng tiền thanh toán</p>
-        <span className="font-bold">1.000.000₫</span>
       </div>
 
       <Link href={CHECKOUT_PATH}>
-        <Button className="w-full p-6 rounded-none uppercase">
-          <CreditCard />
-          Đến trang thanh toán
+        <Button className="w-full p-6 rounded-none uppercase flex items-center justify-between text-lg">
+          <p>1.200.000₫</p>
+          <p>Thanh toán</p>
         </Button>
       </Link>
     </div>
@@ -201,16 +248,14 @@ function OrderSummary() {
 }
 
 export default function CartPage() {
+  const { isShowAppHeader } = useAppHeader();
+
   if (false) return <CartEmpty />;
 
   return (
     <div className="w-full h-fit bg-background">
       <div className="w-full max-w-[1400px] p-4 m-auto space-y-4">
-        <div className="space-y-2">
-          <p className="text-xl font-bold">Giỏ hàng của tôi</p>
-
-          <BreadcrumbWithCustomSeparator />
-        </div>
+        <BreadcrumbWithCustomSeparator />
 
         <div className="w-full md:grid grid-cols-5 gap-4 max-md:space-y-4">
           <div className="w-full grid grid-cols-1 gap-4 md:col-span-3">
@@ -219,7 +264,15 @@ export default function CartPage() {
             ))}
           </div>
 
-          <div className="h-fit space-y-3 md:col-span-2">
+          <div
+            className={cn(
+              "h-fit md:col-span-2 sticky space-y-4 transition-all",
+              isShowAppHeader ? "top-30" : "top-4"
+            )}
+          >
+            <AddressSelectorProvider>
+              <EstimateShipping />
+            </AddressSelectorProvider>
             <OrderSummary />
           </div>
         </div>

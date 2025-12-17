@@ -4,7 +4,10 @@ import { Fira_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import AppFooter from "@/components/shared/app-footer";
 import { Toaster } from "sonner";
-import { AppHeader } from "@/components/shared/app-header";
+import {
+  AppHeaderProvider,
+  AppHeaderContent,
+} from "@/components/shared/app-header";
 import AuthProvider from "@/lib/contexts/auth-context";
 
 const firaSans = Fira_Sans({
@@ -34,10 +37,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <AppHeader />
-            {children}
-            <Toaster />
-            <AppFooter />
+            <AppHeaderProvider>
+              <AppHeaderContent />
+              <Toaster />
+              {children}
+              <AppFooter />
+            </AppHeaderProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

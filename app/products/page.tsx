@@ -1,5 +1,6 @@
 "use client";
 
+import { useAppHeader } from "@/components/shared/app-header";
 import ProductCard from "@/components/shared/product-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ function CategoriesSeclector({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "w-full bg-background dark:bg-accent/50 shadow-sm divide-y",
+        "w-full bg-background dark:bg-accent/50 border divide-y",
         className
       )}
     >
@@ -64,7 +65,7 @@ function SortProducts() {
   const [sortBy, setSortBy] = React.useState<string>("");
 
   return (
-    <div className="w-full flex items-center gap-4 overflow-x-scroll scrollbar-hide p-4 bg-accent/50 shadow-sm">
+    <div className="w-full flex items-center gap-4 overflow-x-scroll scrollbar-hide p-4 bg-accent/50">
       <p className="text-muted-foreground shrink-0">Sắp xếp theo</p>
 
       {sortOptions.map((option, index) => (
@@ -86,16 +87,23 @@ function SortProducts() {
 }
 
 export default function ProductsPage() {
+  const { isShowAppHeader } = useAppHeader();
+
   return (
     <div className="w-full h-fit">
       <div className="w-full max-w-[1400px] p-4 m-auto space-y-4 md:grid grid-cols-4 gap-4">
         {/* Left */}
-        <div className="w-full h-fit space-y-6">
+        <div
+          className={cn(
+            "w-full h-fit space-y-6 md:sticky transition-all",
+            isShowAppHeader ? "top-30" : "top-4"
+          )}
+        >
           {/* Danh mục sản phẩm */}
           <CategoriesSeclector className="w-full" />
 
           {/* Bộ lọc */}
-          <div className="divide-y shadow-sm">
+          <div className="divide-y border">
             <p className="text-xl font-bold flex items-center gap-2 p-4">
               <FunnelPlus size={20} />
               Bộ lọc
