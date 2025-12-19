@@ -1,7 +1,5 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AppLoadingBackground,
@@ -39,14 +37,6 @@ export default function AuthLayout({
           fill
           className="w-full h-full absolute top-0 left-0 z-0 object-cover object-center"
         />
-
-        <Link
-          href={"/"}
-          className="w-fit rounded-full bg-black/20  text-white  py-2 px-3 text-xs flex items-center gap-2 z-1"
-        >
-          <ArrowLeft className="size-4" />
-          Quay lại
-        </Link>
       </div>
       <main className="w-full h-full flex justify-center items-center">
         {children}

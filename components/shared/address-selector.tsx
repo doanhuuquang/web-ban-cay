@@ -62,7 +62,7 @@ function useAddressSelector(): AddressSelctorContextProps {
   return context;
 }
 
-function ProvinceSelector() {
+function ProvinceSelector({ isDisabled }: { isDisabled?: boolean }) {
   const [provinces, setProvinces] = React.useState<Province[]>([]);
 
   const {
@@ -83,6 +83,7 @@ function ProvinceSelector() {
 
   return (
     <Select
+      disabled={isDisabled}
       value={selectedProvince?.provinceID || ""}
       onValueChange={(value) => {
         setSelectedProvince(
@@ -109,7 +110,7 @@ function ProvinceSelector() {
   );
 }
 
-function DistrictSelector() {
+function DistrictSelector({ isDisabled }: { isDisabled?: boolean }) {
   const [districts, setDistricts] = React.useState<District[]>([]);
   const {
     selectedProvince,
@@ -143,7 +144,7 @@ function DistrictSelector() {
         );
         setSelectedWard(null);
       }}
-      disabled={!selectedProvince}
+      disabled={!selectedProvince || isDisabled}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Quận/Huyện" />
@@ -162,7 +163,7 @@ function DistrictSelector() {
   );
 }
 
-function WardSelector() {
+function WardSelector({ isDisabled }: { isDisabled?: boolean }) {
   const [wards, setWards] = React.useState<Ward[]>([]);
   const { selectedProvince, selectedDistrict, selectedWard, setSelectedWard } =
     useAddressSelector();
@@ -189,7 +190,7 @@ function WardSelector() {
       onValueChange={(value) =>
         setSelectedWard(wards.find((ward) => ward.wardCode === value) || null)
       }
-      disabled={!selectedDistrict}
+      disabled={!selectedDistrict || isDisabled}
     >
       <SelectTrigger className="w-full">
         <SelectValue placeholder="Phường/Xã" />
@@ -210,10 +211,11 @@ function WardSelector() {
   );
 }
 
-function StreetInput() {
+function StreetInput({ isDisabled }: { isDisabled?: boolean }) {
   const { street, setStreet } = useAddressSelector();
   return (
     <Input
+      disabled={isDisabled}
       value={street}
       placeholder="Số Nhà, Đường, Tên Tòa Nhà"
       onChange={(e) => setStreet(e.target.value)}
@@ -221,10 +223,11 @@ function StreetInput() {
   );
 }
 
-function ReciverNameInput() {
+function ReciverNameInput({ isDisabled }: { isDisabled?: boolean }) {
   const { fullName, setFullName } = useAddressSelector();
   return (
     <Input
+      disabled={isDisabled}
       value={fullName}
       placeholder="Tên người nhận"
       onChange={(e) => setFullName(e.target.value)}
@@ -232,10 +235,11 @@ function ReciverNameInput() {
   );
 }
 
-function ReciverPhoneNumberInput() {
+function ReciverPhoneNumberInput({ isDisabled }: { isDisabled?: boolean }) {
   const { phone, setPhone } = useAddressSelector();
   return (
     <Input
+      disabled={isDisabled}
       value={phone}
       placeholder="Số điện thoại người nhận"
       onChange={(e) => setPhone(e.target.value)}
@@ -243,10 +247,11 @@ function ReciverPhoneNumberInput() {
   );
 }
 
-function AdditionalInfoInput() {
+function AdditionalInfoInput({ isDisabled }: { isDisabled?: boolean }) {
   const { additionalInfo, setAdditionalInfo } = useAddressSelector();
   return (
     <Input
+      disabled={isDisabled}
       value={additionalInfo}
       placeholder="Thông tin bổ sung"
       onChange={(e) => setAdditionalInfo(e.target.value)}
@@ -254,10 +259,11 @@ function AdditionalInfoInput() {
   );
 }
 
-function LabelInput() {
+function LabelInput({ isDisabled }: { isDisabled?: boolean }) {
   const { label, setLabel } = useAddressSelector();
   return (
     <Input
+      disabled={isDisabled}
       value={label}
       placeholder="Tiêu đề địa chỉ"
       onChange={(e) => setLabel(e.target.value)}
@@ -265,11 +271,12 @@ function LabelInput() {
   );
 }
 
-function PostalCode() {
+function PostalCode({ isDisabled }: { isDisabled?: boolean }) {
   const { postalCode, setPostalCode } = useAddressSelector();
 
   return (
     <Input
+      disabled={isDisabled}
       value={postalCode}
       placeholder="Mã bưu điện"
       onChange={(e) => setPostalCode(e.target.value)}
@@ -277,11 +284,12 @@ function PostalCode() {
   );
 }
 
-function IsDefaultCheckbox() {
+function IsDefaultCheckbox({ isDisabled }: { isDisabled?: boolean }) {
   const { isDefault, setIsDefault } = useAddressSelector();
   return (
     <div className="flex items-center gap-3">
       <Checkbox
+        disabled={isDisabled}
         checked={isDefault}
         id="default"
         onCheckedChange={(checked) => setIsDefault(Boolean(checked))}
@@ -291,11 +299,12 @@ function IsDefaultCheckbox() {
   );
 }
 
-function AddressTypes() {
+function AddressTypes({ isDisabled }: { isDisabled?: boolean }) {
   const { addressType, setAddressType } = useAddressSelector();
 
   return (
     <Select
+      disabled={isDisabled}
       value={addressType}
       onValueChange={(value) => setAddressType(value)}
     >

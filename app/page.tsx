@@ -1,6 +1,5 @@
 "use client";
 
-import ProductCard from "@/components/shared/product-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ArrowUpRight, ChevronRight } from "lucide-react";
@@ -15,7 +14,6 @@ import {
 } from "@/components/shared/carousel-custom";
 import React from "react";
 import { gplantOfferItems } from "@/lib/constants/gplant-offers";
-import { productItemsSample } from "@/lib/constants/product-items";
 import { whatsTrendingItems } from "@/lib/constants/whats-trending-items";
 import { tipsAndIdeasItems } from "@/lib/constants/tips-and-ideas-items";
 import { Input } from "@/components/ui/input";
@@ -216,7 +214,7 @@ function ToDayBestDealsSection() {
 
         <div className="lg:grid lg:grid-cols-4 gap-4 max-md:space-y-5">
           <div className="col-span-3">
-            <CarouselCustom itemSize={"lg"}>
+            {/* <CarouselCustom itemSize={"lg"}>
               {productItemsSample.map((product, index) => (
                 <div key={index}>
                   <CategoryCustomItem>
@@ -224,7 +222,7 @@ function ToDayBestDealsSection() {
                   </CategoryCustomItem>
                 </div>
               ))}
-            </CarouselCustom>
+            </CarouselCustom> */}
           </div>
 
           <Link
@@ -321,7 +319,7 @@ function DiscoverWhatsNewSection() {
           </Button>
         </div>
 
-        <CarouselCustom itemSize={"lg"}>
+        {/* <CarouselCustom itemSize={"lg"}>
           {productItemsSample.map((product, index) => (
             <div key={index}>
               <CategoryCustomItem>
@@ -329,7 +327,7 @@ function DiscoverWhatsNewSection() {
               </CategoryCustomItem>
             </div>
           ))}
-        </CarouselCustom>
+        </CarouselCustom> */}
 
         <Link
           href={""}

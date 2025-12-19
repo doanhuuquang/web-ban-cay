@@ -8,7 +8,7 @@ export class UserProfile {
   gender: boolean;
   birthDate: Date;
   addressResponse: Address[];
-  cartResponse: Cart[];
+  cartResponse: Cart;
 
   constructor(
     profileId: string,
@@ -17,7 +17,7 @@ export class UserProfile {
     gender: boolean,
     birthDate: Date,
     addressResponse: Address[],
-    cartResponse: Cart[]
+    cartResponse: Cart
   ) {
     this.profileId = profileId;
     this.username = username;

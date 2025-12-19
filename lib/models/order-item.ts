@@ -1,4 +1,4 @@
-export class OrderItemResponse {
+export class OrderItem {
   constructor(
     public orderItemId: string,
     public productId: string,

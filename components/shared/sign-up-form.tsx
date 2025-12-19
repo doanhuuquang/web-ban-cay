@@ -197,8 +197,8 @@ export default function SignupForm() {
             type="submit"
             className="w-full py-5 hover:cursor-pointer"
           >
+            {loading && <LoaderCircle className="animate-spin" />}
             <p className="uppercase">
-              {loading && <LoaderCircle className="animate-spin" />}
               {loading ? "Đang kiểm tra thông tin..." : "Xác nhận đăng ký"}
             </p>
           </Button>

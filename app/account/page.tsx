@@ -20,18 +20,11 @@ import {
 import {
   CHANGE_PASSWORD_SUCCESS_MESSAGE,
   CREATE_OR_UPDATE_USER_PROFILE_SUCCESS_MESSAGE,
-  CREATED_ADDRESS_SUCCESS_MESSAGE,
   LOGOUT_SUCCESS_MESSAGE,
 } from "@/lib/constants/success-messages";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { logout } from "@/lib/services/auth-service";
-import {
-  LoaderCircle,
-  LogOut,
-  PenLine,
-  PenSquare,
-  SquarePen,
-} from "lucide-react";
+import { LoaderCircle, PenLine, PenSquare } from "lucide-react";
 import { toast } from "sonner";
 import {
   Sheet,
@@ -57,10 +50,9 @@ import { updateUserProfileByUserId } from "@/lib/services/user-profile-service";
 import { format } from "date-fns";
 import { changePassword } from "@/lib/services/user-service";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 function UserProfile() {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const {
     userName,
     mobileNumber,
@@ -130,6 +122,8 @@ function UserProfile() {
           },
         }
       );
+
+      refreshUserProfile();
     } finally {
       setIsUpdating(false);
     }
@@ -139,7 +133,7 @@ function UserProfile() {
     <div className="space-y-3 p-4 bg-background dark:bg-accent/50">
       {/* Title */}
       <div className="flex items-center justify-between">
-        <p className="font-bold">Thông tin tài khoản</p>
+        <p className="text-lg font-bold">Thông tin tài khoản</p>
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size={"icon"} className="rounded-full">
@@ -237,7 +231,7 @@ function Logout() {
 
   return (
     <div className="p-4 bg-background dark:bg-accent/50 flex items-center justify-between">
-      <p className="font-bold">Đổi tài khoản</p>
+      <p className="text-lg font-bold">Đổi tài khoản</p>
       <Dialog>
         <form>
           <DialogTrigger asChild>
@@ -321,7 +315,7 @@ function ChangePassword() {
 
   return (
     <div className="p-4 bg-background dark:bg-accent/50 flex items-center justify-between">
-      <p className="font-bold">Mật khẩu</p>
+      <p className="text-lg font-bold">Mật khẩu</p>
       <Dialog>
         <form>
           <DialogTrigger asChild>
