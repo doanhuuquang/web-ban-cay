@@ -1,12 +1,18 @@
 "use client";
 
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Pencil,
-  MoreVertical,
   ChevronsLeft,
   ChevronLeft,
   ChevronRight,
   ChevronsRight,
+  Plus,
+  Trash,
 } from "lucide-react";
 import React from "react";
 
@@ -14,12 +20,13 @@ type categoriesItemProps = {
   id: string;
   name: string;
   desc: string;
-  image: string;
-  totalProducts?: string;
-  earning?: string;
+  // image: string;
+  image: File | null;
+  totalProducts?: number;
+  earning?: number;
 };
 
-const categories: categoriesItemProps[] = [
+const categoriesData: categoriesItemProps[] = [
   {
     id: "1",
     name: "Cây ngoài trời",
@@ -81,26 +88,12 @@ function CategoryTable({ rows }: CategoryTableProps) {
     setPageIndex(0);
   }, [rows]);
   return (
-    <div className="bg-white rounded-xl shadow-md border">
-      {/* HEADER */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <input
-          placeholder="Tìm kiếm danh mục..."
-          className="border rounded-md px-3 py-2 text-sm w-60 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
-
-        <div className="flex items-center gap-3">
-          <button className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-            + Thêm danh mục
-          </button>
-        </div>
-      </div>
-
+    <div className="bg-white rounded-xl shadow-md border overflow-hidden">
       {/* TABLE */}
-      <table className="w-full text-sm">
+      <table className="w-full text-sm ">
         <thead className="bg-gray-100 text-gray-700">
           <tr>
-            <th className="p-4 text-left">Danh mục</th>
+            <th className="p-4 text-left ">Danh mục</th>
             <th className="p-4 text-center">Tổng sản phẩm</th>
             <th className="p-4 text-center">Tổng thu nhập</th>
             <th className="p-4 text-center">Tuỳ chọn</th>
@@ -130,8 +123,30 @@ function CategoryTable({ rows }: CategoryTableProps) {
 
               <td className="p-4">
                 <div className="flex items-center justify-center gap-3 text-gray-500">
-                  <Pencil className="w-4 h-4 cursor-pointer hover:text-indigo-600" />
-                  <MoreVertical className="w-4 h-4 cursor-pointer hover:text-indigo-600" />
+                  <div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="p-1 rounded-md w-fit h-fit">
+                          <Pencil className="w-5 h-5 cursor-pointer hover:text-indigo-600" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Sửa danh mục</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="p-1 rounded-md w-fit h-fit">
+                          <Trash className="w-5 h-5 cursor-pointer hover:text-indigo-600" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Xoá danh mục</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
               </td>
             </tr>
@@ -205,11 +220,232 @@ function CategoryTable({ rows }: CategoryTableProps) {
   );
 }
 
+type CategoryModalProps = {
+  closeModal: () => void;
+  onSubmit: (data: categoriesItemProps) => void;
+};
+
+function CategoryModal({ closeModal, onSubmit }: CategoryModalProps) {
+  const [formState, setFormState] = React.useState<categoriesItemProps>({
+    id: crypto.getRandomValues(new Uint32Array(1))[0].toString(16).slice(0, 8),
+    name: "",
+    desc: "",
+    image: null,
+    totalProducts: "",
+    earning: "",
+  });
+
+  const [errors, setErrors] = React.useState("");
+  type Formkeys = keyof typeof formState;
+  const fieldAlias: Record<Formkeys, string> = {
+    id: "ID",
+    name: "Tên danh mục",
+    desc: "Mô tả",
+    image: "Ảnh danh mục",
+    totalProducts: "Tổng sản phẩm",
+    earning: "Tổng thu nhập",
+  };
+
+  const validateForm = () => {
+    if (formState.name && formState.desc && formState.image) {
+      setErrors("");
+      return true;
+    } else {
+      const errorFields: string[] = [];
+      for (const [key, value] of Object.entries(formState)) {
+        if (!value) {
+          errorFields.push(fieldAlias[key as Formkeys]);
+        }
+      }
+      setErrors(errorFields.join(", "));
+      return false;
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormState({ ...formState, [e.target.name]: [e.target.value] });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFormState((prev) => ({ ...prev, image: file }));
+  };
+
+  const handleSubmit = () => {
+    if (!validateForm()) return;
+    onSubmit(formState);
+    closeModal();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) closeModal();
+      }}
+    >
+      <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 animate-in fade-in zoom-in-95 duration-200">
+        <h2 className="text-lg font-semibold mb-4">Thêm danh mục</h2>
+
+        <form className="space-y-4">
+          {/* Tên danh mục */}
+          <div className="flex flex-col">
+            <label htmlFor="name" className="font-medium mb-1">
+              Tên danh mục
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              onChange={handleChange}
+              value={formState.name}
+              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          {/* Mô tả */}
+          <div className="flex flex-col">
+            <label htmlFor="desc" className="font-medium mb-1">
+              Mô tả
+            </label>
+            <input
+              id="desc"
+              name="desc"
+              type="text"
+              value={formState.desc}
+              onChange={handleChange}
+              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          {/* Ảnh danh mục */}
+          <div className="flex flex-col">
+            <label htmlFor="image" className="font-medium mb-1">
+              Ảnh danh mục
+            </label>
+            <input
+              id="image"
+              name="image"
+              type="file"
+              onChange={handleImageChange}
+              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          {/* Tổng sản phẩm */}
+          <div className="flex flex-col">
+            <label htmlFor="totalProducts" className="font-medium mb-1">
+              Tổng sản phẩm
+            </label>
+            <input
+              id="totalProducts"
+              name="totalProducts"
+              type="number"
+              value={formState.totalProducts}
+              onChange={handleChange}
+              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          {/* Tổng thu nhập */}
+          <div className="flex flex-col">
+            <label htmlFor="earning" className="font-medium mb-1">
+              Tổng thu nhập
+            </label>
+            <input
+              id="earning"
+              name="earning"
+              type="number"
+              value={formState.earning}
+              onChange={handleChange}
+              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          {errors && (
+            <div className="mt-2 rounded-md bg-red-50 border border-red-300 text-red-700 px-3 py-2 text-sm">
+              {`Vui lòng nhập: ${errors}`}
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+          >
+            Thêm mới
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function CategoryPage() {
+  const [categories, setCategories] =
+    React.useState<categoriesItemProps[]>(categoriesData);
+  const [filteredCate, setFilteredCate] =
+    React.useState<categoriesItemProps[]>(categoriesData);
+  const [modalOpen, setModalOpen] = React.useState<boolean>(false);
+
+  function removeVNTones(str: string) {
+    return str
+      .normalize("NFD") // tách dấu
+      .replace(/[\u0300-\u036f]/g, "") // xoá dấu
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .toLowerCase();
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = removeVNTones(e.target.value);
+    const record = categories.filter((item) =>
+      removeVNTones(item.name.toLowerCase()).includes(query.toLowerCase())
+    );
+
+    setFilteredCate(record);
+  };
+
+  const handleSubmit = () => {
+    console.log("Thành công");
+  };
   return (
     <div className="container p-6 min-h-screen">
       <h1 className="text-2xl font-semibold mb-6">Danh mục sản phẩm</h1>
-      <CategoryTable rows={categories} />
+      {/* HEADER */}
+      <div className="flex items-center justify-between p-3 border mb-2 rounded-xl">
+        <input
+          placeholder="Tìm kiếm danh mục..."
+          onChange={handleChange}
+          className="border rounded-md px-3 py-2 text-sm w-80 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setModalOpen(true)}
+            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-md text-sm font-medium flex gap-2"
+          >
+            <Plus size={18} />
+            Thêm danh mục
+          </button>
+
+          {modalOpen && (
+            <CategoryModal
+              closeModal={() => {
+                setModalOpen(false);
+              }}
+              onSubmit={handleSubmit}
+            />
+          )}
+        </div>
+      </div>
+      <CategoryTable rows={filteredCate} />
     </div>
   );
 }

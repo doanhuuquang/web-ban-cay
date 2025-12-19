@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  productLists,
-  productItemProps,
-} from "@/app/admin/constants/products-data";
+import { productItemProps } from "@/app/admin/constants/products-data";
 import React from "react";
 import { Input } from "@/components/ui/input";
 
@@ -22,6 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import PopupDelete from "../_components/popup-delete";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 type ProductTableProps = {
   rows: productItemProps[];
@@ -390,27 +388,22 @@ function ModalProduct({
 }
 
 export default function ProductPage() {
-  const [products, setProducts] =
-    React.useState<productItemProps[]>(productLists);
-  const [filteredProducts, setFilteredProducts] =
-    React.useState<productItemProps[]>(productLists);
+  const { user } = useAuth();
+
+  const [products, setProducts] = React.useState<productItemProps[]>([]);
+  const [filteredProducts, setFilteredProducts] = React.useState<
+    productItemProps[]
+  >([]);
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
   const [popupOpen, setPopupOpen] = React.useState<boolean>(false);
   const [rowToEdit, setRowToEdit] = React.useState<string | null>(null);
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
 
-  // lưu data ở local
+  // lấy danh sách sản phẩm từ api
   React.useEffect(() => {
-    const saved = localStorage.getItem("data-product");
-    const data = saved ? JSON.parse(saved) : productLists;
-    setProducts(data);
-    setFilteredProducts(data);
-  }, []);
-  React.useEffect(() => {
-    localStorage.setItem("data-product", JSON.stringify(products));
-  }, [products]);
+    if (!user) return;
+  }, [user]);
 
-  //
   const openDeletePopup = (id: string) => {
     setDeleteId(id);
     setPopupOpen(true);

@@ -78,7 +78,7 @@ const orderStats: itemStatsProps[] = [
 function OrderStatsList({ data }: OrderStatsListProps) {
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
         {data.map((os) => {
           const Icon = os.icon;
           return (

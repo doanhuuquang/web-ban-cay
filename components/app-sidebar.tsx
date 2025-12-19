@@ -84,14 +84,6 @@ const data = {
           title: "Chi tiết đơn hàng",
           url: "/admin/orders/detail",
         },
-        {
-          title: "Trạng thái đơn hàng",
-          url: "#",
-        },
-        {
-          title: "Thanh toán",
-          url: "#",
-        },
       ],
     },
     {
@@ -106,14 +98,6 @@ const data = {
         {
           title: "Khách hàng",
           url: "/admin/users/customer",
-        },
-        {
-          title: "Lịch sử mua hàng",
-          url: "#",
-        },
-        {
-          title: "Trạng thái tài khoản",
-          url: "#",
         },
       ],
     },
