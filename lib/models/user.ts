@@ -1,24 +1,21 @@
+import { Role } from "@/lib/models/role";
+import { UserProfile } from "@/lib/models/user-profile";
+
 export class User {
   id: string;
   email: string;
-  name: string;
-  avatarUrl: string;
-  phoneNumber: string;
-  address: string;
+  roles: Role[];
+  userProfile: UserProfile | null;
 
   constructor(
     id: string,
     email: string,
-    name: string,
-    avatarUrl: string,
-    phoneNumber: string,
-    address: string
+    roles: Role[],
+    userProfile: UserProfile
   ) {
     this.id = id;
     this.email = email;
-    this.name = name;
-    this.avatarUrl = avatarUrl;
-    this.phoneNumber = phoneNumber;
-    this.address = address;
+    this.roles = roles;
+    this.userProfile = userProfile;
   }
 }

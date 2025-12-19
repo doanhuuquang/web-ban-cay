@@ -1,39 +1,49 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import auth from "@/lib/firebase/firebase-auth";
+import { User } from "@/lib/models/user";
+import instance from "@/lib/services/axios-config";
+import axios from "axios";
 
-const createUser = async ({
-  email,
-  password,
-}: // user,
-{
-  email: string;
-  password: string;
-  // user: User;
-}) => {
-  await createUserWithEmailAndPassword(auth, email, password);
+const getCurrentUserProfile = async (): Promise<{
+  code: number;
+  userProfile: User | null;
+}> => {
+  try {
+    const getCurrentUserProfileUrl = "/users/myInfo";
+    const response = await instance.get(getCurrentUserProfileUrl);
 
-  // await setDoc(doc(firestore, "users", credential.user.uid), {
-  //   avatarBase64: user.avatarBase64,
-  //   firstName: user.firstName,
-  //   lastName: user.lastName,
-  //   email: user.email,
-  //   birthOfDate: user.birthOfDate,
-  //   createdAt: user.createdAt,
-  //   updatedAt: user.updatedAt,
-  //   isVerified: user.isVerified,
-  //   isOnline: user.isOnline,
-  // });
+    return {
+      code: response.data.code,
+      userProfile: response.data.data as User,
+    };
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return { code: -1, userProfile: null };
+  }
 };
 
-// const getUserById = async (userId: string): Promise<User | null> => {
-//   const friendsRef = collection(firestore, "users");
-//   const docSnap = await getDoc(doc(friendsRef, userId));
+const changePassword = async ({
+  userId,
+  data,
+}: {
+  userId: string;
+  data: {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  };
+}): Promise<number> => {
+  try {
+    const changePasswordUrl = `users/${userId}/change-password`;
+    const response = await instance.put(changePasswordUrl, data);
 
-//   if (docSnap.exists()) {
-//     return { id: docSnap.id, ...docSnap.data() } as User;
-//   }
+    return response.data.code;
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return -1;
+  }
+};
 
-//   return null;
-// };
-
-export { createUser /*, getUserById*/ };
+export { getCurrentUserProfile, changePassword };

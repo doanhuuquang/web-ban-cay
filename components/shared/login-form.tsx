@@ -30,9 +30,9 @@ import {
   ERROR_MESSAGES,
 } from "@/lib/constants/error-messages";
 import { LOGIN_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
-import { IS_LOGGED } from "@/lib/constants/local-storage-keys";
-import { useUser } from "@/lib/contexts/auth-context";
+import { useAuth } from "@/lib/contexts/auth-context";
 import { FORGET_PASSWORD_PATH } from "@/lib/constants/path";
+import { API_SUCCESS_CODE } from "@/lib/constants/api-success-code";
 
 // Style cho input
 const inputClassName =
@@ -49,7 +49,7 @@ const formSchema = z.object({
 export default function LoginForm() {
   const [loading, setLoading] = React.useState(false);
   const [isChecked, setIsChecked] = React.useState<boolean>(false);
-  const { setIsLoggedIn } = useUser();
+  const { setIsLoggedIn } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,18 +68,21 @@ export default function LoginForm() {
         password: value.password,
       });
 
-      toast(code !== 200 ? "Thất bại" : "Thành công", {
-        description:
-          code !== 200
-            ? ERROR_MESSAGES[code]
+      toast(
+        code !== API_SUCCESS_CODE.LOGIN_SUCCESS ? "Thất bại" : "Thành công",
+        {
+          description:
+            code !== API_SUCCESS_CODE.LOGIN_SUCCESS
               ? ERROR_MESSAGES[code]
-              : DEFAULT_ERROR_MESSAGE
-            : LOGIN_SUCCESS_MESSAGE,
-        action: {
-          label: "Oke",
-          onClick: () => {},
-        },
-      });
+                ? ERROR_MESSAGES[code]
+                : DEFAULT_ERROR_MESSAGE
+              : LOGIN_SUCCESS_MESSAGE,
+          action: {
+            label: "Oke",
+            onClick: () => {},
+          },
+        }
+      );
 
       if (code === 200) setIsLoggedIn(true);
     } finally {
@@ -174,10 +177,10 @@ export default function LoginForm() {
             type="submit"
             className="w-full py-5 hover:cursor-pointer"
           >
+            {loading ? <LoaderCircle className="animate-spin" /> : <></>}
             <p className="uppercase">
               {loading ? "Đang kiểm tra thông tin..." : "Đăng nhập"}
             </p>
-            {loading ? <LoaderCircle className="animate-spin" /> : <></>}
           </Button>
 
           <div className="w-full flex items-center gap-5 text-muted-foreground text-sm">

@@ -6,7 +6,6 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { productItemsSample } from "@/lib/constants/product-items";
 import { SlashIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -42,11 +41,11 @@ export default function WishlistPage() {
           <BreadcrumbWithCustomSeparator />
         </div>
 
-        <div className="w-full space-y-4">
+        {/* <div className="w-full space-y-4">
           {productItemsSample.map((product, index) => (
             <WishlistProductCard key={index} product={product} />
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );

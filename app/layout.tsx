@@ -1,14 +1,17 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Fira_Sans } from "next/font/google";
+import { Be_Vietnam_Pro } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import AppFooter from "@/components/shared/app-footer";
 import { Toaster } from "sonner";
-import { AppHeader } from "@/components/shared/app-header";
+import {
+  AppHeaderProvider,
+  AppHeaderContent,
+} from "@/components/shared/app-header";
 import AuthProvider from "@/lib/contexts/auth-context";
 
-const firaSans = Fira_Sans({
-  weight: ["400", "500", "600", "700"],
+const beVietnamPro = Be_Vietnam_Pro({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
 });
 
@@ -26,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${firaSans.className} antialiased min-w-xs`}>
+      <body className={`${beVietnamPro.className} antialiased min-w-xs`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -34,10 +37,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <AppHeader />
-            {children}
-            <Toaster />
-            <AppFooter />
+            <AppHeaderProvider>
+              <AppHeaderContent />
+              <Toaster />
+              {children}
+              <AppFooter />
+            </AppHeaderProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
