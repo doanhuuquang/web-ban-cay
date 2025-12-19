@@ -1,18 +1,9 @@
 "use client";
 
-import { productItemProps } from "@/app/admin/constants/products-data";
 import React from "react";
 import { Input } from "@/components/ui/input";
-
-import {
-  SquarePen,
-  Plus,
-  Trash,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+import { z } from "zod";
+import { SquarePen, Plus, Trash } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -20,27 +11,354 @@ import {
 } from "@/components/ui/tooltip";
 import PopupDelete from "../_components/popup-delete";
 import { useAuth } from "@/lib/contexts/auth-context";
+import { getProducts } from "@/lib/services/product-service";
+import { Product } from "@/lib/models/product";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { formatMoney } from "@/lib/helpers/format-money";
+import { Category } from "@/lib/models/category";
+import { getCategories } from "@/lib/services/category-service";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type ProductTableProps = {
-  rows: productItemProps[];
-  editRow: (id: string) => void;
-  popup: (id: string) => void;
-};
+function UpdateProduct({ product }: { product: Product }) {
+  const [categories, setCategories] = React.useState<Category[]>([]);
 
-function ProductTable({ rows, editRow, popup }: ProductTableProps) {
+  const formSchema = z.object({
+    productName: z.string().min(2).max(100),
+    description: z.string().min(2).max(100),
+    bio: z.string().min(2).max(100000),
+    price: z.number().min(0),
+    discount: z.number().min(0),
+    specialPrice: z.number().min(0),
+    origin: z.string().min(2).max(100),
+    category: z.string().min(2).max(100),
+    height: z.number().min(0),
+    length: z.number().min(0),
+    weight: z.number().min(0),
+    width: z.number().min(0),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      productName: product.productName,
+      description: product.description,
+      bio: product.bio,
+      price: product.price,
+      discount: product.discount,
+      specialPrice: product.specialPrice,
+      origin: product.origin,
+      category: product.category.categoryId,
+      height: product.height,
+      length: product.length,
+      weight: product.weight,
+      width: product.width,
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+  }
+
+  React.useEffect(() => {
+    if (!product) return;
+
+    const fetchCategories = async () => {
+      const response = await getCategories();
+
+      if (response.categories.length > 0) setCategories(response.categories);
+    };
+
+    fetchCategories();
+  }, [product]);
+
+  // Chỉnh sửa sản phẩm
+  const handleUpdateProduct = async () => {};
+
+  return (
+    <Sheet>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <SheetTrigger asChild>
+            <Button size={"icon"} variant="ghost">
+              <SquarePen className="size-5 " />
+            </Button>
+          </SheetTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Sửa sản phẩm</p>
+        </TooltipContent>
+      </Tooltip>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>{product.productName}</SheetTitle>
+          <SheetDescription>Chỉnh sửa sản phẩm</SheetDescription>
+        </SheetHeader>
+        <div className="grid flex-1 auto-rows-min gap-6 px-4 overflow-y-auto">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="productName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tên sản phẩm</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Tên sản phẩm" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mô tả sản phẩm</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Mô tả sản phẩm" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Thông tin thêm của sản phẩm</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Thông tin thêm của sản phẩm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Giá sản phẩm</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Giá sản phẩm" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="discount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Giảm giá</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Giảm giá" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="specialPrice"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Giảm giá đặc biệt</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Giảm giá" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="origin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel> Xuất xứ</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Xuất xứ" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Danh mục sản phẩm</FormLabel>
+
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Chọn danh mục sản phẩm" />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Danh mục sản phẩm</SelectLabel>
+                          {categories.map((category) => (
+                            <SelectItem
+                              key={category.categoryId}
+                              value={category.categoryId}
+                            >
+                              {category.categoryName}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="height"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel> Chiều cao</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Chiều cao" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="length"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Chiều dài</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Chiều dài" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="weight"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Trọng lượng</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Trọng lượng" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="width"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Chiều rộng</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Chiều rộng" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <SheetFooter>
+                <Button type="submit">Submit</Button>
+                <SheetClose asChild>
+                  <Button variant="outline">Close</Button>
+                </SheetClose>
+              </SheetFooter>
+            </form>
+          </Form>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function DeleteProduct({ product }: { product: Product }) {
+  const [categories, setCategories] = React.useState<Category[]>([]);
+
+  return (
+    <div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="p-1 rounded-md w-fit h-fit">
+            <Trash
+              className="cursor-pointer hover:text-red-600 transition"
+              onClick={() => {}}
+            />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Xoá sản phẩm</p>
+        </TooltipContent>
+      </Tooltip>
+    </div>
+  );
+}
+
+function ProductTable({ products }: { products: Product[] }) {
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
-  const pageCount = Math.ceil(rows.length / pageSize);
+  const pageCount = Math.ceil(products.length / pageSize);
 
-  const currentPageRows = rows.slice(
+  const currentProductsInPage = products.slice(
     pageIndex * pageSize,
     pageIndex * pageSize + pageSize
   );
 
   React.useEffect(() => {
     setPageIndex(0);
-  }, [rows]);
+  }, [products]);
   return (
     <div className="space-y-4">
       {/* TABLE */}
@@ -59,70 +377,30 @@ function ProductTable({ rows, editRow, popup }: ProductTableProps) {
           </thead>
 
           <tbody>
-            {currentPageRows.map((row) => {
-              const statusStyles = {
-                "Chờ xử lý": "bg-yellow-100 text-yellow-700",
-                "Đang xử lý": "bg-blue-100 text-blue-700",
-                "Thành công": "bg-green-100 text-green-700",
-                "Thất bại": "bg-red-100 text-red-700",
-              };
-
+            {currentProductsInPage.map((product, index) => {
               return (
                 <tr
-                  key={row.id}
+                  key={index}
                   className="border-b hover:bg-gray-50 transition"
                 >
-                  <td className="px-4 py-3">{row.id}</td>
-                  <td className="px-4 py-3">{row.productName}</td>
-                  <td className="px-4 py-3">{row.categories}</td>
-                  <td className="px-4 py-3">{row.price}</td>
-                  <td className="px-4 py-3">{row.quantity}</td>
+                  <td className="px-4 py-3">{product.productId}</td>
+                  <td className="px-4 py-3">{product.productName}</td>
+                  <td className="px-4 py-3">{product.category.categoryName}</td>
+                  <td className="px-4 py-3">{product.price}</td>
+                  <td className="px-4 py-3">{product.inventory.available}</td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        statusStyles[row.status] || "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {row.status}
-                    </span>
+                    {product.inventory.available === 0
+                      ? "Hết hàng"
+                      : "Còn hàng"}
                   </td>
 
                   <td className="px-4 py-3">
                     <span className="flex items-center gap-3 text-gray-600">
-                      {/* edit */}
-                      <div>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="p-1 rounded-md w-fit h-fit">
-                              <SquarePen
-                                className="cursor-pointer hover:text-blue-600 transition"
-                                onClick={() => editRow(row.id)}
-                              />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Sửa sản phẩm</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
+                      {/* update */}
+                      <UpdateProduct product={product} />
 
                       {/* delete */}
-                      <div>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="p-1 rounded-md w-fit h-fit">
-                              <Trash
-                                className="cursor-pointer hover:text-red-600 transition"
-                                // onClick={() => deleteRow(row.id)}
-                                onClick={() => popup(row.id)}
-                              />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Xoá sản phẩm</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
+                      <DeleteProduct product={product} />
                     </span>
                   </td>
                 </tr>
@@ -134,9 +412,9 @@ function ProductTable({ rows, editRow, popup }: ProductTableProps) {
 
       {/* PAGINATION */}
       <div className="flex items-center justify-between px-2 mt-2">
-        <div className="text-gray-600 text-sm">
+        {/* <div className="text-gray-600 text-sm">
           Trang {pageIndex + 1} trên {pageCount} — Tổng {rows.length} hàng
-        </div>
+        </div> */}
 
         <div className="flex items-center space-x-6">
           {/* PAGE SIZE */}
@@ -159,7 +437,7 @@ function ProductTable({ rows, editRow, popup }: ProductTableProps) {
           </div>
 
           {/* PAGE CONTROLS */}
-          <div className="flex items-center space-x-2">
+          {/* <div className="flex items-center space-x-2">
             <button
               className="border rounded p-1 disabled:opacity-50"
               onClick={() => setPageIndex(0)}
@@ -191,18 +469,12 @@ function ProductTable({ rows, editRow, popup }: ProductTableProps) {
             >
               <ChevronsRight size={18} />
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
   );
 }
-
-type ModalProductProps = {
-  closeModal: () => void;
-  onSubmit: (data: productItemProps) => void;
-  defaultValue: productItemProps | null;
-};
 
 function ModalProduct({
   closeModal,
@@ -390,24 +662,30 @@ function ModalProduct({
 export default function ProductPage() {
   const { user } = useAuth();
 
-  const [products, setProducts] = React.useState<productItemProps[]>([]);
-  const [filteredProducts, setFilteredProducts] = React.useState<
-    productItemProps[]
-  >([]);
-  const [modalOpen, setModalOpen] = React.useState<boolean>(false);
+  const [products, setProducts] = React.useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = React.useState<Product[]>([]);
   const [popupOpen, setPopupOpen] = React.useState<boolean>(false);
-  const [rowToEdit, setRowToEdit] = React.useState<string | null>(null);
-  const [deleteId, setDeleteId] = React.useState<string | null>(null);
 
   // lấy danh sách sản phẩm từ api
   React.useEffect(() => {
     if (!user) return;
+
+    const fetchProducts = async () => {
+      const response = await getProducts();
+
+      if (response.products.length > 0) setProducts(response.products);
+    };
+
+    fetchProducts();
   }, [user]);
 
-  const openDeletePopup = (id: string) => {
-    setDeleteId(id);
-    setPopupOpen(true);
-  };
+  // Xoá sản phẩm
+  // const handleDeleteProduct = async () => {};
+
+  // const openDeletePopup = (id: string) => {
+  //   setDeleteId(id);
+  //   setPopupOpen(true);
+  // };
 
   function removeVNTones(str: string) {
     return str
@@ -428,32 +706,6 @@ export default function ProductPage() {
     setFilteredProducts(records);
   };
 
-  const handleDeleteProduct = (currId: string) => {
-    setProducts(products.filter((p) => p.id !== currId));
-    setFilteredProducts(products.filter((p) => p.id !== currId));
-  };
-
-  const handleEditProduct = (id: string) => {
-    setRowToEdit(id);
-    setModalOpen(true);
-  };
-
-  const handleSubmit = (newRow: productItemProps) => {
-    setProducts((prev) => {
-      let update: productItemProps[];
-      if (rowToEdit === null) {
-        update = [...prev, newRow];
-      } else {
-        update = prev.map((row) => (row.id === rowToEdit ? newRow : row));
-      }
-
-      setFilteredProducts(update);
-      return update;
-    });
-
-    setRowToEdit(null);
-  };
-
   return (
     <div className="container mx-auto px-15 pb-10 space-y-6">
       <div className="font-semibold text-3xl">Sản phẩm</div>
@@ -471,41 +723,12 @@ export default function ProductPage() {
 
         {/* filter status */}
         <div></div>
-
-        <button
-          onClick={() => setModalOpen(true)}
-          className="px-4 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-sm 
-             hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 
-             flex items-center gap-2 cursor-pointer"
-        >
-          <Plus size={18} />
-          Thêm
-        </button>
-
-        {modalOpen && (
-          <ModalProduct
-            closeModal={() => {
-              setModalOpen(false);
-              setRowToEdit(null);
-            }}
-            onSubmit={handleSubmit}
-            defaultValue={
-              rowToEdit !== null
-                ? products.find((p) => p.id == rowToEdit) ?? null
-                : null
-            }
-          />
-        )}
       </div>
 
       {/* Data table */}
-      <ProductTable
-        rows={filteredProducts}
-        editRow={handleEditProduct}
-        popup={openDeletePopup}
-      />
+      <ProductTable products={products} />
 
-      {popupOpen && deleteId && (
+      {/* {popupOpen && deleteId && (
         <PopupDelete
           closePopupDelete={() => setPopupOpen(false)}
           deleteButton={() => {
@@ -514,7 +737,7 @@ export default function ProductPage() {
             setDeleteId(null);
           }}
         />
-      )}
+      )} */}
     </div>
   );
 }

@@ -114,9 +114,42 @@ const getProductsByCategoryName = async ({
   }
 };
 
+const updateProduct = async ({
+  productId,
+  data,
+}: {
+  productId: string;
+  data: {
+    productName: string;
+    description: string;
+    bio: string;
+    price: number;
+    discount: number;
+    specialPrice: number;
+    origin: string;
+    height: number;
+    length: number;
+    weight: number;
+    width: number;
+  };
+}): Promise<number> => {
+  try {
+    const updateProductsUrl = `/products/product/${productId}/update`;
+    const response = await instance.put(updateProductsUrl, data);
+
+    return response.data.code;
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return -1;
+  }
+};
+
 export {
   getProducts,
   getProductById,
   getProductBySlug,
   getProductsByCategoryName,
+  updateProduct,
 };
