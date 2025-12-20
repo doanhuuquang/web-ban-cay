@@ -324,18 +324,16 @@ function UpdateProduct({ product }: { product: Product }) {
 }
 
 function DeleteProduct({ product }: { product: Product }) {
-  const [categories, setCategories] = React.useState<Category[]>([]);
-
   return (
     <div>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="p-1 rounded-md w-fit h-fit">
+          <Button onClick={() => {}} size={"icon"} variant="ghost">
             <Trash
-              className="cursor-pointer hover:text-red-600 transition"
+              className="size-5 cursor-pointer hover:text-red-600 transition"
               onClick={() => {}}
             />
-          </div>
+          </Button>
         </TooltipTrigger>
         <TooltipContent>
           <p>Xoá sản phẩm</p>
