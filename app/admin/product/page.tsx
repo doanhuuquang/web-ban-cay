@@ -3,7 +3,7 @@
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
-import { SquarePen, Plus, Trash } from "lucide-react";
+import { SquarePen, Plus, Trash, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight, Eye, Ellipsis } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 
 function UpdateProduct({ product }: { product: Product }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
@@ -399,6 +400,9 @@ function ProductTable({ products }: { products: Product[] }) {
 
                       {/* delete */}
                       <DeleteProduct product={product} />
+
+                      <Link href={`/admin/product/${product.slug}`}>
+                      <Button size={"icon"} variant={"ghost"}><Ellipsis className="size-5"/></Button></Link>
                     </span>
                   </td>
                 </tr>
@@ -410,9 +414,9 @@ function ProductTable({ products }: { products: Product[] }) {
 
       {/* PAGINATION */}
       <div className="flex items-center justify-between px-2 mt-2">
-        {/* <div className="text-gray-600 text-sm">
-          Trang {pageIndex + 1} trên {pageCount} — Tổng {rows.length} hàng
-        </div> */}
+        <div className="text-gray-600 text-sm">
+          Trang {pageIndex + 1} trên {pageCount} — Tổng {products.length} hàng
+        </div>
 
         <div className="flex items-center space-x-6">
           {/* PAGE SIZE */}
@@ -435,7 +439,7 @@ function ProductTable({ products }: { products: Product[] }) {
           </div>
 
           {/* PAGE CONTROLS */}
-          {/* <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <button
               className="border rounded p-1 disabled:opacity-50"
               onClick={() => setPageIndex(0)}
@@ -467,7 +471,7 @@ function ProductTable({ products }: { products: Product[] }) {
             >
               <ChevronsRight size={18} />
             </button>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
