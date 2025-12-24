@@ -1,5 +1,6 @@
 import { Order } from "@/lib/models/order";
 import instance from "@/lib/services/axios-config";
+import axios from "axios";
 
 const placeOrderFromCart = async (data: {
   profileId: string;
@@ -110,10 +111,30 @@ const cancelOrder = async ({
   }
 };
 
+const getOrders = async (): Promise<{ code: number; orders: Order[] }> => {
+  try {
+    const getOrderUrl = `/orders/all`;
+    const response = await instance.get(getOrderUrl);
+    const orders = response.data.data.map((order: Order) =>
+      Order.fromJson(order)
+    );
+    return { code: response.data.code, orders: orders };
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return {
+        code: error.response?.data.code,
+        orders: [],
+      };
+    }
+    return { code: -1, orders: [] };
+  }
+};
+
 export {
   placeOrderFromCart,
   getOrdersByProfileId,
   getOrderById,
   updateOrderAddress,
   cancelOrder,
+  getOrders,
 };

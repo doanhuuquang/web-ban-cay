@@ -26,6 +26,9 @@ import {
 import { Input } from "@/components/ui/input";
 import PopupDelete from "../_components/popup-delete";
 import Link from "next/link";
+import { Order } from "@/lib/models/order";
+import { useAuth } from "@/lib/contexts/auth-context";
+import { getOrders } from "@/lib/services/order-service";
 
 type itemStatsProps = {
   title: string;
@@ -78,7 +81,7 @@ const orderStats: itemStatsProps[] = [
 function OrderStatsList({ data }: OrderStatsListProps) {
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
         {data.map((os) => {
           const Icon = os.icon;
           return (
@@ -103,24 +106,24 @@ function OrderStatsList({ data }: OrderStatsListProps) {
 }
 
 type OrderTableProps = {
-  rows: OrderItemProps[];
+  orders: Order[];
   popup: (id: string) => void;
 };
 
-function OrderTable({ rows, popup }: OrderTableProps) {
+function OrderTable({ orders, popup }: OrderTableProps) {
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
-  const pageCount = Math.ceil(rows.length / pageSize);
+  const pageCount = Math.ceil(orders.length / pageSize);
 
-  const currentPageRows = rows.slice(
+  const currentOrderInPage = orders.slice(
     pageIndex * pageSize,
     pageIndex * pageSize + pageSize
   );
 
   React.useEffect(() => {
     setPageIndex(0);
-  }, [rows]);
+  }, [orders]);
 
   return (
     <div className="space-y-4">
@@ -129,50 +132,54 @@ function OrderTable({ rows, popup }: OrderTableProps) {
         <table className="w-full border-collapse text-left text-sm">
           <thead className="bg-gray-100 border-b">
             <tr className="font-semibold text-gray-700">
-              <th className="px-4 py-3">Id</th>
-              <th className="px-4 py-3">Tên sản phẩm</th>
-              <th className="px-4 py-3">Tên khách hàng</th>
+              <th className="px-4 py-3">Mã đơn hàng</th>
+              <th className="px-4 py-3">Mã thanh toán</th>
               <th className="px-4 py-3">Mã khách hàng</th>
-              <th className="px-4 py-3">Ngày đặt hàng</th>
-              <th className="px-4 py-3">Giá tiền</th>
-              <th className="px-4 py-3">Số lượng</th>
+              <th className="px-4 py-3">Địa chỉ giao hàng</th>
+              <th className="px-4 py-3">Phí vận chuyển</th>
+              <th className="px-4 py-3">Số tiền giảm giá</th>
+              <th className="px-4 py-3">Tổng tiền</th>
               <th className="px-4 py-3">Trạng thái</th>
-              <th className="px-4 py-3">Tuỳ chọn</th>
+              <th className="px-4 py-3">Ngày đặt hàng</th>
             </tr>
           </thead>
 
           <tbody>
-            {currentPageRows.map((row) => {
-              const statusStyles: Record<OrderItemProps["status"], string> = {
-                "Chờ xử lý": "bg-yellow-100 text-yellow-700",
-                "Đang giao hàng": "bg-blue-100 text-blue-700",
-                "Chờ lấy hàng": "bg-indigo-100 text-indigo-700",
-                "Thành công": "bg-green-100 text-green-700",
-                "Thất bại": "bg-red-100 text-red-700",
-                "Đã huỷ": "bg-gray-200 text-gray-700",
-              };
+            {currentOrderInPage.map((order) => {
+              const statusStyles = [
+                {
+                  "Chờ xử lý": "bg-yellow-100 text-yellow-700",
+                  "Đang giao hàng": "bg-blue-100 text-blue-700",
+                  "Chờ lấy hàng": "bg-indigo-100 text-indigo-700",
+                  "Thành công": "bg-green-100 text-green-700",
+                  "Thất bại": "bg-red-100 text-red-700",
+                  "Đã huỷ": "bg-gray-200 text-gray-700",
+                },
+              ];
 
               return (
                 <tr
-                  key={row.id}
+                  key={order.orderId}
                   className="border-b hover:bg-gray-50 transition"
                 >
-                  <td className="px-4 py-3">{row.id}</td>
-                  <td className="px-4 py-3">{row.name}</td>
-                  <td className="px-4 py-3">{row.customer}</td>
-                  <td className="px-4 py-3">{row.customerID}</td>
-                  <td className="px-4 py-3">{row.date}</td>
-                  <td className="px-4 py-3">{row.price}</td>
-                  <td className="px-4 py-3">{row.quantity}</td>
+                  <td className="px-4 py-3">{order.orderId}</td>
+                  <td className="px-4 py-3">{order.profileId}</td>
+                  <td className="px-4 py-3">{order.paymentId}</td>
+                  <td className="px-4 py-3">{order.deliveryAddressId}</td>
+                  <td className="px-4 py-3">{order.shippingFee}</td>
+                  <td className="px-4 py-3">{order.discountAmount}</td>
+                  <td className="px-4 py-3">{order.totalAmount}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        statusStyles[row.status] || "bg-gray-100 text-gray-700"
+                        statusStyles[order.orderStatus] ||
+                        "bg-gray-100 text-gray-700"
                       }`}
                     >
-                      {row.status}
+                      {order.orderStatus}
                     </span>
                   </td>
+                  <td className="px-4 py-3">{order.orderDate}</td>
 
                   <td className="px-4 py-3">
                     <span className="flex items-center gap-3 text-gray-600">
@@ -181,7 +188,7 @@ function OrderTable({ rows, popup }: OrderTableProps) {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="p-1 rounded-md w-fit h-fit">
-                              <Link href={`/admin/orders/${row.id}`}>
+                              <Link href={`/admin/orders/${order.orderId}`}>
                                 <Eye className="cursor-pointer hover:text-blue-600 transition" />
                               </Link>
                             </div>
@@ -199,7 +206,7 @@ function OrderTable({ rows, popup }: OrderTableProps) {
                             <div className="p-1 rounded-md w-fit h-fit">
                               <Trash
                                 className="cursor-pointer hover:text-red-600 transition"
-                                onClick={() => popup(row.id)}
+                                onClick={() => popup(order.orderId)}
                               />
                             </div>
                           </TooltipTrigger>
@@ -220,7 +227,7 @@ function OrderTable({ rows, popup }: OrderTableProps) {
       {/* pagination */}
       <div className="flex items-center justify-between px-2 mt-2">
         <div className="text-gray-600 text-sm">
-          Trang {pageIndex + 1} trên {pageCount} — Tổng {rows.length} hàng
+          Trang {pageIndex + 1} trên {pageCount} — Tổng {orders.length} hàng
         </div>
 
         <div className="flex items-center space-x-6">
@@ -495,12 +502,21 @@ function ModalOrder({ closeModal, onSubmit }: ModalOrderProps) {
 }
 
 const OrderPage = () => {
-  const [orders, setOrders] = React.useState<OrderItemProps[]>(ordersData);
-  const [filteredOrders, setFilteredOrders] =
-    React.useState<OrderItemProps[]>(ordersData);
+  const [orders, setOrders] = React.useState<Order[]>([]);
+  const user = useAuth();
   const [popupOpen, setPopupOpen] = React.useState<boolean>(false);
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (!user) return;
+    const fetchOrder = async () => {
+      const response = await getOrders();
+
+      if (response.orders.length > 0) setOrders(response.orders);
+    };
+    fetchOrder();
+  }, [user]);
 
   function removeVNTones(str: string) {
     return str
@@ -514,11 +530,11 @@ const OrderPage = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = removeVNTones(e.target.value);
     const records = orders.filter((item) =>
-      removeVNTones(item.name.toLocaleLowerCase()).includes(
+      removeVNTones(item.orderId.toLocaleLowerCase()).includes(
         query.toLocaleLowerCase()
       )
     );
-    setFilteredOrders(records);
+    setOrders(records);
   };
 
   const openDeletePopup = (id: string) => {
@@ -526,10 +542,10 @@ const OrderPage = () => {
     setPopupOpen(true);
   };
 
-  const handleDeleteOrder = (currId: string) => {
-    setOrders(orders.filter((p) => p.id !== currId));
-    setFilteredOrders(orders.filter((p) => p.id !== currId));
-  };
+  // const handleDeleteOrder = (currId: string) => {
+  //   setOrders(orders.filter((p) => p.id !== currId));
+  //   setFilteredOrders(orders.filter((p) => p.id !== currId));
+  // };
 
   const handleSubmit = () => {};
   // const handleSubmit = (newRow: string) => {
@@ -573,12 +589,11 @@ const OrderPage = () => {
 
       {/* table order */}
       <div>
-        <OrderTable rows={filteredOrders} popup={openDeletePopup} />
+        <OrderTable orders={orders} popup={openDeletePopup} />
         {popupOpen && deleteId && (
           <PopupDelete
             closePopupDelete={() => setPopupOpen(false)}
             deleteButton={() => {
-              handleDeleteOrder(deleteId);
               setPopupOpen(false);
               setDeleteId(null);
             }}

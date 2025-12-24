@@ -115,9 +115,103 @@ const getProductsByCategoryName = async ({
   }
 };
 
+const updateProduct = async ({
+  productId,
+  data,
+}: {
+  productId: string;
+  data: {
+    productName: string;
+    origin: string;
+    bio: string;
+    quantity: number;
+    height: number;
+    length: number;
+    weight: number;
+    width: number;
+    description: string;
+    categoryId: string;
+    price: number;
+    discount: number;
+    soldCount: number;
+    reviewCount: number;
+    avgRating: number;
+    createAt: Date;
+  };
+}): Promise<number> => {
+  try {
+    const updateProductsUrl = `/products/product/${productId}/update`;
+    const response = await instance.put(updateProductsUrl, data);
+
+    return response.data.code;
+  } catch (error) {
+    console.log(error);
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return -1;
+  }
+};
+
+const deleteProductById = async ({
+  productId,
+}: {
+  productId: string;
+}): Promise<number> => {
+  try {
+    const deleteProductUrl = `/products/product/${productId}/delete`;
+    const response = await instance.delete(deleteProductUrl);
+
+    return response.data.code;
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return -1;
+  }
+};
+
+const addProduct = async ({
+  data,
+}: {
+  data: {
+    productName: string;
+    description: string;
+    bio: string;
+    price: number;
+    discount: number;
+    quantity: number;
+    origin: string;
+    categoryId: string;
+    height: number;
+    length: number;
+    weight: number;
+    width: number;
+    soldCount: number;
+    reviewCount: number;
+    avgRating: number;
+    createAt: Date;
+  };
+}): Promise<number> => {
+  try {
+    const addProductsUrl = `/products/product/add`;
+    const response = await instance.post(addProductsUrl, data);
+
+    return response.data.code;
+  } catch (error) {
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return -1;
+  }
+};
+
 export {
   getProducts,
   getProductById,
   getProductBySlug,
   getProductsByCategoryName,
+  updateProduct,
+  deleteProductById,
+  addProduct,
 };

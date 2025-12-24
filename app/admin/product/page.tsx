@@ -1,48 +1,559 @@
 "use client";
 
-import {
-  productLists,
-  productItemProps,
-} from "@/app/admin/constants/products-data";
 import React from "react";
-import { Input } from "@/components/ui/input";
 
+import { Input } from "@/components/ui/input";
+import { z } from "zod";
 import {
   SquarePen,
-  Plus,
   Trash,
+  ChevronsLeft,
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
   ChevronsRight,
+  Eye,
 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import PopupDelete from "../_components/popup-delete";
+import { useAuth } from "@/lib/contexts/auth-context";
+import {
+  addProduct,
+  deleteProductById,
+  getProducts,
+  updateProduct,
+} from "@/lib/services/product-service";
+import { Product } from "@/lib/models/product";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Category } from "@/lib/models/category";
+import {
+  getCategories,
+  getCategoryName,
+} from "@/lib/services/category-service";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { toast } from "sonner";
+import { API_SUCCESS_CODE } from "@/lib/constants/api-success-code";
+import {
+  DEFAULT_ERROR_MESSAGE,
+  ERROR_MESSAGES,
+} from "@/lib/constants/error-messages";
+import { DELETE_PRODUCT_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
 
-type ProductTableProps = {
-  rows: productItemProps[];
-  editRow: (id: string) => void;
-  popup: (id: string) => void;
-};
+function UpdateProduct({ product }: { product: Product }) {
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  const [categoryName, setCategoryName] = React.useState<Category[]>([]);
+  const [open, setOpen] = React.useState(false);
 
-function ProductTable({ rows, editRow, popup }: ProductTableProps) {
+  // React.useEffect(() => {
+  //   const fetchCategoryName = async () => {
+  //     const response = await getCategoryName();
+  //     if (response.categoryName.length > 0) {
+  //       setCategoryName(response.categoryName);
+  //     }
+  //   };
+
+  //   fetchCategoryName();
+  // }, []);
+
+  const formSchema = z.object({
+    productName: z.string().min(2).max(100),
+    description: z.string().min(2).max(100),
+    bio: z.string().min(2).max(100000),
+    price: z.number().min(0),
+    discount: z.number().min(0),
+    specialPrice: z.number().min(0),
+    origin: z.string().min(2).max(100),
+    quantity: z.number().min(0),
+    categoryId: z.string(),
+    height: z.number().min(0),
+    length: z.number().min(0),
+    weight: z.number().min(0),
+    width: z.number().min(0),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      productName: product.productName,
+      description: product.description,
+      bio: product.bio,
+      price: product.price,
+      discount: product.discount,
+      specialPrice: product.specialPrice,
+      quantity: product.inventory.available,
+      origin: product.origin,
+      categoryId: product.category.categoryId,
+      height: product.height,
+      length: product.length,
+      weight: product.weight,
+      width: product.width,
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const code = await updateProduct({
+        productId: product.productId,
+        data: {
+          productName: values.productName,
+          description: values.description,
+          categoryId: values.categoryId.toString(),
+          bio: values.bio,
+          price: values.price,
+          discount: values.discount,
+          origin: values.origin,
+          height: values.height,
+          quantity: values.quantity,
+          length: values.length,
+          weight: values.weight,
+          width: values.width,
+          avgRating: product.avgRating,
+          reviewCount: product.reviewCount,
+          soldCount: product.soldCount,
+          createAt: product.createAt,
+        },
+      });
+
+      if (code === 200) {
+        toast.success("Cập nhật thành công");
+        setOpen(false);
+        window.location.reload();
+      } else {
+        toast.error("Cập nhật thất bại");
+      }
+    } catch {
+      toast.error("Lỗi khi cập nhật");
+    }
+  }
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await getCategories();
+      if (response.categories.length > 0) {
+        setCategories(response.categories);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SheetTrigger asChild>
+              <Button size={"icon"} variant="ghost">
+                <SquarePen className="size-5 " />
+              </Button>
+            </SheetTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Sửa sản phẩm</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>{product.productName}</SheetTitle>
+          <SheetDescription>Chỉnh sửa sản phẩm</SheetDescription>
+        </SheetHeader>
+        <div className="grid flex-1 auto-rows-min gap-6 px-4 overflow-y-auto">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="productName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tên sản phẩm</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="Tên sản phẩm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mô tả sản phẩm</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        placeholder="Mô tả sản phẩm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Thông tin thêm của sản phẩm</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Thông tin thêm của sản phẩm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Giá sản phẩm</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Giá sản phẩm"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="discount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Giảm giá</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Giảm giá"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="origin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel> Xuất xứ</FormLabel>
+                    <FormControl>
+                      <Input type="text" placeholder="Xuất xứ" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Số lượng</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Số lượng"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Danh mục sản phẩm</FormLabel>
+
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Chọn danh mục sản phẩm" />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Danh mục sản phẩm</SelectLabel>
+                          {categories.map((category) => (
+                            <SelectItem
+                              key={category.categoryId}
+                              value={category.categoryId.toString()}
+                              defaultValue={category.categoryId}
+                            >
+                              {category.categoryName}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="height"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel> Chiều cao</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Chiều cao"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="length"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Chiều dài</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Chiều dài"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="weight"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Trọng lượng</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Trọng lượng"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="width"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Chiều rộng</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Chiều rộng"
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseFloat(e.target.value))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <SheetFooter>
+                <Button type="submit">Lưu</Button>
+                <SheetClose asChild>
+                  <Button variant="outline">Close</Button>
+                </SheetClose>
+              </SheetFooter>
+            </form>
+          </Form>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function DeleteProduct({ product }: { product: Product }) {
+  const [isOpenDeleteDialog, setIsOpenDeleteDialog] =
+    React.useState<boolean>(false);
+  const [isDeletingProduct, setIsDeletingProduct] =
+    React.useState<boolean>(false);
+
+  const handleDeleteProduct = async () => {
+    try {
+      setIsDeletingProduct(true);
+      const code = await deleteProductById({ productId: product.productId });
+
+      toast(
+        code !== API_SUCCESS_CODE.DELETE_PRODUCT_SUCCESS
+          ? "Thất bại"
+          : "Thành công",
+        {
+          description:
+            code !== API_SUCCESS_CODE.DELETE_PRODUCT_SUCCESS
+              ? ERROR_MESSAGES[code]
+                ? ERROR_MESSAGES[code]
+                : DEFAULT_ERROR_MESSAGE
+              : DELETE_PRODUCT_SUCCESS_MESSAGE,
+          action: {
+            label: "Oke",
+            onClick: () => {},
+          },
+        }
+      );
+
+      if (code === API_SUCCESS_CODE.DELETE_PRODUCT_SUCCESS) {
+        setIsOpenDeleteDialog(false);
+        window.location.reload();
+      }
+    } finally {
+      setIsDeletingProduct(false);
+    }
+  };
+  return (
+    <Dialog open={isOpenDeleteDialog} onOpenChange={setIsOpenDeleteDialog}>
+      <form>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+              <Button onClick={() => {}} size={"icon"} variant="ghost">
+                <Trash
+                  className="size-5 cursor-pointer hover:text-red-600 transition"
+                  onClick={() => {}}
+                />
+              </Button>
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Xoá sản phẩm</p>
+          </TooltipContent>
+        </Tooltip>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Xoá sản phẩm</DialogTitle>
+            <DialogDescription>
+              Có chắc chắn muốn xoá sản phẩm <b>{product.productName}</b> không?
+              <br />
+              Hành động này không thể hoàn tác.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline">Huỷ</Button>
+            </DialogClose>
+            <Button onClick={() => handleDeleteProduct()} type="submit">
+              {isDeletingProduct ? "Đang xoá..." : "Xoá"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </form>
+    </Dialog>
+  );
+}
+
+function ProductTable({ products }: { products: Product[] }) {
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
-  const pageCount = Math.ceil(rows.length / pageSize);
+  const pageCount = Math.ceil(products.length / pageSize);
 
-  const currentPageRows = rows.slice(
+  const currentProductsInPage = products.slice(
     pageIndex * pageSize,
     pageIndex * pageSize + pageSize
   );
 
   React.useEffect(() => {
     setPageIndex(0);
-  }, [rows]);
+  }, [products]);
   return (
     <div className="space-y-4">
       {/* TABLE */}
@@ -52,79 +563,65 @@ function ProductTable({ rows, editRow, popup }: ProductTableProps) {
             <tr className="font-semibold text-gray-700">
               <th className="px-4 py-3">Id</th>
               <th className="px-4 py-3">Tên sản phẩm</th>
+              <th className="px-4 py-3">Mô tả sản phẩm</th>
               <th className="px-4 py-3">Danh mục</th>
               <th className="px-4 py-3">Giá tiền</th>
               <th className="px-4 py-3">Số lượng</th>
+              <th className="px-4 py-3">Xuất xứ</th>
+              <th className="px-4 py-3">Cao</th>
+              <th className="px-4 py-3">Dài</th>
+              <th className="px-4 py-3">Rộng</th>
+              <th className="px-4 py-3">Trọng lượng (kg)</th>
               <th className="px-4 py-3">Trạng thái</th>
               <th className="px-4 py-3">Tuỳ chọn</th>
             </tr>
           </thead>
 
           <tbody>
-            {currentPageRows.map((row) => {
-              const statusStyles = {
-                "Chờ xử lý": "bg-yellow-100 text-yellow-700",
-                "Đang xử lý": "bg-blue-100 text-blue-700",
-                "Thành công": "bg-green-100 text-green-700",
-                "Thất bại": "bg-red-100 text-red-700",
-              };
-
+            {currentProductsInPage.map((product, index) => {
               return (
                 <tr
-                  key={row.id}
+                  key={index}
                   className="border-b hover:bg-gray-50 transition"
                 >
-                  <td className="px-4 py-3">{row.id}</td>
-                  <td className="px-4 py-3">{row.productName}</td>
-                  <td className="px-4 py-3">{row.categories}</td>
-                  <td className="px-4 py-3">{row.price}</td>
-                  <td className="px-4 py-3">{row.quantity}</td>
+                  <td className="px-4 py-3">{product.productId}</td>
+                  <td className="px-4 py-3">{product.productName}</td>
+                  <td className="px-4 py-3">{product.description}</td>
+                  <td className="px-4 py-3">{product.category.categoryName}</td>
+                  <td className="px-4 py-3">{product.price}</td>
+                  <td className="px-4 py-3">{product.inventory.available}</td>
+                  <td className="px-4 py-3">{product.origin}</td>
+                  <td className="px-4 py-3">{product.height}</td>
+                  <td className="px-4 py-3">{product.length}</td>
+                  <td className="px-4 py-3">{product.width}</td>
+                  <td className="px-4 py-3">{product.weight}</td>
                   <td className="px-4 py-3">
-                    <span
-                      className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        statusStyles[row.status] || "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {row.status}
-                    </span>
+                    {product.inventory.available === 0
+                      ? "Hết hàng"
+                      : "Còn hàng"}
                   </td>
 
                   <td className="px-4 py-3">
                     <span className="flex items-center gap-3 text-gray-600">
-                      {/* edit */}
-                      <div>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="p-1 rounded-md w-fit h-fit">
-                              <SquarePen
-                                className="cursor-pointer hover:text-blue-600 transition"
-                                onClick={() => editRow(row.id)}
-                              />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Sửa sản phẩm</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
+                      {/* update */}
+                      <UpdateProduct product={product} />
 
                       {/* delete */}
-                      <div>
+                      <DeleteProduct product={product} />
+
+                      {/* detail */}
+                      <Link href={`/admin/product/${product.slug}`}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="p-1 rounded-md w-fit h-fit">
-                              <Trash
-                                className="cursor-pointer hover:text-red-600 transition"
-                                // onClick={() => deleteRow(row.id)}
-                                onClick={() => popup(row.id)}
-                              />
-                            </div>
+                            <Button size={"icon"} variant="ghost">
+                              <Eye className="size-5" />
+                            </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Xoá sản phẩm</p>
+                            <p>Chi tiết sản phẩm</p>
                           </TooltipContent>
                         </Tooltip>
-                      </div>
+                      </Link>
                     </span>
                   </td>
                 </tr>
@@ -137,7 +634,7 @@ function ProductTable({ rows, editRow, popup }: ProductTableProps) {
       {/* PAGINATION */}
       <div className="flex items-center justify-between px-2 mt-2">
         <div className="text-gray-600 text-sm">
-          Trang {pageIndex + 1} trên {pageCount} — Tổng {rows.length} hàng
+          Trang {pageIndex + 1} trên {pageCount} — Tổng {products.length} hàng
         </div>
 
         <div className="flex items-center space-x-6">
@@ -200,79 +697,94 @@ function ProductTable({ rows, editRow, popup }: ProductTableProps) {
   );
 }
 
-type ModalProductProps = {
-  closeModal: () => void;
-  onSubmit: (data: productItemProps) => void;
-  defaultValue: productItemProps | null;
-};
+function AddProduct({ closeModal }: { closeModal: () => void }) {
+  const [categories, setCategories] = React.useState<Category[]>([]);
 
-function ModalProduct({
-  closeModal,
-  onSubmit,
-  defaultValue,
-}: ModalProductProps) {
-  const [formState, setFormSate] = React.useState<productItemProps>(
-    defaultValue || {
-      id: crypto
-        .getRandomValues(new Uint32Array(1))[0]
-        .toString(16)
-        .slice(0, 8),
-      productName: "",
-      categories: "Trong nhà",
-      price: "",
-      quantity: "",
-      status: "Chờ xử lý",
-    }
-  );
-
-  const [errors, setErrors] = React.useState("");
-  type FormKeys = keyof typeof formState;
-  const fieldAlias: Record<FormKeys, string> = {
-    id: "ID",
-    productName: "Tên sản phẩm",
-    quantity: "Số lượng",
-    price: "Giá tiền",
-    categories: "Danh mục",
-    status: "Trạng thái",
-  };
-
-  const validateForm = () => {
-    if (formState.productName && formState.price && formState.quantity) {
-      setErrors("");
-      return true;
-    } else {
-      const errorFields: string[] = [];
-
-      for (const [key, value] of Object.entries(formState)) {
-        if (!value) {
-          errorFields.push(fieldAlias[key as FormKeys]);
-        }
-      }
-
-      setErrors(errorFields.join(", "));
-
-      return false;
-    }
-  };
+  const formSchema = z.object({
+    productName: z.string().min(2).max(100),
+    description: z.string().min(2).max(100),
+    bio: z.string().min(2).max(100000),
+    price: z.number().min(0),
+    discount: z.number().min(0),
+    specialPrice: z.number().min(0),
+    origin: z.string().min(2).max(100),
+    quantity: z.number().min(0),
+    categoryId: z.string(),
+    height: z.number().min(0),
+    length: z.number().min(0),
+    weight: z.number().min(0),
+    width: z.number().min(0),
+  });
 
   React.useEffect(() => {
-    if (defaultValue) {
-      setFormSate(defaultValue);
+    const fetchCategories = async () => {
+      const res = await getCategories();
+      if (res.categories.length > 0) setCategories(res.categories);
+    };
+    fetchCategories();
+  }, []);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      productName: "",
+      description: "",
+      bio: "",
+      price: 0,
+      discount: 0,
+      specialPrice: 0,
+      quantity: 0,
+      origin: "",
+      categoryId: "",
+      height: 0,
+      length: 0,
+      weight: 0,
+      width: 0,
+    },
+  });
+
+  React.useEffect(() => {
+    if (categories.length > 0) {
+      form.setValue("categoryId", categories[0].categoryId);
     }
-  }, [defaultValue]);
+  }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    setFormSate({ ...formState, [e.target.name]: e.target.value });
-  };
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const code = await addProduct({
+        data: {
+          productName: values.productName,
+          description: values.description,
+          categoryId: values.categoryId.toString(),
+          bio: values.bio,
+          price: values.price,
+          discount: values.discount,
+          origin: values.origin,
+          height: values.height,
+          quantity: values.quantity,
+          length: values.length,
+          weight: values.weight,
+          width: values.width,
+          avgRating: 0,
+          reviewCount: 0,
+          soldCount: 0,
+          createAt: new Date(),
+        },
+      });
 
-  const handleSubmit = () => {
-    if (!validateForm()) return;
-    onSubmit(formState);
-    closeModal();
-  };
+      if (code === 201) {
+        toast.success("Thêm sản phẩm thành công");
+        window.location.reload();
+      } else {
+        toast.error("Thêm sản phẩm thất bại");
+      }
+    } catch {
+      toast.error("Lỗi khi thêm sản phẩm");
+    }
+  }
 
+  // const handleChange = () => {};
+  // const handleSubmit = () => {};
   return (
     <div
       className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
@@ -280,141 +792,278 @@ function ModalProduct({
         if (e.target === e.currentTarget) closeModal();
       }}
     >
-      <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 animate-in fade-in zoom-in-95 duration-200">
-        <h2 className="text-lg font-semibold mb-4">Thêm sản phẩm</h2>
-
-        <form className="space-y-4">
-          {/* Tên sản phẩm */}
-          <div className="flex flex-col">
-            <label htmlFor="productName" className="font-medium mb-1">
-              Tên sản phẩm
-            </label>
-            <input
-              id="productName"
+      <div className="grid flex-1 auto-rows-min gap-6 overflow-y-auto bg-white max-h-5/6 max-w-1/2 shadow-lg py-6 px-10 animate-in fade-in zoom-in-95 duration-200">
+        <p className="font-semibold w-full text-center text-2xl">
+          Thêm sản phẩm
+        </p>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
               name="productName"
-              onChange={handleChange}
-              value={formState.productName}
-              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tên sản phẩm</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="Tên sản phẩm" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-
-          {/* Số lượng */}
-          <div className="flex flex-col">
-            <label htmlFor="quantity" className="font-medium mb-1">
-              Số lượng
-            </label>
-            <input
-              id="quantity"
-              name="quantity"
-              type="number"
-              value={formState.quantity}
-              onChange={handleChange}
-              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mô tả sản phẩm</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Mô tả sản phẩm"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-
-          {/* Giá */}
-          <div className="flex flex-col">
-            <label htmlFor="price" className="font-medium mb-1">
-              Giá
-            </label>
-            <input
-              id="price"
+            <FormField
+              control={form.control}
+              name="bio"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Thông tin thêm của sản phẩm</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Thông tin thêm của sản phẩm"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="price"
-              type="number"
-              value={formState.price}
-              onChange={handleChange}
-              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Giá sản phẩm</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Giá sản phẩm"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number.parseFloat(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
+            <FormField
+              control={form.control}
+              name="discount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Giảm giá</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Giảm giá"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number.parseFloat(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Trạng thái */}
-          <div className="flex flex-col">
-            <label htmlFor="status" className="font-medium mb-1">
-              Trạng thái
-            </label>
-            <select
-              id="status"
-              name="status"
-              value={formState.status}
-              onChange={handleChange}
-              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
-            >
-              <option value="Chờ xử lý">Chờ xử lý</option>
-              <option value="Đang xử lý">Đang xử lý</option>
-              <option value="Thành công">Thành công</option>
-              <option value="Thất bại">Thất bại</option>
-            </select>
-          </div>
+            <FormField
+              control={form.control}
+              name="origin"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel> Xuất xứ</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="Xuất xứ" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Số lượng</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Số lượng"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number.parseFloat(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Danh mục sản phẩm</FormLabel>
 
-          {/* Danh mục */}
-          <div className="flex flex-col">
-            <label htmlFor="categories" className="font-medium mb-1">
-              Danh mục
-            </label>
-            <select
-              id="categories"
-              name="categories"
-              value={formState.categories}
-              onChange={handleChange}
-              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
-            >
-              <option value="Trong nhà">Trong nhà</option>
-              <option value="Ngoài trời">Ngoài trời</option>
-              <option value="Hạt giống">Hạt giống</option>
-              <option value="Dụng cụ">Dụng cụ làm vườn</option>
-            </select>
-          </div>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Chọn danh mục sản phẩm" />
+                      </SelectTrigger>
+                    </FormControl>
 
-          {errors && (
-            <div className="mt-2 rounded-md bg-red-50 border border-red-300 text-red-700 px-3 py-2 text-sm">
-              {`Vui lòng nhập: ${errors}`}
-            </div>
-          )}
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Danh mục sản phẩm</SelectLabel>
+                        {categories.map((category) => (
+                          <SelectItem
+                            key={category.categoryId}
+                            value={category.categoryId.toString()}
+                          >
+                            {category.categoryName}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              handleSubmit();
-            }}
-          >
-            {defaultValue ? "Cập nhật" : "Thêm mới"}
-          </button>
-        </form>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="height"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel> Chiều cao</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Chiều cao"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number.parseFloat(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="length"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Chiều dài</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Chiều dài"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number.parseFloat(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="weight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Trọng lượng</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Trọng lượng"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number.parseFloat(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="width"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Chiều rộng</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Chiều rộng"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number.parseFloat(e.target.value))
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit">Lưu</Button>
+            <Button onClick={() => closeModal()} variant="outline">
+              Close
+            </Button>
+          </form>
+        </Form>
       </div>
     </div>
   );
 }
 
 export default function ProductPage() {
-  const [products, setProducts] =
-    React.useState<productItemProps[]>(productLists);
-  const [filteredProducts, setFilteredProducts] =
-    React.useState<productItemProps[]>(productLists);
+  const { user } = useAuth();
+  const [products, setProducts] = React.useState<Product[]>([]);
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
-  const [popupOpen, setPopupOpen] = React.useState<boolean>(false);
-  const [rowToEdit, setRowToEdit] = React.useState<string | null>(null);
-  const [deleteId, setDeleteId] = React.useState<string | null>(null);
 
-  // lưu data ở local
+  // lấy danh sách sản phẩm từ api
   React.useEffect(() => {
-    const saved = localStorage.getItem("data-product");
-    const data = saved ? JSON.parse(saved) : productLists;
-    setProducts(data);
-    setFilteredProducts(data);
-  }, []);
-  React.useEffect(() => {
-    localStorage.setItem("data-product", JSON.stringify(products));
-  }, [products]);
+    if (!user) return;
 
-  //
-  const openDeletePopup = (id: string) => {
-    setDeleteId(id);
-    setPopupOpen(true);
-  };
+    const fetchProducts = async () => {
+      const response = await getProducts();
+
+      if (response.products.length > 0) setProducts(response.products);
+    };
+
+    fetchProducts();
+  }, [user]);
 
   function removeVNTones(str: string) {
     return str
@@ -432,96 +1081,39 @@ export default function ProductPage() {
         query.toLowerCase()
       )
     );
-    setFilteredProducts(records);
-  };
-
-  const handleDeleteProduct = (currId: string) => {
-    setProducts(products.filter((p) => p.id !== currId));
-    setFilteredProducts(products.filter((p) => p.id !== currId));
-  };
-
-  const handleEditProduct = (id: string) => {
-    setRowToEdit(id);
-    setModalOpen(true);
-  };
-
-  const handleSubmit = (newRow: productItemProps) => {
-    setProducts((prev) => {
-      let update: productItemProps[];
-      if (rowToEdit === null) {
-        update = [...prev, newRow];
-      } else {
-        update = prev.map((row) => (row.id === rowToEdit ? newRow : row));
-      }
-
-      setFilteredProducts(update);
-      return update;
-    });
-
-    setRowToEdit(null);
+    setProducts(records);
   };
 
   return (
-    <div className="container mx-auto px-15 pb-10 space-y-6">
+    <div className="container mx-auto px-5 pb-10 space-y-2">
       <div className="font-semibold text-3xl">Sản phẩm</div>
       {/* top table */}
-      <div className="flex items-center py-4 justify-end gap-2">
+      <div className="flex items-center p-3 shadow-2xs mb-2 rounded-md justify-end gap-2">
         {/* search input */}
         <Input
           placeholder="Tìm kiếm sản phẩm..."
-          className="max-w-sm rounded-md"
+          className="max-w-sm rounded-md p-5"
           onChange={handleChange}
         />
 
-        {/* view option */}
-        <div></div>
-
-        {/* filter status */}
-        <div></div>
-
-        <button
+        {/* button add  */}
+        <Button
+          className="text-white px-8 py-5 rounded-md text-sm font-medium flex gap-2 bg-blue-600/90 hover:bg-blue-700"
           onClick={() => setModalOpen(true)}
-          className="px-4 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-sm 
-             hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 
-             flex items-center gap-2 cursor-pointer"
         >
-          <Plus size={18} />
-          Thêm
-        </button>
-
+          Thêm sản phẩm
+        </Button>
         {modalOpen && (
-          <ModalProduct
+          <AddProduct
             closeModal={() => {
               setModalOpen(false);
-              setRowToEdit(null);
             }}
-            onSubmit={handleSubmit}
-            defaultValue={
-              rowToEdit !== null
-                ? products.find((p) => p.id == rowToEdit) ?? null
-                : null
-            }
           />
         )}
       </div>
 
       {/* Data table */}
-      <ProductTable
-        rows={filteredProducts}
-        editRow={handleEditProduct}
-        popup={openDeletePopup}
-      />
-
-      {popupOpen && deleteId && (
-        <PopupDelete
-          closePopupDelete={() => setPopupOpen(false)}
-          deleteButton={() => {
-            handleDeleteProduct(deleteId);
-            setPopupOpen(false);
-            setDeleteId(null);
-          }}
-        />
-      )}
+      <ProductTable products={products} />
     </div>
   );
 }
