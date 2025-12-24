@@ -40,7 +40,7 @@ export default function CartItemCard({
     React.useState<boolean>(false);
   const [isRemoving, setIsRemoving] = React.useState<boolean>(false);
   const [product, setProduct] = React.useState<Product | null>(null);
-  const [quantity, setQuantity] = React.useState<number>(-1);
+  const [quantity, setQuantity] = React.useState<number>(1);
 
   React.useEffect(() => {
     const fetchProduct = async () => {
@@ -68,6 +68,7 @@ export default function CartItemCard({
   }, [quantity, cartId, cartItem.cartItemId]);
 
   const handelIncreaseQuantity = () => {
+    if (product && quantity >= product.inventory.available) return;
     setQuantity((prev) => prev + 1);
   };
 

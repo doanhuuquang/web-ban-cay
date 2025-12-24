@@ -91,6 +91,7 @@ const getProductsByCategoryName = async ({
   code: number;
   products: Product[];
 }> => {
+  console.log("categoryName", categoryName);
   try {
     const getProductsUrl = `/products/category/by-category-name`;
     const response = await instance.get(getProductsUrl, {

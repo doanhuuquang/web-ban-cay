@@ -4,9 +4,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { Order } from "@/lib/models/order";
+import { Payment } from "@/lib/models/payment";
 import { Product } from "@/lib/models/product";
+import { getPaymentByOrderId } from "@/lib/services/payment-service";
 import { getProductById } from "@/lib/services/product-service";
 import { OrderStatusTypeLabel } from "@/lib/type/order-status";
+import { PaymenStatusTypeLabel } from "@/lib/type/payment-status";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,6 +20,7 @@ export default function OrderCard({ order }: { order: Order }) {
   const [orderItems, setOrderItems] = React.useState<
     { product: Product; quantity: number }[]
   >([]);
+  const [payment, setPayment] = React.useState<Payment | null>(null);
   const { user } = useAuth();
 
   React.useEffect(() => {
@@ -50,6 +54,17 @@ export default function OrderCard({ order }: { order: Order }) {
 
     fetchProductById();
   }, [user, order]);
+
+  React.useEffect(() => {
+    if (!order) return;
+
+    const fetchPayment = async () => {
+      const response = await getPaymentByOrderId(order.orderId);
+      if (response.payment) setPayment(response.payment);
+    };
+
+    fetchPayment();
+  }, [order]);
 
   if (isLoading || orderItems.length === 0)
     return (
@@ -110,6 +125,10 @@ export default function OrderCard({ order }: { order: Order }) {
           <span>Tổng giá tiền: </span>
           <span className="font-semibold">
             {formatMoney(order.totalAmount)}
+          </span>
+          <span className="text-xs ml-2">
+            ({PaymenStatusTypeLabel[payment ? payment.paymentStatus : "UNPAID"]}
+            )
           </span>
         </div>
       </div>
