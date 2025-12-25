@@ -1,17 +1,15 @@
 import storeOrder, { OrderSummary } from "@/store/storeOder";
-import { getOrderAll, getOrderId, getOrderProfileId, getOrderStatus } from "@/lib/services/order-service";
+import { getOrderAll, getOrderId, getOrderProfileId, getOrderStatus, updateStatusOrder } from "@/lib/services/order-service";
 import { Order } from "@/lib/models/order";
+import { toast } from "sonner";
+import { OrderStatusType } from "@/lib/type/order-status";
 
 export async function getAllOrderMock() {
-    const { setLoading, setAllOrder, setOrderSum } = storeOrder.getState();
+    const { setLoading, setAllOrder } = storeOrder.getState();
     setLoading(true);
     const res = await getOrderAll();
     if (res.code === 1) {
         setAllOrder(res.order);
-        if (res.order) {
-            const sum = summaryOrders(res.order);
-            setOrderSum(sum);
-        }
     }
 
     setLoading(false);
@@ -25,6 +23,23 @@ export async function getOrderByStatusMock(param: string) {
     if (res.code === 1)
         setAllOrder(res.order)
     else setAllOrder(null);
+
+    setLoading(false);
+}
+
+
+export async function UpdateOrderStatusMock(id: string, status: string) {
+
+    const { setLoading, updateOrderStatus } = storeOrder.getState();
+    setLoading(true);
+    const res = await updateStatusOrder(id, status);
+
+    if (res.code === 1 && res.order) {
+        updateOrderStatus(id,status);
+        toast("cập nhật trạng thái thành công");
+    }
+    else
+        toast("cập nhật trạng thái thất bại");
 
     setLoading(false);
 }
@@ -59,23 +74,22 @@ export async function getOrderByIdOrProfileMock(stype: string, param: string) {
 }
 
 
-function summaryOrders(orders: Order[]): OrderSummary {
+export function summaryOrders(orders: Order[]): OrderSummary {
     return orders.reduce<OrderSummary>((acc, order) => {
-        if (order.orderStatus === "COMPLETED") {
+
+        // chỉ cộng tiền khi đơn đã giao thành công
+        if (order.orderStatus === "DELIVERED") {
             acc.totalIncome += order.totalAmount;
         }
 
         switch (order.orderStatus) {
-            case "COMPLETED":
+            case "DELIVERED":
                 acc.success++;
                 break;
             case "PENDING":
                 acc.pending++;
                 break;
-            case "DELIVERING":
-                acc.delivering++;
-                break;
-            case "SHIPPING":
+            case "SHIPPED":
                 acc.shipping++;
                 break;
             case "CANCELLED":
@@ -91,9 +105,9 @@ function summaryOrders(orders: Order[]): OrderSummary {
         totalIncome: 0,
         success: 0,
         pending: 0,
-        delivering: 0,
         shipping: 0,
         cancelled: 0,
         returned: 0
     });
 }
+

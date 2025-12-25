@@ -107,14 +107,14 @@ const getOrderStatus = async (param: string): Promise<{
   try {
     const getOrderByIdUrl = `orders/status`;
     const response = await instance.get(getOrderByIdUrl, {
-      params: {orderStatus:param}
+      params: { orderStatus: param }
     });
 
     return {
       code: 1,
       order: response.data.data
     };
-  } 
+  }
   catch {
     return {
       code: -1,
@@ -136,7 +136,31 @@ const getOrderId = async (orderId: string): Promise<{
       code: 1,
       order: response.data.data
     };
-  } 
+  }
+  catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
+const updateStatusOrder = async (orderId: string, orderStatus: string): Promise<{
+  code: number;
+  order: Order | null;
+}> => {
+  try {
+    console.log(orderId,orderStatus)
+    const getOrderByIdUrl = `orders/order/updateStatus`;
+    const response = await instance.put(getOrderByIdUrl,null,{
+      params:{orderStatus:orderStatus,orderId:orderId}
+    });
+
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  }
   catch {
     return {
       code: -1,
@@ -158,7 +182,7 @@ const getOrderProfileId = async (profileId: string): Promise<{
       code: 1,
       order: response.data.data
     };
-  } 
+  }
   catch {
     return {
       code: -1,
@@ -199,25 +223,6 @@ const cancelOrder = async ({
   }
 };
 
-const getOrders = async (): Promise<{ code: number; orders: Order[] }> => {
-  try {
-    const getOrderUrl = `/orders/all`;
-    const response = await instance.get(getOrderUrl);
-    const orders = response.data.data.map((order: Order) =>
-      Order.fromJson(order)
-    );
-    return { code: response.data.code, orders: orders };
-  } catch (error) {
-    if (error instanceof axios.AxiosError) {
-      return {
-        code: error.response?.data.code,
-        orders: [],
-      };
-    }
-    return { code: -1, orders: [] };
-  }
-};
-
 export {
   placeOrderFromCart,
   getOrdersByProfileId,
@@ -227,5 +232,5 @@ export {
   getOrderAll,
   getOrderStatus,
   getOrderId,
-  getOrderProfileId
+  getOrderProfileId,updateStatusOrder
 };

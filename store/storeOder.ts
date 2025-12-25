@@ -1,44 +1,32 @@
 import { Order } from "@/lib/models/order";
+import { OrderStatusType } from "@/lib/type/order-status";
 import { create } from "zustand";
 
 export type OrderSummary = {
-    totalIncome: 0,
-    success: 0,
-    pending: 0,      // Chờ xử lý
-    delivering: 0,   // Chờ lấy hàng
-    shipping: 0,     // Đang giao hàng
-    cancelled: 0,    // Đã hủy
-    returned: 0,     // Đã trả
+    totalIncome: number;
+    success: number;
+    pending: number;
+    shipping: number;
+    cancelled: number;
+    returned: number;
 };
 
 interface OderState {
     loading: boolean
     orderAll: Order[] | null
-    orderSum: OrderSummary;
     setLoading: (loading: boolean) => void
     setAllOrder: (details: Order[] | null) => void
     setOrder: (details: Order | null) => void
     addOrder: (order: Order) => void;
-    updateOrder: (order: Order) => void;
+    updateOrderStatus: (orderId: string, status: string) => void;
     addOrUpdateOrder: (order: Order) => void;
     removeOrder: (orderId: string) => void;
-    setOrderSum:(a:OrderSummary)=>void;
 }
 
 
 const storeOrder = create<OderState>((set) => ({
     orderAll: null,
     loading: false,
-
-    orderSum: {
-        totalIncome: 0,
-        success: 0,
-        pending: 0,      // Chờ xử lý
-        delivering: 0,   // Chờ lấy hàng
-        shipping: 0,     // Đang giao hàng
-        cancelled: 0,    // Đã hủy
-        returned: 0,     // Đã trả
-    },
 
     setLoading: (value: boolean) => set({ loading: value }),
 
@@ -56,12 +44,17 @@ const storeOrder = create<OderState>((set) => ({
             : [order],
     })),
 
-    updateOrder: (order) => set((state) => ({
-        orderAll: state.orderAll
-            ? state.orderAll.map((c) => c.orderId === order.orderId
-                ? { ...c, ...order } : c)
-            : [order],
-    })),
+    updateOrderStatus: (orderId: string, status: string) =>
+        set((state) => ({
+            ...state,
+            orderAll: state.orderAll
+                ? state.orderAll.map((c) =>
+                    c.orderId === orderId
+                        ? { ...c, orderStatus: status as OrderStatusType }
+                        : c
+                )
+                : null,
+        })),
 
     addOrUpdateOrder: (order) =>
         set((state) => ({
@@ -83,7 +76,6 @@ const storeOrder = create<OderState>((set) => ({
             ? state.orderAll.filter((c) => c.orderId !== orderId) : null,
     })),
 
-    setOrderSum:(value) => set({ orderSum: value })
 
 }));
 

@@ -10,28 +10,35 @@ import {
   XCircle,
   RefreshCcw,
   DollarSign,
-  Truck
+  Truck,
+  SquarePen,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { getAllOrderMock, getOrderByIdOrProfileMock, getOrderByStatusMock } from "@/mock/orderMock";
+import { getAllOrderMock, getOrderByIdOrProfileMock, getOrderByStatusMock, summaryOrders, UpdateOrderStatusMock } from "@/mock/orderMock";
 import storeOrder from "@/store/storeOder";
 import { OrderStatusTypeLabel } from "@/lib/type/order-status";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Order } from "@/lib/models/order";
+import Link from "next/link";
 
 
 function OrderStatsList() {
-  const stats = storeOrder((s) => s.orderSum)
+  const F = storeOrder((s) => s.orderAll);
+  const stats = summaryOrders(F|| []);
+
   const data = [
-    { title: "Tổng doanh thu", countStats: stats.totalIncome, icon: DollarSign },
-    { title: "Đã hoàn thành", countStats: stats.success, icon: CheckCircle },
-    { title: "Chờ xử lý", countStats: stats.pending, icon: Clock },
-    { title: "Chờ lấy hàng", countStats: stats.delivering, icon: Truck },
-    { title: "Đang giao hàng", countStats: stats.shipping, icon: Package },
-    { title: "Đã hủy", countStats: stats.cancelled, icon: XCircle },
-    { title: "Hoàn trả", countStats: stats.returned, icon: RefreshCcw },
+    { title: "Tổng doanh thu", countStats: stats?.totalIncome ?? 0, icon: DollarSign },
+    { title: "Đã hoàn thành", countStats: stats?.success ?? 0, icon: CheckCircle },
+    { title: "Chờ xử lý", countStats: stats?.pending ?? 0, icon: Clock },
+    { title: "Đang giao hàng", countStats: stats?.shipping ?? 0, icon: Package },
+    { title: "Đã hủy", countStats: stats?.cancelled ?? 0, icon: XCircle },
+    { title: "Hoàn trả", countStats: stats?.returned ?? 0, icon: RefreshCcw },
   ];
+
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
@@ -59,8 +66,18 @@ function OrderStatsList() {
 
 function OrderTable() {
 
+  //data
   const isloading = storeOrder((s) => s.loading);
   const currentPageRows = storeOrder((s) => s.orderAll);
+
+  //modal
+  const [modalUpdateStatus, setModalUpdateStatus] = React.useState<boolean>(false);
+  const [valueOrderSelect, setValueOrderSelect] = React.useState<Order | null>(null);
+
+  const handlerUpdateStatusOrder = (order: Order) => {
+    setModalUpdateStatus(true);
+    setValueOrderSelect(order);
+  }
 
   if (isloading) return (
     <div className="text-center">loading...</div>
@@ -85,7 +102,7 @@ function OrderTable() {
               <th className="px-4 py-3">Giá tiền</th>
               <th className="px-4 py-3">ngày đặt</th>
               <th className="px-4 py-3">Trạng thái</th>
-              <th className="px-4 py-3">Ngày đặt hàng</th>
+              <th className="px-4 py-3">Cài đặt</th>
             </tr>
           </thead>
 
@@ -114,8 +131,31 @@ function OrderTable() {
                   </td>
 
                   <td className="px-4 py-3">
-                    <span className="flex items-center gap-3 text-gray-600">
-                    </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button onClick={(e) => { e.preventDefault(); handlerUpdateStatusOrder(row); }}
+                          size={"icon"} variant="ghost">
+                          <SquarePen className="size-5 " />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Sửa trạng thái</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link href={`/admin/orders/${row.orderId}`}>
+                          <Button onClick={(e) => { e.preventDefault() }}
+                            size={"icon"} variant="ghost">
+                            <Eye className="size-5 " />
+                          </Button>
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Xem chi tiết</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </td>
                 </tr>
               );
@@ -123,6 +163,11 @@ function OrderTable() {
           </tbody>
         </table>
       </div>
+      {
+        modalUpdateStatus && (<EditCategoryModal
+          closeModal={() => setModalUpdateStatus(false)}
+          initialData={valueOrderSelect} />)
+      }
     </div>
   );
 }
@@ -216,3 +261,108 @@ const OrderPage = () => {
 };
 
 export default OrderPage;
+
+
+//modal
+function EditCategoryModal({
+  closeModal,
+  initialData
+}: {
+  closeModal: () => void;
+  initialData: Order | null;
+}) {
+  const [selectStatus, setSelectStatus] = React.useState<string>(
+    initialData ? initialData.orderStatus : ""
+  );
+  const [loading, setLoading] = React.useState(false);
+
+  if (!initialData) return null;
+
+  const handleSubmit = async () => {
+    if (!initialData || !selectStatus) return;
+    try {
+      setLoading(true);
+      await UpdateOrderStatusMock(initialData.orderId, selectStatus);
+      closeModal();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) closeModal();
+      }}
+    >
+      <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 animate-in fade-in zoom-in-95 duration-200">
+        <h2 className="text-xl font-semibold mb-4">
+          Sửa trạng thái đơn hàng
+        </h2>
+
+        <div className="space-y-2 mb-4 text-sm">
+          <div>
+            <strong>Mã đơn hàng:</strong> {initialData.orderId}
+          </div>
+          <div>
+            <strong>Giá tiền:</strong> {initialData.totalAmount}
+          </div>
+          <div>
+            <strong>Ngày đặt:</strong>{" "}
+            {new Date(initialData.orderDate).toLocaleString()}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <label className="block text-sm font-medium">
+            Trạng thái đơn hàng
+          </label>
+
+          <Select
+            value={selectStatus}
+            onValueChange={(value) => setSelectStatus(value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Chọn trạng thái đơn hàng" />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Trạng thái</SelectLabel>
+                {Object.entries(OrderStatusTypeLabel).map(
+                  ([key, label], index) => (
+                    <SelectItem key={index} value={key}>
+                      {label}
+                    </SelectItem>
+                  )
+                )}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Footer buttons */}
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            type="button"
+            onClick={closeModal}
+            className="px-4 py-2 rounded-md border hover:bg-gray-50"
+            disabled={loading}
+          >
+            Hủy
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!selectStatus || loading}
+            className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+          >
+            {loading ? "Đang lưu..." : "Lưu thay đổi"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
