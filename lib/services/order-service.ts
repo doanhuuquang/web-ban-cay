@@ -79,6 +79,94 @@ const getOrderById = async ({
   }
 };
 
+
+const getOrderAll = async (): Promise<{
+  code: number;
+  order: Order[] | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `orders/all`;
+    const response = await instance.get(getOrderByIdUrl);
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  } catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
+
+const getOrderStatus = async (param: string): Promise<{
+  code: number;
+  order: Order[] | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `orders/status`;
+    const response = await instance.get(getOrderByIdUrl, {
+      params: {orderStatus:param}
+    });
+
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  } 
+  catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
+
+const getOrderId = async (orderId: string): Promise<{
+  code: number;
+  order: Order | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `orders/order/${orderId}`;
+    const response = await instance.get(getOrderByIdUrl);
+
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  } 
+  catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
+
+const getOrderProfileId = async (profileId: string): Promise<{
+  code: number;
+  order: Order[] | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `orders/profile/${profileId}`;
+    const response = await instance.get(getOrderByIdUrl);
+
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  } 
+  catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
 const updateOrderAddress = async ({
   orderId,
   addressId,
@@ -136,5 +224,8 @@ export {
   getOrderById,
   updateOrderAddress,
   cancelOrder,
-  getOrders,
+  getOrderAll,
+  getOrderStatus,
+  getOrderId,
+  getOrderProfileId
 };

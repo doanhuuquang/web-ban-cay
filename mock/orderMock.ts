@@ -1,0 +1,99 @@
+import storeOrder, { OrderSummary } from "@/store/storeOder";
+import { getOrderAll, getOrderId, getOrderProfileId, getOrderStatus } from "@/lib/services/order-service";
+import { Order } from "@/lib/models/order";
+
+export async function getAllOrderMock() {
+    const { setLoading, setAllOrder, setOrderSum } = storeOrder.getState();
+    setLoading(true);
+    const res = await getOrderAll();
+    if (res.code === 1) {
+        setAllOrder(res.order);
+        if (res.order) {
+            const sum = summaryOrders(res.order);
+            setOrderSum(sum);
+        }
+    }
+
+    setLoading(false);
+}
+
+export async function getOrderByStatusMock(param: string) {
+
+    const { setLoading, setAllOrder } = storeOrder.getState();
+    setLoading(true);
+    const res = await getOrderStatus(param);
+    if (res.code === 1)
+        setAllOrder(res.order)
+    else setAllOrder(null);
+
+    setLoading(false);
+}
+
+
+export async function getOrderByIdOrProfileMock(stype: string, param: string) {
+    const { setLoading, setAllOrder, setOrder, addOrUpdateOrder } = storeOrder.getState();
+    setLoading(true);
+
+    if (stype === "all") {
+        const res1 = await getOrderProfileId(param)
+        setAllOrder(res1.order);
+
+        const res2 = await getOrderId(param);
+        if (res2.code == 1 && res2.order !== null)
+            addOrUpdateOrder(res2.order);
+    }
+
+    if (stype === "userId") {
+        const res1 = await getOrderProfileId(param)
+        setAllOrder(res1.order);
+    }
+
+    if (stype === "paymentId") {
+
+        const res2 = await getOrderId(param);
+        if (res2.code == 1)
+            setOrder(res2.order);
+    }
+
+    setLoading(false);
+}
+
+
+function summaryOrders(orders: Order[]): OrderSummary {
+    return orders.reduce<OrderSummary>((acc, order) => {
+        if (order.orderStatus === "COMPLETED") {
+            acc.totalIncome += order.totalAmount;
+        }
+
+        switch (order.orderStatus) {
+            case "COMPLETED":
+                acc.success++;
+                break;
+            case "PENDING":
+                acc.pending++;
+                break;
+            case "DELIVERING":
+                acc.delivering++;
+                break;
+            case "SHIPPING":
+                acc.shipping++;
+                break;
+            case "CANCELLED":
+                acc.cancelled++;
+                break;
+            case "RETURNED":
+                acc.returned++;
+                break;
+        }
+
+        return acc;
+    }, {
+        totalIncome: 0,
+        success: 0,
+        pending: 0,
+        delivering: 0,
+        shipping: 0,
+        cancelled: 0,
+        returned: 0
+    });
+}

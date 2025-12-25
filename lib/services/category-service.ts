@@ -27,42 +27,110 @@ const getCategories = async (): Promise<{
   }
 };
 
-const deleteCategoryById = async ({
-  categoryId,
-}: {
-  categoryId: string;
-}): Promise<number> => {
-  try {
-    const deleteUrl = `categories/category/${categoryId}/delete`;
-    const response = await instance.delete(deleteUrl);
 
-    return response.data.code;
+const getCategoriesById = async (categoryId: string): Promise<{
+  categories: Category | null;
+  code: number;
+}> => {
+  try {
+    const getCategories = `categories/category/${categoryId}`;
+    const response = await instance.get(getCategories);
+    return {
+      categories: response.data.data,
+      code: 1,
+    };
   } catch (error) {
-    console.log(error);
-    if (error instanceof axios.AxiosError) {
-      return error.response?.data.code;
-    }
-    return -1;
+    return {
+      code: -1,
+      categories: null,
+    };
+
   }
 };
 
-const getCategoryName = async ({
-  categoryName,
-}: {
-  categoryName: string;
-}): Promise<number> => {
+const getCategoriesByName = async (categoryName: string): Promise<{
+  categories: Category | null;
+  code: number;
+}> => {
   try {
-    const deleteUrl = `/categories/category/${categoryName}`;
-    const response = await instance.get(deleteUrl);
-
-    return response.data.code;
+    const getCategories = `categories/category/${categoryName}/name`;
+    const response = await instance.get(getCategories);
+    return {
+      categories: response.data.data,
+      code: 1,
+    };
   } catch (error) {
-    console.log(error);
-    if (error instanceof axios.AxiosError) {
-      return error.response?.data.code;
-    }
-    return -1;
+    return {
+      code: -1,
+      categories: null,
+    };
+
   }
 };
 
-export { getCategories, deleteCategoryById, getCategoryName };
+
+const createCategories = async (data: {
+  categoryName: string,
+  description: string,
+  createAt: Date,
+  updateAt: Date
+}): Promise<{
+  categorie: Category | null;
+  code: number;
+}> => {
+  try {
+    const addCategories = `categories/category/add`;
+    const response = await instance.post(addCategories, data);
+    return {
+      categorie: response.data.data,
+      code: 1,
+    };
+  } catch (error) {
+    return {
+      code: -1,
+      categorie: null,
+    };
+  }
+};
+
+
+const updateCategories = async (data: Category): Promise<{
+  categorie: Category | null;
+  code: number;
+}> => {
+  try {
+    const addCategories = `categories/category/${data.categoryId}/update`;
+    const response = await instance.put(addCategories, data);
+    return {
+      categorie: response.data.data,
+      code: 1,
+    };
+  } catch (error) {
+    return {
+      code: -1,
+      categorie: null,
+    };
+  }
+};
+
+
+const deleteCategories = async (categoryId: string): Promise<{
+  categorie: Category | null;
+  code: number;
+}> => {
+  try {
+    const addCategories = `categories/category/${categoryId}/delete`;
+    const response = await instance.delete(addCategories);
+    return {
+      categorie: response.data.data,
+      code: 1,
+    };
+  } catch (error) {
+    return {
+      code: -1,
+      categorie: null,
+    };
+  }
+};
+
+export { getCategories, createCategories, updateCategories, deleteCategories,getCategoriesById,getCategoriesByName };

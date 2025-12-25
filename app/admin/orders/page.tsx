@@ -2,128 +2,81 @@
 
 import * as React from "react";
 import {
-  CalendarClock,
-  CheckCheck,
-  Ban,
-  OctagonAlert,
-  Package2,
-  Truck,
   Eye,
   Trash,
-  ChevronsLeft,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsRight,
-  Plus,
+  CheckCircle,
+  Clock,
+  Package,
+  XCircle,
+  RefreshCcw,
+  DollarSign,
+  Truck
 } from "lucide-react";
 
 import { Tooltip } from "@radix-ui/react-tooltip";
 import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   orders as ordersData,
-  OrderItemProps,
 } from "@/app/admin/constants/order-data";
 import { Input } from "@/components/ui/input";
 import PopupDelete from "../_components/popup-delete";
 import Link from "next/link";
-import { Order } from "@/lib/models/order";
-import { useAuth } from "@/lib/contexts/auth-context";
-import { getOrders } from "@/lib/services/order-service";
+import { getAllOrderMock, getOrderByIdOrProfileMock, getOrderByStatusMock } from "@/mock/orderMock";
+import storeOrder from "@/store/storeOder";
+import { OrderStatusTypeLabel } from "@/lib/type/order-status";
+import { formatMoney } from "@/lib/helpers/format-money";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type itemStatsProps = {
-  title: string;
-  countStats: number;
-  icon: React.ElementType;
-};
 
-type OrderStatsListProps = {
-  data: itemStatsProps[];
-};
 
-const orderStats: itemStatsProps[] = [
-  {
-    title: "Thu nhập",
-    countStats: 186450000,
-    icon: CheckCheck,
-  },
-  {
-    title: "Thành công",
-    countStats: 1_248,
-    icon: CheckCheck,
-  },
-  {
-    title: "Thất bại",
-    countStats: 47,
-    icon: OctagonAlert,
-  },
-  {
-    title: "Chờ xử lý",
-    countStats: 132,
-    icon: CalendarClock,
-  },
-  {
-    title: "Chờ lấy hàng",
-    countStats: 89,
-    icon: Package2,
-  },
-  {
-    title: "Đang giao hàng",
-    countStats: 276,
-    icon: Truck,
-  },
-  {
-    title: "Đã huỷ",
-    countStats: 63,
-    icon: Ban,
-  },
-];
+function OrderStatsList() {
+  const stats = storeOrder((s) => s.orderSum)
+  const data = [
+    { title: "Tổng doanh thu", countStats: stats.totalIncome, icon: DollarSign },
+    { title: "Đã hoàn thành", countStats: stats.success, icon: CheckCircle },
+    { title: "Chờ xử lý", countStats: stats.pending, icon: Clock },
+    { title: "Chờ lấy hàng", countStats: stats.delivering, icon: Truck },
+    { title: "Đang giao hàng", countStats: stats.shipping, icon: Package },
+    { title: "Đã hủy", countStats: stats.cancelled, icon: XCircle },
+    { title: "Hoàn trả", countStats: stats.returned, icon: RefreshCcw },
+  ];
 
-function OrderStatsList({ data }: OrderStatsListProps) {
   return (
-    <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
-        {data.map((os) => {
-          const Icon = os.icon;
-          return (
-            <div
-              key={os.title}
-              className="flex items-center justify-between h-fit py-5 px-4 bg-white border-r-2 last:border-r-0"
-            >
-              <div className="">
-                <h1 className="text-xl font-semibold">{os.countStats}</h1>
-                <p className="text-sm text-gray-500">{os.title}</p>
-              </div>
-
-              <div className=" p-3 rounded-xl bg-gray-100">
-                <Icon className=" text-gray-600" />
-              </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
+      {data.map((os) => {
+        const Icon = os.icon;
+        return (
+          <div
+            key={os.title}
+            className="flex items-center justify-between h-fit py-5 px-4 bg-white border-r-2 last:border-r-0"
+          >
+            <div>
+              <h1 className="text-xl font-semibold">{os.countStats}</h1>
+              <p className="text-sm text-gray-500">{os.title}</p>
             </div>
-          );
-        })}
-      </div>
-    </>
+
+            <div className="p-3 rounded-xl bg-gray-100">
+              <Icon className="text-gray-600" />
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 
-type OrderTableProps = {
-  orders: Order[];
-  popup: (id: string) => void;
-};
+function OrderTable() {
 
-function OrderTable({ orders, popup }: OrderTableProps) {
-  const [pageIndex, setPageIndex] = React.useState(0);
-  const [pageSize, setPageSize] = React.useState(10);
+  const isloading = storeOrder((s) => s.loading);
+  const currentPageRows = storeOrder((s) => s.orderAll);
 
-  const pageCount = Math.ceil(orders.length / pageSize);
+  if (isloading) return (
+    <div className="text-center">loading...</div>
+  )
 
-  const currentOrderInPage = orders.slice(
-    pageIndex * pageSize,
-    pageIndex * pageSize + pageSize
-  );
-
-  React.useEffect(() => {
-    setPageIndex(0);
-  }, [orders]);
+  if (!currentPageRows) return (
+    <div className="text-center">Không có dữ liệu</div>
+  )
 
   return (
     <div className="space-y-4">
@@ -132,51 +85,39 @@ function OrderTable({ orders, popup }: OrderTableProps) {
         <table className="w-full border-collapse text-left text-sm">
           <thead className="bg-gray-100 border-b">
             <tr className="font-semibold text-gray-700">
-              <th className="px-4 py-3">Mã đơn hàng</th>
+              <th className="px-4 py-3">Id</th>
               <th className="px-4 py-3">Mã thanh toán</th>
               <th className="px-4 py-3">Mã khách hàng</th>
-              <th className="px-4 py-3">Địa chỉ giao hàng</th>
+              <th className="px-4 py-3">Mã địa chỉ</th>
               <th className="px-4 py-3">Phí vận chuyển</th>
-              <th className="px-4 py-3">Số tiền giảm giá</th>
-              <th className="px-4 py-3">Tổng tiền</th>
+              <th className="px-4 py-3">Giá tiền</th>
+              <th className="px-4 py-3">ngày đặt</th>
               <th className="px-4 py-3">Trạng thái</th>
               <th className="px-4 py-3">Ngày đặt hàng</th>
             </tr>
           </thead>
 
           <tbody>
-            {currentOrderInPage.map((order) => {
-              const statusStyles = [
-                {
-                  "Chờ xử lý": "bg-yellow-100 text-yellow-700",
-                  "Đang giao hàng": "bg-blue-100 text-blue-700",
-                  "Chờ lấy hàng": "bg-indigo-100 text-indigo-700",
-                  "Thành công": "bg-green-100 text-green-700",
-                  "Thất bại": "bg-red-100 text-red-700",
-                  "Đã huỷ": "bg-gray-200 text-gray-700",
-                },
-              ];
+            {currentPageRows.map((row) => {
 
               return (
                 <tr
-                  key={order.orderId}
+                  key={row.orderId}
                   className="border-b hover:bg-gray-50 transition"
                 >
-                  <td className="px-4 py-3">{order.orderId}</td>
-                  <td className="px-4 py-3">{order.profileId}</td>
-                  <td className="px-4 py-3">{order.paymentId}</td>
-                  <td className="px-4 py-3">{order.deliveryAddressId}</td>
-                  <td className="px-4 py-3">{order.shippingFee}</td>
-                  <td className="px-4 py-3">{order.discountAmount}</td>
-                  <td className="px-4 py-3">{order.totalAmount}</td>
+                  <td className="px-4 py-3">{row.orderId}</td>
+                  <td className="px-4 py-3">{row.paymentId}</td>
+                  <td className="px-4 py-3">{row.profileId}</td>
+                  <td className="px-4 py-3">{row.deliveryAddressId}</td>
+                  <td className="px-4 py-3">{formatMoney(row.shippingFee)}</td>
+                  <td className="px-4 py-3">{formatMoney(row.totalAmount)}</td>
+                  <td className="px-4 py-3">{row.orderDate.toString()}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`px-2 py-1 rounded-md text-xs font-medium ${
-                        statusStyles[order.orderStatus] ||
-                        "bg-gray-100 text-gray-700"
-                      }`}
+                      className={`px-2 py-1 rounded-md text-xs font-medium "bg-gray-100 text-gray-700"
+                        }`}
                     >
-                      {order.orderStatus}
+                      {OrderStatusTypeLabel[row.orderStatus]}
                     </span>
                   </td>
                   <td className="px-4 py-3">{order.orderDate}</td>
@@ -222,69 +163,6 @@ function OrderTable({ orders, popup }: OrderTableProps) {
             })}
           </tbody>
         </table>
-      </div>
-
-      {/* pagination */}
-      <div className="flex items-center justify-between px-2 mt-2">
-        <div className="text-gray-600 text-sm">
-          Trang {pageIndex + 1} trên {pageCount} — Tổng {orders.length} hàng
-        </div>
-
-        <div className="flex items-center space-x-6">
-          {/* PAGE SIZE */}
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Số hàng / trang</p>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPageIndex(0);
-              }}
-              className="h-8 border rounded px-2"
-            >
-              {[10, 20, 30, 50].map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* page controls */}
-          <div className="flex items-center space-x-2">
-            <button
-              className="border rounded p-1 disabled:opacity-50"
-              onClick={() => setPageIndex(0)}
-              disabled={pageIndex === 0}
-            >
-              <ChevronsLeft size={18} />
-            </button>
-
-            <button
-              className="border rounded p-1 disabled:opacity-50"
-              onClick={() => setPageIndex((p) => p - 1)}
-              disabled={pageIndex === 0}
-            >
-              <ChevronLeft size={18} />
-            </button>
-
-            <button
-              className="border rounded p-1 disabled:opacity-50"
-              onClick={() => setPageIndex((p) => p + 1)}
-              disabled={pageIndex === pageCount - 1}
-            >
-              <ChevronRight size={18} />
-            </button>
-
-            <button
-              className="border rounded p-1 disabled:opacity-50"
-              onClick={() => setPageIndex(pageCount - 1)}
-              disabled={pageIndex === pageCount - 1}
-            >
-              <ChevronsRight size={18} />
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -502,8 +380,46 @@ function ModalOrder({ closeModal, onSubmit }: ModalOrderProps) {
 }
 
 const OrderPage = () => {
-  const [orders, setOrders] = React.useState<Order[]>([]);
-  const user = useAuth();
+
+
+  const [selectedOrderId, setSelectedOrderId] = React.useState<string>("all");
+  const [valueFindOrder, setValueFindOrder] = React.useState<string>("");
+
+  React.useEffect(() => {
+    const feachOder = async () => {
+      if (!valueFindOrder) await getAllOrderMock();
+      else
+        await getOrderByIdOrProfileMock(selectedOrderId, valueFindOrder);
+    }
+    feachOder();
+  }, [valueFindOrder, selectedOrderId])
+
+  React.useEffect(() => {
+    const feachOder = async () => {
+      await getAllOrderMock();
+    }
+
+    feachOder();
+  }, [])
+
+  const [selectedOrderStatus, setSelectedOrderStatus] = React.useState<string>("");
+
+
+  React.useEffect(() => {
+    const feachOder = async () => {
+      if (!selectedOrderStatus || selectedOrderStatus === "all") await getAllOrderMock();
+      else
+        await getOrderByStatusMock(selectedOrderStatus);
+    }
+    feachOder();
+  }, [selectedOrderStatus])
+
+
+
+
+  const [orders, setOrders] = React.useState<OrderItemProps[]>(ordersData);
+  const [filteredOrders, setFilteredOrders] =
+    React.useState<OrderItemProps[]>(ordersData);
   const [popupOpen, setPopupOpen] = React.useState<boolean>(false);
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
@@ -527,15 +443,6 @@ const OrderPage = () => {
       .toLowerCase();
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = removeVNTones(e.target.value);
-    const records = orders.filter((item) =>
-      removeVNTones(item.orderId.toLocaleLowerCase()).includes(
-        query.toLocaleLowerCase()
-      )
-    );
-    setOrders(records);
-  };
 
   const openDeletePopup = (id: string) => {
     setDeleteId(id);
@@ -547,7 +454,7 @@ const OrderPage = () => {
   //   setFilteredOrders(orders.filter((p) => p.id !== currId));
   // };
 
-  const handleSubmit = () => {};
+  const handleSubmit = () => { };
   // const handleSubmit = (newRow: string) => {
   //   setOrders((prev) => {
   //     let updated: OrderItemProps[] = [...prev, newRow];
@@ -556,35 +463,51 @@ const OrderPage = () => {
   //     return updated;
   //   });
   // };
+
+
   return (
     <div className="container mx-auto px-15 pb-10 space-y-6">
       <div className="font-semibold text-3xl">Đơn hàng</div>
-      <OrderStatsList data={orderStats} />
+      <OrderStatsList  />
 
-      <div className="flex items-center justify-end w-full gap-4">
-        <Input
-          placeholder="Tìm kiếm đơn hàng..."
-          className="max-w-sm rounded-md"
-          onChange={handleChange}
-        />
-
-        <button
-          onClick={() => setModalOpen(true)}
-          className="px-4 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-sm 
-             hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 
-             flex items-center gap-2 cursor-pointer"
-        >
-          <Plus size={18} />
-          Thêm đơn hàng
-        </button>
-        {modalOpen && (
-          <ModalOrder
-            closeModal={() => {
-              setModalOpen(false);
-            }}
-            onSubmit={handleSubmit}
+      <div className="flex items-center justify-between w-full gap-4">
+        <div className="flex items-center gap-4">
+          <Input
+            placeholder="Tìm kiếm đơn hàng"
+            className="max-w-sm rounded-md"
+            value={valueFindOrder}
+            onChange={(e) => setValueFindOrder(e.target.value)}
           />
-        )}
+
+          <Select value={selectedOrderId} onValueChange={(value) => setSelectedOrderId(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Tìm kiếm theo..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup >
+                <SelectItem value={"all"}>tất cả</SelectItem>
+                <SelectItem value={"userId"}>Mã khách hàng</SelectItem>
+                <SelectItem value={"paymentId"}>Mã Thanh toán</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Select onValueChange={(value) => setSelectedOrderStatus(value)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Chọn trạng thái đơn hàng" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Trạng thái đơn hàng</SelectLabel>
+              <SelectItem value="all">Tất cả</SelectItem>
+              {
+                Object.entries(OrderStatusTypeLabel).map(([key, label], index) => <SelectItem key={index} value={key}>{label}</SelectItem>)
+              }
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
       </div>
 
       {/* table order */}

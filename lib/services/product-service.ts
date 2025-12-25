@@ -74,6 +74,7 @@ const getProductBySlug = async ({
   } catch (error) {
     console.log(error);
     if (error instanceof axios.AxiosError) {
+      console.log(error.response?.data);
       return {
         code: error.response?.data.code,
         product: null,
