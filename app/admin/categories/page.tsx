@@ -25,17 +25,6 @@ import { Category } from "@/lib/models/category";
 import { Button } from "@/components/ui/button";
 
 
-
-type categoriesItemProps = {
-  categoryId: string;
-  categoryName: string;
-  description: string;
-};
-
-type CategoryTableProps = {
-  rows: categoriesItemProps[];
-};
-
 function CategoryTable() {
 
   const isloading = storeCategory((s) => s.loading);
