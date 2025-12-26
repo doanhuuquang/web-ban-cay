@@ -35,12 +35,21 @@ export async function UpdateOrderStatusMock(id: string, status: string) {
     const res = await updateStatusOrder(id, status);
 
     if (res.code === 1 && res.order) {
-        updateOrderStatus(id,status);
+        updateOrderStatus(id, status);
         toast("cập nhật trạng thái thành công");
     }
     else
         toast("cập nhật trạng thái thất bại");
 
+    setLoading(false);
+}
+
+export async function filterOrdersByDateMock(from: string, to: string) {
+
+    const { setLoading, filterOrdersByDateRange,setAllOrder } = storeOrder.getState();
+    setLoading(true);
+    const orders = filterOrdersByDateRange(from, to);
+    setAllOrder(orders)
     setLoading(false);
 }
 

@@ -21,10 +21,11 @@ interface OderState {
     updateOrderStatus: (orderId: string, status: string) => void;
     addOrUpdateOrder: (order: Order) => void;
     removeOrder: (orderId: string) => void;
+    filterOrdersByDateRange: (from: string, to: string) => Order[]
 }
 
 
-const storeOrder = create<OderState>((set) => ({
+const storeOrder = create<OderState>((set, get) => ({
     orderAll: null,
     loading: false,
 
@@ -75,6 +76,25 @@ const storeOrder = create<OderState>((set) => ({
         orderAll: state.orderAll
             ? state.orderAll.filter((c) => c.orderId !== orderId) : null,
     })),
+
+    filterOrdersByDateRange: (from: string, to: string) => {
+        const orders = get().orderAll ?? [];
+
+        const normalize = (d: string) =>
+            new Date(new Date(d).toDateString()).getTime();
+
+        // Bỏ qua thứ tự — tự động lấy khoảng nhỏ → lớn
+        const fromDate = normalize(from);
+        const toDate = normalize(to);
+
+        const start = Math.min(fromDate, toDate);
+        const end = Math.max(fromDate, toDate);
+
+        return orders.filter(o => {
+            const onlyDate = normalize(o.orderDate as unknown as string);
+            return onlyDate >= start && onlyDate <= end;
+        });
+    },
 
 
 }));

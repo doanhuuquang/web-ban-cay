@@ -3,19 +3,17 @@
 import * as React from "react";
 import {
   Eye,
-  Trash,
   CheckCircle,
   Clock,
   Package,
   XCircle,
   RefreshCcw,
   DollarSign,
-  Truck,
   SquarePen,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { getAllOrderMock, getOrderByIdOrProfileMock, getOrderByStatusMock, summaryOrders, UpdateOrderStatusMock } from "@/mock/orderMock";
+import { filterOrdersByDateMock, getAllOrderMock, getOrderByIdOrProfileMock, getOrderByStatusMock, summaryOrders, UpdateOrderStatusMock } from "@/mock/orderMock";
 import storeOrder from "@/store/storeOder";
 import { OrderStatusTypeLabel } from "@/lib/type/order-status";
 import { formatMoney } from "@/lib/helpers/format-money";
@@ -24,11 +22,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Button } from "@/components/ui/button";
 import { Order } from "@/lib/models/order";
 import Link from "next/link";
+import { handler } from "next/dist/build/templates/app-page";
 
 
 function OrderStatsList() {
   const F = storeOrder((s) => s.orderAll);
-  const stats = summaryOrders(F|| []);
+  const stats = summaryOrders(F || []);
 
   const data = [
     { title: "Tổng doanh thu", countStats: stats?.totalIncome ?? 0, icon: DollarSign },
@@ -177,6 +176,21 @@ const OrderPage = () => {
   const [selectedOrderId, setSelectedOrderId] = React.useState<string>("all");
   const [valueFindOrder, setValueFindOrder] = React.useState<string>("");
 
+  const [from, setFrom] = React.useState("");
+  const [to, setTo] = React.useState(() => new Date().toISOString().split("T")[0]);
+
+  const handlerResetDate = async () => {
+    setFrom("");
+    setTo(() => new Date().toISOString().split("T")[0]);
+    getAllOrderMock();
+  }
+
+  const handlerSearchDate = async () => {
+    await getAllOrderMock();
+    filterOrdersByDateMock(from, to)
+  }
+
+
   React.useEffect(() => {
     const feachOder = async () => {
       if (!valueFindOrder) await getAllOrderMock();
@@ -252,11 +266,49 @@ const OrderPage = () => {
 
       </div>
 
+      <div className="flex justify-end">
+        <div className="flex gap-4 items-baseline">
+          <label>Từ ngày</label>
+
+          <div className="flex flex-col">
+            <input
+              type="date"
+              className="border rounded px-2 py-1"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+            />
+          </div>
+
+          <label>Đến ngày</label>
+
+          <div className="flex flex-col">
+            <input
+              type="date"
+              className="border rounded px-2 py-1"
+              value={to}
+              min={from} // chặn chọn ngày nhỏ hơn from
+              onChange={(e) => setTo(e.target.value)}
+            />
+          </div>
+          <Button onClick={(e) => {
+            e.preventDefault()
+            handlerSearchDate();
+          }}
+            className="bg-blue-500/100 hover:bg-blue-500/90 rounded-sm" variant="default">tìm kiếm</Button>
+
+          <Button onClick={(e) => {
+            e.preventDefault()
+            handlerResetDate();
+          }}
+            className="rounded-sm" variant="destructive">Xóa</Button>
+        </div>
+      </div>
+
       {/* table order */}
       <div>
         <OrderTable />
       </div>
-    </div>
+    </div >
   );
 };
 
