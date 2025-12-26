@@ -31,6 +31,7 @@ export default function ProductDetails({ slug }: { slug: string }) {
 
     fetchProduct();
   }, [slug]);
+  
   const isLoading = storeProduct((state) => state.loading);
 
   if (isLoading) return <div>loading...</div>;

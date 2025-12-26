@@ -1,6 +1,7 @@
 import { Order } from "@/lib/models/order";
 import instance from "@/lib/services/axios-config";
 import axios from "axios";
+import { Payment } from "../models/payment";
 
 const placeOrderFromCart = async (data: {
   profileId: string;
@@ -145,6 +146,27 @@ const getOrderId = async (orderId: string): Promise<{
   }
 };
 
+const getPaymentById = async (paymentId: string): Promise<{
+  code: number;
+  payment: Payment | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `payment/${paymentId}`;
+    const response = await instance.get(getOrderByIdUrl);
+
+    return {
+      code: 1,
+      payment: response.data.data
+    };
+  }
+  catch {
+    return {
+      code: -1,
+      payment: null,
+    };
+  }
+};
+
 const updateStatusOrder = async (orderId: string, orderStatus: string): Promise<{
   code: number;
   order: Order | null;
@@ -232,5 +254,6 @@ export {
   getOrderAll,
   getOrderStatus,
   getOrderId,
-  getOrderProfileId,updateStatusOrder
+  getOrderProfileId,updateStatusOrder,
+  getPaymentById
 };

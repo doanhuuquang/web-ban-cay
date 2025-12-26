@@ -14,9 +14,11 @@ export type OrderSummary = {
 interface OderState {
     loading: boolean
     orderAll: Order[] | null
+    orderOne: Order | null
     setLoading: (loading: boolean) => void
     setAllOrder: (details: Order[] | null) => void
     setOrder: (details: Order | null) => void
+    setOrderOne: (details: Order | null) => void
     addOrder: (order: Order) => void;
     updateOrderStatus: (orderId: string, status: string) => void;
     addOrUpdateOrder: (order: Order) => void;
@@ -28,6 +30,7 @@ interface OderState {
 const storeOrder = create<OderState>((set, get) => ({
     orderAll: null,
     loading: false,
+    orderOne:  null,
 
     setLoading: (value: boolean) => set({ loading: value }),
 
@@ -37,6 +40,10 @@ const storeOrder = create<OderState>((set, get) => ({
         const arr: Order[] = [];
         if (value) arr.push(value);
         set({ orderAll: arr })
+    },
+
+    setOrderOne: (value) => {
+        set({ orderOne: value })
     },
 
     addOrder: (order) => set((state) => ({

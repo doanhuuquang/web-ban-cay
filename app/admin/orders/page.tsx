@@ -42,7 +42,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Order } from "@/lib/models/order";
 import Link from "next/link";
-import { handler } from "next/dist/build/templates/app-page";
 
 function OrderStatsList() {
   const F = storeOrder((s) => s.orderAll);
@@ -180,9 +179,6 @@ function OrderTable() {
                       <TooltipTrigger asChild>
                         <Link href={`/admin/orders/${row.orderId}`}>
                           <Button
-                            onClick={(e) => {
-                              e.preventDefault();
-                            }}
                             size={"icon"}
                             variant="ghost"
                           >

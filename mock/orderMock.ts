@@ -45,7 +45,7 @@ export async function UpdateOrderStatusMock(id: string, status: string) {
 
 export async function filterOrdersByDateMock(from: string, to: string) {
 
-    const { setLoading, filterOrdersByDateRange,setAllOrder } = storeOrder.getState();
+    const { setLoading, filterOrdersByDateRange, setAllOrder } = storeOrder.getState();
     setLoading(true);
     const orders = filterOrdersByDateRange(from, to);
     setAllOrder(orders)
@@ -77,6 +77,17 @@ export async function getOrderByIdOrProfileMock(stype: string, param: string) {
         if (res2.code == 1)
             setOrder(res2.order);
     }
+
+    setLoading(false);
+}
+
+export async function getOrderById(param: string) {
+    const { setLoading, setOrderOne } = storeOrder.getState();
+    setLoading(true);
+
+    const res = await getOrderId(param)
+    if (res.code === 1 && res.order)
+        setOrderOne(res.order);
 
     setLoading(false);
 }
