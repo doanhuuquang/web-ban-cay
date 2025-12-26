@@ -1,32 +1,26 @@
 "use client";
 
-
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import {
-
-  Plus,
-  Trash,
-  SquarePen,
-} from "lucide-react";
+import { Plus, Trash, SquarePen } from "lucide-react";
 import React, { useEffect } from "react";
 
 import {
-  getAllCategoryMock, addCategoryMock, updateCategoryMock,
+  getAllCategoryMock,
+  addCategoryMock,
+  updateCategoryMock,
   deleteCategoryMock,
-  getCategoryByIdOrNameMock
+  getCategoryByIdOrNameMock,
 } from "@/mock/categoryMock";
 import storeCategory from "@/store/storeCategory";
 import { Category } from "@/lib/models/category";
 import { Button } from "@/components/ui/button";
 
-
 function CategoryTable() {
-
   const isloading = storeCategory((s) => s.loading);
   const currentPageRows = storeCategory((s) => s.categoryAll);
 
@@ -38,26 +32,25 @@ function CategoryTable() {
   const handlerUpdateCategory = (data: Category) => {
     setModalOpenUpdate(true);
     setValuesUpdate(data);
-  }
+  };
 
   const handlerDeleteCategory = (data: Category) => {
     setModalOpenDelete(true);
     setValuesUpdate(data);
-  }
+  };
 
-  if (isloading) return (
-    <div className="container p-6 min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
+  if (isloading)
+    return (
+      <div className="container p-6 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
 
-  if (!currentPageRows) return (
-    <div className="text-center"> không có dữ liệu</div>
-  )
-
+  if (!currentPageRows)
+    return <div className="text-center"> không có dữ liệu</div>;
 
   return (
     <div className="bg-white rounded-xl shadow-md border overflow-hidden">
@@ -76,31 +69,49 @@ function CategoryTable() {
 
         <tbody>
           {currentPageRows.map((row) => (
-            <tr key={row.categoryId} className="border-t hover:bg-gray-50 transition">
+            <tr
+              key={row.categoryId}
+              className="border-t hover:bg-gray-50 transition"
+            >
               <td className="p-4">
                 <div className="flex items-center gap-3">
-
                   <div>
-                    <div className="font-medium text-gray-900">{row.categoryId}</div>
+                    <div className="font-medium text-gray-900">
+                      {row.categoryId}
+                    </div>
                   </div>
                 </div>
               </td>
 
-              <td className="p-4 text-center text-gray-600">
+              <td className="p-4 text-center font-medium">
                 {row.categoryName}
               </td>
 
-              <td className="p-4 text-center font-medium">{row.description}</td>
-              <td className="p-4 text-center font-medium">{row.createAt.toString()}</td>
-              <td className="p-4 text-center font-medium">{row.updateAt.toString()}</td>
+              <td className="p-4 text-center text-gray-600 font-medium">
+                {row.description}
+              </td>
+              <td className="p-4 text-center text-gray-600 font-medium">
+                {/* {row.createAt.toString()} */}
+                {row.createAt ? new Date(row.createAt).toLocaleString() : "-"}
+              </td>
+              <td className="p-4 text-center text-gray-600 font-medium">
+                {/* {row.updateAt.toString()} */}
+                {row.updateAt ? new Date(row.updateAt).toLocaleString() : "-"}
+              </td>
 
               <td className="p-4">
                 <div className="flex items-center justify-center gap-3 text-gray-500">
                   <div>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button onClick={(e) => { e.preventDefault(); handlerUpdateCategory(row); }}
-                          size={"icon"} variant="ghost">
+                        <Button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlerUpdateCategory(row);
+                          }}
+                          size={"icon"}
+                          variant="ghost"
+                        >
                           <SquarePen className="size-5 " />
                         </Button>
                       </TooltipTrigger>
@@ -112,8 +123,14 @@ function CategoryTable() {
                   <div>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button onClick={(e) => { e.preventDefault(); handlerDeleteCategory(row); }}
-                          className="bg-white hover:bg-white" size={"icon"}>
+                        <Button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlerDeleteCategory(row);
+                          }}
+                          className="bg-white hover:bg-white"
+                          size={"icon"}
+                        >
                           <Trash className="w-5 h-5 cursor-pointer text-red-600 hover:text-red-700" />
                         </Button>
                       </TooltipTrigger>
@@ -152,13 +169,12 @@ function CategoryTable() {
 type CategoryModalUpdate = {
   closeModal: () => void;
   initialData: Category | null;
-}
-
+};
 
 function CategoryModal({ closeModal }: { closeModal: () => void }) {
   const [formState, setFormState] = React.useState({
     categoryName: "",
-    description: ""
+    description: "",
   });
 
   const [errors, setErrors] = React.useState("");
@@ -189,10 +205,10 @@ function CategoryModal({ closeModal }: { closeModal: () => void }) {
       categoryName: formState.categoryName,
       description: formState.description,
       createAt: now,
-      updateAt: now
+      updateAt: now,
     };
 
-    await addCategoryMock(data)
+    await addCategoryMock(data);
 
     closeModal();
   };
@@ -251,11 +267,7 @@ function CategoryModal({ closeModal }: { closeModal: () => void }) {
       </div>
     </div>
   );
-
-
-
 }
-
 
 function EditCategoryModal({ closeModal, initialData }: CategoryModalUpdate) {
   const [formState, setFormState] = React.useState(initialData);
@@ -291,10 +303,10 @@ function EditCategoryModal({ closeModal, initialData }: CategoryModalUpdate) {
       categoryName: formState.categoryName,
       description: formState.description,
       createAt: initialData ? initialData.createAt : now,
-      updateAt: now
+      updateAt: now,
     };
 
-    await updateCategoryMock(data)
+    await updateCategoryMock(data);
 
     closeModal();
   };
@@ -363,9 +375,7 @@ function EditCategoryModal({ closeModal, initialData }: CategoryModalUpdate) {
   );
 }
 
-
 function DeleteCategoryModal({ closeModal, initialData }: CategoryModalUpdate) {
-
   const handleDelete = async () => {
     if (!initialData) return closeModal();
 
@@ -387,8 +397,12 @@ function DeleteCategoryModal({ closeModal, initialData }: CategoryModalUpdate) {
         </h2>
 
         <ul className="mt-2 mb-4 text-sm text-gray-700">
-          <li><strong>ID:</strong> {initialData?.categoryId}</li>
-          <li><strong>Tên:</strong> {initialData?.categoryName}</li>
+          <li>
+            <strong>ID:</strong> {initialData?.categoryId}
+          </li>
+          <li>
+            <strong>Tên:</strong> {initialData?.categoryName}
+          </li>
         </ul>
 
         <div className="flex gap-2">
@@ -411,31 +425,27 @@ function DeleteCategoryModal({ closeModal, initialData }: CategoryModalUpdate) {
   );
 }
 
-
 export default function CategoryPage() {
-
   const [valueSearch, setValueSearch] = React.useState<string>("");
 
   useEffect(() => {
     const fetchCategory = async () => {
       await getAllCategoryMock();
-    }
+    };
 
     fetchCategory();
-  }, [])
+  }, []);
 
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
 
   useEffect(() => {
     const feactGetCategory = async (valueSearch: string) => {
-      if (!valueSearch)
-        await getAllCategoryMock();
-      else
-        await getCategoryByIdOrNameMock(valueSearch);
-    }
+      if (!valueSearch) await getAllCategoryMock();
+      else await getCategoryByIdOrNameMock(valueSearch);
+    };
 
     feactGetCategory(valueSearch);
-  }, [valueSearch])
+  }, [valueSearch]);
 
   return (
     <div className="container p-6 min-h-screen">
@@ -445,9 +455,7 @@ export default function CategoryPage() {
         <input
           placeholder="Tìm kiếm danh mục..."
           value={valueSearch}
-          onChange={
-            (e) => setValueSearch(e.target.value)
-          }
+          onChange={(e) => setValueSearch(e.target.value)}
           className="border rounded-md px-3 py-2 text-sm w-80 focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
 
@@ -467,11 +475,9 @@ export default function CategoryPage() {
               }}
             />
           )}
-
         </div>
       </div>
       <CategoryTable />
-
     </div>
   );
 }

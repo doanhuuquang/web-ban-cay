@@ -58,10 +58,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Category } from "@/lib/models/category";
-import {
-  getCategories,
-  getCategoryName,
-} from "@/lib/services/category-service";
+import { getCategories } from "@/lib/services/category-service";
 import {
   Select,
   SelectContent,
@@ -86,17 +83,6 @@ function UpdateProduct({ product }: { product: Product }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [categoryName, setCategoryName] = React.useState<Category[]>([]);
   const [open, setOpen] = React.useState(false);
-
-  // React.useEffect(() => {
-  //   const fetchCategoryName = async () => {
-  //     const response = await getCategoryName();
-  //     if (response.categoryName.length > 0) {
-  //       setCategoryName(response.categoryName);
-  //     }
-  //   };
-
-  //   fetchCategoryName();
-  // }, []);
 
   const formSchema = z.object({
     productName: z.string().min(2).max(100),
