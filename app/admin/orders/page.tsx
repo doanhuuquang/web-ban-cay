@@ -15,33 +15,61 @@ import {
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
-import { getAllOrderMock, getOrderByIdOrProfileMock, getOrderByStatusMock, summaryOrders, UpdateOrderStatusMock } from "@/mock/orderMock";
+import {
+  getAllOrderMock,
+  getOrderByIdOrProfileMock,
+  getOrderByStatusMock,
+  summaryOrders,
+  UpdateOrderStatusMock,
+} from "@/mock/orderMock";
 import storeOrder from "@/store/storeOder";
 import { OrderStatusTypeLabel } from "@/lib/type/order-status";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Order } from "@/lib/models/order";
 import Link from "next/link";
 
-
 function OrderStatsList() {
   const F = storeOrder((s) => s.orderAll);
-  const stats = summaryOrders(F|| []);
+  const stats = summaryOrders(F || []);
 
   const data = [
-    { title: "Tổng doanh thu", countStats: stats?.totalIncome ?? 0, icon: DollarSign },
-    { title: "Đã hoàn thành", countStats: stats?.success ?? 0, icon: CheckCircle },
+    {
+      title: "Tổng doanh thu",
+      countStats: stats?.totalIncome ?? 0,
+      icon: DollarSign,
+    },
+    {
+      title: "Đã hoàn thành",
+      countStats: stats?.success ?? 0,
+      icon: CheckCircle,
+    },
     { title: "Chờ xử lý", countStats: stats?.pending ?? 0, icon: Clock },
-    { title: "Đang giao hàng", countStats: stats?.shipping ?? 0, icon: Package },
+    {
+      title: "Đang giao hàng",
+      countStats: stats?.shipping ?? 0,
+      icon: Package,
+    },
     { title: "Đã hủy", countStats: stats?.cancelled ?? 0, icon: XCircle },
     { title: "Hoàn trả", countStats: stats?.returned ?? 0, icon: RefreshCcw },
   ];
 
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
       {data.map((os) => {
         const Icon = os.icon;
         return (
@@ -65,27 +93,26 @@ function OrderStatsList() {
 }
 
 function OrderTable() {
-
   //data
   const isloading = storeOrder((s) => s.loading);
   const currentPageRows = storeOrder((s) => s.orderAll);
 
   //modal
-  const [modalUpdateStatus, setModalUpdateStatus] = React.useState<boolean>(false);
-  const [valueOrderSelect, setValueOrderSelect] = React.useState<Order | null>(null);
+  const [modalUpdateStatus, setModalUpdateStatus] =
+    React.useState<boolean>(false);
+  const [valueOrderSelect, setValueOrderSelect] = React.useState<Order | null>(
+    null
+  );
 
   const handlerUpdateStatusOrder = (order: Order) => {
     setModalUpdateStatus(true);
     setValueOrderSelect(order);
-  }
+  };
 
-  if (isloading) return (
-    <div className="text-center">loading...</div>
-  )
+  if (isloading) return <div className="text-center">loading...</div>;
 
-  if (!currentPageRows) return (
-    <div className="text-center">Không có dữ liệu</div>
-  )
+  if (!currentPageRows)
+    return <div className="text-center">Không có dữ liệu</div>;
 
   return (
     <div className="space-y-4">
@@ -108,7 +135,6 @@ function OrderTable() {
 
           <tbody>
             {currentPageRows.map((row) => {
-
               return (
                 <tr
                   key={row.orderId}
@@ -133,8 +159,14 @@ function OrderTable() {
                   <td className="px-4 py-3">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Button onClick={(e) => { e.preventDefault(); handlerUpdateStatusOrder(row); }}
-                          size={"icon"} variant="ghost">
+                        <Button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlerUpdateStatusOrder(row);
+                          }}
+                          size={"icon"}
+                          variant="ghost"
+                        >
                           <SquarePen className="size-5 " />
                         </Button>
                       </TooltipTrigger>
@@ -146,8 +178,13 @@ function OrderTable() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Link href={`/admin/orders/${row.orderId}`}>
-                          <Button onClick={(e) => { e.preventDefault() }}
-                            size={"icon"} variant="ghost">
+                          <Button
+                            onClick={(e) => {
+                              e.preventDefault();
+                            }}
+                            size={"icon"}
+                            variant="ghost"
+                          >
                             <Eye className="size-5 " />
                           </Button>
                         </Link>
@@ -163,49 +200,47 @@ function OrderTable() {
           </tbody>
         </table>
       </div>
-      {
-        modalUpdateStatus && (<EditCategoryModal
+      {modalUpdateStatus && (
+        <EditCategoryModal
           closeModal={() => setModalUpdateStatus(false)}
-          initialData={valueOrderSelect} />)
-      }
+          initialData={valueOrderSelect}
+        />
+      )}
     </div>
   );
 }
 
 const OrderPage = () => {
-
   const [selectedOrderId, setSelectedOrderId] = React.useState<string>("all");
   const [valueFindOrder, setValueFindOrder] = React.useState<string>("");
 
   React.useEffect(() => {
     const feachOder = async () => {
       if (!valueFindOrder) await getAllOrderMock();
-      else
-        await getOrderByIdOrProfileMock(selectedOrderId, valueFindOrder);
-    }
+      else await getOrderByIdOrProfileMock(selectedOrderId, valueFindOrder);
+    };
     feachOder();
-  }, [valueFindOrder, selectedOrderId])
+  }, [valueFindOrder, selectedOrderId]);
 
   React.useEffect(() => {
     const feachOder = async () => {
       await getAllOrderMock();
-    }
+    };
 
     feachOder();
-  }, [])
+  }, []);
 
-  const [selectedOrderStatus, setSelectedOrderStatus] = React.useState<string>("");
-
+  const [selectedOrderStatus, setSelectedOrderStatus] =
+    React.useState<string>("");
 
   React.useEffect(() => {
     const feachOder = async () => {
-      if (!selectedOrderStatus || selectedOrderStatus === "all") await getAllOrderMock();
-      else
-        await getOrderByStatusMock(selectedOrderStatus);
-    }
+      if (!selectedOrderStatus || selectedOrderStatus === "all")
+        await getAllOrderMock();
+      else await getOrderByStatusMock(selectedOrderStatus);
+    };
     feachOder();
-  }, [selectedOrderStatus])
-
+  }, [selectedOrderStatus]);
 
   return (
     <div className="container mx-auto px-15 pb-10 space-y-6">
@@ -221,12 +256,15 @@ const OrderPage = () => {
             onChange={(e) => setValueFindOrder(e.target.value)}
           />
 
-          <Select value={selectedOrderId} onValueChange={(value) => setSelectedOrderId(value)}>
+          <Select
+            value={selectedOrderId}
+            onValueChange={(value) => setSelectedOrderId(value)}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Tìm kiếm theo..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectGroup >
+              <SelectGroup>
                 <SelectItem value={"all"}>tất cả</SelectItem>
                 <SelectItem value={"userId"}>Mã khách hàng</SelectItem>
                 <SelectItem value={"paymentId"}>Mã Thanh toán</SelectItem>
@@ -243,13 +281,16 @@ const OrderPage = () => {
             <SelectGroup>
               <SelectLabel>Trạng thái đơn hàng</SelectLabel>
               <SelectItem value="all">Tất cả</SelectItem>
-              {
-                Object.entries(OrderStatusTypeLabel).map(([key, label], index) => <SelectItem key={index} value={key}>{label}</SelectItem>)
-              }
+              {Object.entries(OrderStatusTypeLabel).map(
+                ([key, label], index) => (
+                  <SelectItem key={index} value={key}>
+                    {label}
+                  </SelectItem>
+                )
+              )}
             </SelectGroup>
           </SelectContent>
         </Select>
-
       </div>
 
       {/* table order */}
@@ -262,11 +303,10 @@ const OrderPage = () => {
 
 export default OrderPage;
 
-
 //modal
 function EditCategoryModal({
   closeModal,
-  initialData
+  initialData,
 }: {
   closeModal: () => void;
   initialData: Order | null;
@@ -297,9 +337,7 @@ function EditCategoryModal({
       }}
     >
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 animate-in fade-in zoom-in-95 duration-200">
-        <h2 className="text-xl font-semibold mb-4">
-          Sửa trạng thái đơn hàng
-        </h2>
+        <h2 className="text-xl font-semibold mb-4">Sửa trạng thái đơn hàng</h2>
 
         <div className="space-y-2 mb-4 text-sm">
           <div>
