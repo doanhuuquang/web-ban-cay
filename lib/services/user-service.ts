@@ -22,6 +22,99 @@ const getCurrentUserProfile = async (): Promise<{
   }
 };
 
+const getAllUserProfile = async (): Promise<{
+  code: number;
+  account: User[] | null;
+}> => {
+  try {
+    const getCurrentUserProfileUrl = "/users/all";
+    const response = await instance.get(getCurrentUserProfileUrl);
+
+    return {
+      code: 1,
+      account: response.data.data,
+    };
+  } catch {
+
+    return { code: -1, account: null };
+  }
+};
+
+const getUserProfileById = async (id: string): Promise<{
+  code: number;
+  account: User | null;
+}> => {
+  try {
+    const getCurrentUserProfileUrl = `/users/${id}`;
+    const response = await instance.get(getCurrentUserProfileUrl);
+
+    return {
+      code: 1,
+      account: response.data.data,
+    };
+  } catch {
+
+    return { code: -1, account: null };
+  }
+};
+
+const updateUserStateLock = async (userId: string, lockedReason: string): Promise<{
+  code: number;
+}> => {
+  try {
+    const str = lockedReason || "tai khoan nay da bi khoa";
+    const getCurrentUserProfileUrl = `/users/${userId}/lock-user`;
+    await instance.put(getCurrentUserProfileUrl, null, {
+      params: { lockReason: str }
+    });
+
+    return {
+      code: 1,
+    };
+  } catch {
+
+    return { code: -1 };
+  }
+};
+
+const addAccountSer = async ({ email, password
+}: {
+  email: string;
+  password: string;
+}): Promise<{
+  code: number;
+  account: User | null;
+}> => {
+  try {
+    const getCurrentUserProfileUrl = "/users/registration";
+    const response = await instance.post(getCurrentUserProfileUrl, { email: email, password: password });
+
+    return {
+      code: 1,
+      account: response.data.data,
+    };
+  } catch {
+
+    return { code: -1, account: null };
+  }
+};
+
+const updateUserStateUnlock = async (userId: string): Promise<{
+  code: number;
+}> => {
+  try {
+    const getCurrentUserProfileUrl = `/users/${userId}/unlocked-user`;
+    await instance.put(getCurrentUserProfileUrl);
+
+    return {
+      code: 1,
+    };
+  } catch {
+
+    return { code: -1 };
+  }
+};
+
 const changePassword = async ({
   userId,
   data,
@@ -46,4 +139,8 @@ const changePassword = async ({
   }
 };
 
-export { getCurrentUserProfile, changePassword };
+export {
+  getCurrentUserProfile, changePassword, getAllUserProfile,
+  updateUserStateLock, updateUserStateUnlock, getUserProfileById,
+  addAccountSer
+};

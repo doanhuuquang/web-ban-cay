@@ -2,7 +2,6 @@ import storeOrder, { OrderSummary } from "@/store/storeOder";
 import { getOrderAll, getOrderId, getOrderProfileId, getOrderStatus, updateStatusOrder } from "@/lib/services/order-service";
 import { Order } from "@/lib/models/order";
 import { toast } from "sonner";
-import { OrderStatusType } from "@/lib/type/order-status";
 
 export async function getAllOrderMock() {
     const { setLoading, setAllOrder } = storeOrder.getState();
