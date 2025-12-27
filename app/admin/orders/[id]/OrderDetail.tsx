@@ -18,6 +18,8 @@ import {
     Tag,
     Truck,
     Wallet,
+    X,
+    CheckCircle,
 } from "lucide-react";
 import { getOrderById } from "@/mock/orderMock";
 import { useEffect, useState } from "react";
@@ -30,6 +32,9 @@ import { getUserProfileById } from "@/lib/services/user-service";
 import { User } from "@/lib/models/user";
 import { DeliveryAddress } from "@/lib/models/delivery-address";
 import { getDeliveryAddressByOrderId } from "@/lib/services/address-service";
+import { Button } from "@/components/ui/button";
+import { confirmPayment } from "@/lib/services/payment-service";
+import { toast } from "sonner";
 
 export default function OrderDetail({ id }: { id: string }) {
     const data = storeOrder((s) => s.orderOne)
@@ -38,6 +43,8 @@ export default function OrderDetail({ id }: { id: string }) {
     const [valueAddressId, setValueAddressId] = useState<DeliveryAddress | null>(null)
     const [valuePaymentId, setValuePaymentId] = useState<Payment | null>(null)
     const [valueProfileId, setValueProfileId] = useState<User | null>(null)
+
+    const [modalOpenConfirmPayment, setModalOpenConfirmPayment] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -48,25 +55,28 @@ export default function OrderDetail({ id }: { id: string }) {
     }, [id]);
 
     useEffect(() => {
+        if (!data || !data?.deliveryAddressId || !data?.paymentId || !data?.profileId) return;
         const fetchProduct1 = async () => {
-            const res = await getDeliveryAddressByOrderId({ orderId: data?.deliveryAddressId || "" })
+            const res = await getDeliveryAddressByOrderId({ orderId: data?.deliveryAddressId })
             if (res.code !== -1)
                 setValueAddressId(res.address);
 
-            const res1 = await getPaymentById(data?.paymentId || "")
+            const res1 = await getPaymentById(data?.paymentId)
             if (res1.code === 1)
                 setValuePaymentId(res1.payment);
 
-            const res2 = await getUserProfileById(data?.profileId || "")
+            const res2 = await getUserProfileById(data?.profileId)
             if (res2.code === 1)
                 setValueProfileId(res2.account);
+
         };
 
         fetchProduct1();
     }, [data]);
 
-    if (isLoading || !valuePaymentId || !valueProfileId)
+    if (isLoading || !valuePaymentId )
         return (<div className="text-center">loading...</div>)
+
     if (!data) return (<div className="text-center">không có dữ liệu</div>)
 
     return (
@@ -105,6 +115,13 @@ export default function OrderDetail({ id }: { id: string }) {
                             >
                                 {data.orderStatus}
                             </div>
+
+                            {valuePaymentId.paymentStatus === "PAID" && (
+                                <div className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white text-sm font-semibold px-3 py-1 shadow-md">
+                                    ✓ Đã thanh toán
+                                </div>
+                            )}
+
                         </div>
                         <div className="text-sm text-gray-600 flex items-center gap-5 mt-2">
                             <div className="flex items-center gap-1">
@@ -187,9 +204,9 @@ export default function OrderDetail({ id }: { id: string }) {
 
                                         <div className="flex justify-between border-b py-2 mb-5 text-gray-600">
                                             <span className="flex items-center gap-2">
-                                                <ReceiptText className="w-5 h-5" /> Tạm tính
+                                                <ReceiptText className="w-5 h-5" /> Giá sản phẩm
                                             </span>
-                                            <span>{formatMoney(data.totalAmount)}</span>
+                                            <span>{formatMoney(data.totalAmount - data.shippingFee)}</span>
                                         </div>
 
                                         <div className="flex justify-between border-b py-2 mb-5 text-gray-600">
@@ -275,6 +292,29 @@ export default function OrderDetail({ id }: { id: string }) {
                                 </div>
                             </div>
 
+
+                            {/* Payment */}
+                            {valuePaymentId?.paymentStatus === "UNPAID" &&
+                                (<div className="w-full border mt-4 p-6 bg-white rounded-lg shadow-sm">
+                                    <div className="w-full px-3 mx-auto">
+                                        <h2 className="flex items-center gap-2 font-semibold text-xl w-full pb-5">
+                                            <Receipt className="w-6 h-6" />
+                                            Xác nhận đã thanh toán bằng {valuePaymentId?.paymentMethod === "CASH" ? (
+                                                <span className="flex items-center gap-2 text-green-500">
+                                                    <Wallet className="w-5 h-5" /> tiền mặt :
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-2">
+                                                    <CreditCard className="w-5 h-5" /> Tài khoản :
+                                                </span>
+                                            )}
+                                            <Button onClick={() => setModalOpenConfirmPayment(true)} className="rounded-md ml-4">Xác nhận</Button>
+                                        </h2>
+                                    </div>
+                                </div>
+                                )}
+
+
                         </div>
                     </div>
 
@@ -293,7 +333,7 @@ export default function OrderDetail({ id }: { id: string }) {
                                 </Avatar> */}
                                 <div className="space-y-1">
                                     <div className="font-medium text-xl text-gray-800">
-                                        <h2>{valueProfileId.userProfile?.username}</h2>
+                                        <h2>{valueProfileId?.userProfile?.username}</h2>
                                     </div>
                                     <div className="text-sm text-gray-500">
                                         Mã khách hàng:{" "}
@@ -331,16 +371,20 @@ export default function OrderDetail({ id }: { id: string }) {
                                                 Số điện thoại
                                             </p>
                                             <p className="font-semibold text-md">
-                                                {valueProfileId.userProfile?.mobileNumber}
+                                                {valueProfileId?.userProfile?.mobileNumber}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
+                            <hr />
+                            <br />
+
+
                             {/* shipping detail */}
-                            <div className="bg-white rounded-xl shadow-sm border p-6 space-y-3">
-                                <div className="flex justify-between items-center">
+                            <div className=" flex flex-col gap-y-4">
+                                <div>
                                     <h2 className="text-lg font-semibold text-gray-800">
                                         Thông tin giao hàng
                                     </h2>
@@ -397,11 +441,15 @@ export default function OrderDetail({ id }: { id: string }) {
                                 </div>
                             </div>
 
-
                         </div>
                     </div>
                 </div>
             </div>
+            {modalOpenConfirmPayment
+                && <ConfirmPaymentModal
+                    close={() => setModalOpenConfirmPayment(false)}
+                    id={data.orderId}
+                    isCash={valuePaymentId.paymentMethod === "CASH"} />}
         </div>
     );
 }
@@ -421,3 +469,63 @@ const headerTitleTable = [
     "Số lượng",
 ];
 
+function ConfirmPaymentModal({ close, id, isCash }: { close: () => void, id: string, isCash: boolean }) {
+
+    const handleConfirmPayment = async () => {
+        const res = await confirmPayment(id, isCash)
+        if (res.code === 1) {
+            toast("xác nhận thành công");
+            window.location.reload()
+        }
+        else
+            toast("xác nhận thất bại");
+        close();
+    }
+
+    return (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-lg w-[400px] p-5 relative">
+
+                {/* Close button */}
+                <button
+                    onClick={close}
+                    className="absolute right-3 top-3 text-gray-500 hover:text-black"
+                >
+                    <X size={18} />
+                </button>
+
+                <div className="flex flex-col items-center gap-3 text-center">
+
+                    <CheckCircle className="w-10 h-10 text-green-500" />
+
+                    <h2 className="font-semibold text-lg">
+                        Xác nhận thanh toán
+                    </h2>
+
+                    <p className="text-gray-600 text-sm">
+                        Bạn có chắc chắn muốn xác nhận đơn hàng
+                        <span className="font-semibold"> #{id}</span> đã được thanh toán
+                        {isCash ? " bằng tiền mặt" : " qua thẻ / online"} không?
+                    </p>
+
+                    <div className="flex gap-3 mt-4">
+                        <button
+                            onClick={close}
+                            className="px-4 py-2 rounded-md border"
+                        >
+                            Hủy
+                        </button>
+
+                        <button
+                            onClick={() => handleConfirmPayment()}
+                            className="px-4 py-2 rounded-md bg-green-600 text-white"
+                        >
+                            Xác nhận
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    );
+}

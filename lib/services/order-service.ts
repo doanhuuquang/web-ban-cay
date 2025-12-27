@@ -1,6 +1,5 @@
 import { Order } from "@/lib/models/order";
 import instance from "@/lib/services/axios-config";
-import axios from "axios";
 import { Payment } from "../models/payment";
 
 const placeOrderFromCart = async (data: {

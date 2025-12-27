@@ -50,7 +50,7 @@ function OrderStatsList() {
   const data = [
     {
       title: "Tổng doanh thu",
-      countStats: stats?.totalIncome ?? 0,
+      countStats: formatMoney(stats?.totalIncome) ?? 0,
       icon: DollarSign,
     },
     {
@@ -75,15 +75,15 @@ function OrderStatsList() {
         return (
           <div
             key={os.title}
-            className="flex items-center justify-between h-fit py-5 px-4 bg-white border-r-2 last:border-r-0"
+            className="flex flex-col gap-y-3 items-end justify-end h-fit py-5 px-4 bg-white border-r-2 last:border-r-0"
           >
-            <div>
-              <h1 className="text-xl font-semibold">{os.countStats}</h1>
+            <div className="flex rounded-xl bg-gray-100 px-2 py-0.5">
+              <Icon className="text-gray-600" />
               <p className="text-sm text-gray-500">{os.title}</p>
             </div>
 
-            <div className="p-3 rounded-xl bg-gray-100">
-              <Icon className="text-gray-600" />
+            <div>
+              <h3 className="text-xl font-semibold">{os.countStats}</h3>
             </div>
           </div>
         );
@@ -157,23 +157,6 @@ function OrderTable() {
                   </td>
 
                   <td className="px-4 py-3">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlerUpdateStatusOrder(row);
-                          }}
-                          size={"icon"}
-                          variant="ghost"
-                        >
-                          <SquarePen className="size-5 " />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Sửa trạng thái</p>
-                      </TooltipContent>
-                    </Tooltip>
 
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -190,6 +173,25 @@ function OrderTable() {
                         <p>Xem chi tiết</p>
                       </TooltipContent>
                     </Tooltip>
+                    {row.orderStatus !== "DELIVERED" &&
+                      (<Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handlerUpdateStatusOrder(row);
+                            }}
+                            size={"icon"}
+                            variant="ghost"
+                          >
+                            <SquarePen className="size-5 " />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Sửa trạng thái</p>
+                        </TooltipContent>
+                      </Tooltip>)}
+
                   </td>
                 </tr>
               );
@@ -294,13 +296,12 @@ const OrderPage = () => {
             <SelectGroup>
               <SelectLabel>Trạng thái đơn hàng</SelectLabel>
               <SelectItem value="all">Tất cả</SelectItem>
-              {Object.entries(OrderStatusTypeLabel).map(
-                ([key, label], index) => (
-                  <SelectItem key={index} value={key}>
-                    {label}
-                  </SelectItem>
-                )
-              )}
+              {Object.entries(OrderStatusTypeLabel).map(([key, label]) => (
+                <SelectItem key={key} value={key}>
+                  {label}
+                </SelectItem>
+              ))}
+
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -429,13 +430,15 @@ function EditCategoryModal({
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Trạng thái</SelectLabel>
-                {Object.entries(OrderStatusTypeLabel).map(
-                  ([key, label], index) => (
-                    <SelectItem key={index} value={key}>
-                      {label}
-                    </SelectItem>
-                  )
-                )}
+                {Object.entries(OrderStatusTypeLabel)
+                  .filter(([value]) => value !== "DELIVERED")
+                  .map(
+                    ([key, label], index) => (
+                      <SelectItem key={index} value={key}>
+                        {label}
+                      </SelectItem>
+                    )
+                  )}
               </SelectGroup>
             </SelectContent>
           </Select>
