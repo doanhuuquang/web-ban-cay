@@ -1,5 +1,6 @@
 import { Role } from "@/lib/models/role";
 import { UserProfile } from "@/lib/models/user-profile";
+import { Cart } from "./cart";
 
 export class User {
   id: string;
@@ -9,6 +10,7 @@ export class User {
   lockedReason:string;
   lockedAt:Date;
   userProfile: UserProfile | null;
+  cartResponse: Cart | null;
 
   constructor(
     id: string,
@@ -17,7 +19,8 @@ export class User {
     lockedReason: string,
     lockedAt: Date,
     roles: Role[],
-    userProfile: UserProfile
+    userProfile: UserProfile,
+    cartResponse:Cart,
   ) {
     this.id = id;
     this.email = email;
@@ -26,5 +29,6 @@ export class User {
     this.lockedAt = lockedAt;
     this.roles = roles;
     this.userProfile = userProfile;
+    this.cartResponse=cartResponse
   }
 }

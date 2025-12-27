@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import {
+    User as HH,
     Calendar,
     CircleUser,
     ClipboardCheck,
@@ -23,18 +24,18 @@ import { useEffect, useState } from "react";
 import storeOrder from "@/store/storeOder";
 import { OrderStatusType } from "@/lib/type/order-status";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { Address } from "@/lib/models/address";
 import { Payment } from "@/lib/models/payment";
-import { getAddressById } from "@/lib/services/address-service";
 import { getPaymentById } from "@/lib/services/order-service";
 import { getUserProfileById } from "@/lib/services/user-service";
 import { User } from "@/lib/models/user";
+import { DeliveryAddress } from "@/lib/models/delivery-address";
+import { getDeliveryAddressByOrderId } from "@/lib/services/address-service";
 
 export default function OrderDetail({ id }: { id: string }) {
     const data = storeOrder((s) => s.orderOne)
     const isLoading = storeOrder((s) => s.loading)
 
-    const [valueAddressId, setValueAddressId] = useState<Address | null>(null)
+    const [valueAddressId, setValueAddressId] = useState<DeliveryAddress | null>(null)
     const [valuePaymentId, setValuePaymentId] = useState<Payment | null>(null)
     const [valueProfileId, setValueProfileId] = useState<User | null>(null)
 
@@ -48,7 +49,7 @@ export default function OrderDetail({ id }: { id: string }) {
 
     useEffect(() => {
         const fetchProduct1 = async () => {
-            const res = await getAddressById({ addressId: data?.deliveryAddressId || "" })
+            const res = await getDeliveryAddressByOrderId({ orderId: data?.deliveryAddressId || "" })
             if (res.code !== -1)
                 setValueAddressId(res.address);
 
@@ -155,7 +156,7 @@ export default function OrderDetail({ id }: { id: string }) {
                                                     className="hover:bg-gray-50 transition"
                                                 >
                                                     <td className="px-4 py-3">{data.productId}</td>
-                                                    <td className="px-4 py-3">{data.orderItemId}</td>
+                                                    <td className="px-4 py-3">{data.productName}</td>
                                                     <td className="px-4 py-3 font-medium">
                                                         {data.price.toLocaleString()} đ
                                                     </td>
@@ -236,13 +237,6 @@ export default function OrderDetail({ id }: { id: string }) {
                                                 <Truck className="w-5 h-5" /> Trạng thái thanh toán
                                             </span>
                                             <span>{valuePaymentId?.paymentStatus || "—"}</span>
-                                        </div>
-
-                                        <div className="flex justify-between border-b py-2 mb-2">
-                                            <span className="flex items-center gap-2">
-                                                <ClipboardCheck className="w-5 h-5" /> Trạng thái giao dịch
-                                            </span>
-                                            <span>{valuePaymentId?.status || "—"}</span>
                                         </div>
 
                                         <div className="flex justify-between border-b py-2 mb-2">
@@ -358,7 +352,7 @@ export default function OrderDetail({ id }: { id: string }) {
                                     </div>
                                     <div className="flex flex-col gap-1">
                                         <p className="font-semibold ">Địa chỉ giao hàng</p>
-                                        <p className="font-medium text-sm">{valueAddressId?.shortAddress}</p>
+                                        <p className="font-medium text-sm">{valueAddressId?.street},{valueAddressId?.ward},{valueAddressId?.district},{valueAddressId?.province}</p>
                                     </div>
                                 </div>
 
@@ -371,7 +365,7 @@ export default function OrderDetail({ id }: { id: string }) {
                                             <p className="text-sm text-gray-600">
                                                 số điện thoại
                                             </p>
-                                            <p className="text-gray-900 font-bold">{valueAddressId?.phone}</p>
+                                            <p className="text-gray-900 font-bold">{valueAddressId?.recipientPhone}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -379,15 +373,13 @@ export default function OrderDetail({ id }: { id: string }) {
                                 <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                                     <div className="flex items-center gap-3">
                                         <div className="p-3">
-                                            <Truck className="w-6 h-6 text-blue-600" />
+                                            <HH className="w-6 h-6 text-blue-600" />
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-600">
-                                                Ngày đặt hàng
+                                                Tên người nhận
                                             </p>
-                                            <p className="text-gray-900 font-bold">{valueAddressId?.createdAt
-                                                ? new Date(valueAddressId.createdAt).toLocaleDateString("vi-VN")
-                                                : ""}</p>
+                                            <p className="text-gray-900 font-bold">{valueAddressId?.recipientName}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -399,7 +391,7 @@ export default function OrderDetail({ id }: { id: string }) {
                                         </div>
                                         <div>
                                             <p className="text-sm text-gray-600">Mã vận đơn</p>
-                                            <p className="text-gray-900 font-bold">#{data.deliveryAddressId}</p>
+                                            <p className="text-gray-900 font-bold">#{valueAddressId?.postalCode}</p>
                                         </div>
                                     </div>
                                 </div>
