@@ -16,8 +16,10 @@ import storeAccount from "@/store/storeAccount";
 import { Button } from "@/components/ui/button";
 import { User } from "@/lib/models/user";
 import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-function CustomerTable() {
+function CustomerTable({ sort }: { sort: string }) {
 
   const currentPageRows = storeAccount((s) => s.AccountAll)
   const [statusLock, setStatusLock] = useState<User | null>(null);
@@ -47,7 +49,7 @@ function CustomerTable() {
           </thead>
 
           <tbody>
-            {currentPageRows.map((row) => {
+            {(sort === "DESC" ? currentPageRows.slice().reverse() : currentPageRows).map((row) => {
               return (
                 <tr
                   key={row.id}
@@ -57,7 +59,7 @@ function CustomerTable() {
                   <td className="px-4 py-3">{row.email}</td>
                   <td className="px-4 py-3">{row.roles.map((role, index) => <p key={index}>{role.roleName}</p>)}</td>
                   <td className="px-4 py-3">{row.roles.some(r => r.roleName !== "ADMIN") ? (
-                    <Eye className="w-5 h-5 text-gray-400" />
+                    <Link href={`/admin/users/customer/${row.id}`}><Eye className="w-5 h-5 text-gray-400" /></Link>
                   ) : (
                     <EyeOff className="w-5 h-5 text-gray-400" />
                   )}</td>
@@ -94,6 +96,7 @@ export default function CustomerPage() {
 
   const [modalOpenAddAccount, setModalOpenAddAccount] = useState<boolean>(false);
   const [stringById, setStringById] = useState<string>("");
+  const [selectedSort, setSelectedSort] = useState<string>("DESC");
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -119,26 +122,45 @@ export default function CustomerPage() {
     <div className="container mx-auto px-15 pb-10 space-y-6">
       <div className="font-semibold text-3xl">Khách hàng</div>
       {/* top table */}
-      <div className="flex items-center py-4 justify-end gap-2">
-        {/* search input */}
-        <Input
-          placeholder="Tìm kiếm theo Id..."
-          className="max-w-sm rounded-md"
-          value={stringById}
-          onChange={(e) => setStringById(e.target.value)}
-        />
 
-        <button
-          onClick={() => setModalOpenAddAccount(true)}
-          className="px-4 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-sm 
+      <div className="flex justify-between items-center">
+        <Select
+          value={selectedSort}
+          onValueChange={(value) => setSelectedSort(value)}
+        >
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Sắp xếp theo..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value={"DESC"}>Mới nhất</SelectItem>
+              <SelectItem value={"ASC"}>Cũ nhất</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        <div className="flex items-center py-4 justify-end gap-2">
+          {/* search input */}
+          <Input
+            placeholder="Tìm kiếm theo Id"
+            className="max-w-sm rounded-md"
+            value={stringById}
+            onChange={(e) => setStringById(e.target.value)}
+          />
+
+          <button
+            onClick={() => setModalOpenAddAccount(true)}
+            className="px-4 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-sm 
              hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 
              flex items-center gap-2 cursor-pointer"
-        >
-          <Plus size={18} />
-          Thêm
-        </button>
+          >
+            <Plus size={18} />
+            Thêm
+          </button>
+        </div>
       </div>
-      <CustomerTable />
+
+      <CustomerTable sort={selectedSort} />
       {/* Data table */}
       {modalOpenAddAccount && (
         <ModalCustomer

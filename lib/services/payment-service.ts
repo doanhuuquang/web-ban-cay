@@ -48,5 +48,5 @@ const confirmPayment = async (orderId: string, isCash: boolean): Promise<{
 };
 
 export {
-    confirmPayment
+    confirmCashPayment
 };

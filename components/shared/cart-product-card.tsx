@@ -28,6 +28,7 @@ import { REMOVE_ITEM_FROM_CART_SUCCESS_MESSAGE } from "@/lib/constants/success-m
 import { updateCartItemQuantity } from "@/lib/services/cart-item-service";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { formatMoney } from "@/lib/helpers/format-money";
+import imgDef from "@/public/assets/images/products/hoacuc-1-gplant.jpg"
 
 export default function CartItemCard({
   cartId,
@@ -147,7 +148,7 @@ export default function CartItemCard({
 
       <div className="w-full max-w-25 relative aspect-3/4">
         <Image
-          src={product.images[0].url}
+          src={product?.images[0]?.url ?? imgDef}
           alt={product.productName}
           fill
           className="absolute top-0 left-0 object-center object-contain"

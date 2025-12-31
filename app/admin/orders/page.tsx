@@ -42,6 +42,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Order } from "@/lib/models/order";
 import Link from "next/link";
+import { confirmCashPayment } from "@/lib/services/payment-service";
+import { toast } from "sonner";
 
 function OrderStatsList() {
   const F = storeOrder((s) => s.orderAll);
@@ -92,7 +94,7 @@ function OrderStatsList() {
   );
 }
 
-function OrderTable() {
+function OrderTable({ sort }: { sort: string }) {
   //data
   const isloading = storeOrder((s) => s.loading);
   const currentPageRows = storeOrder((s) => s.orderAll);
@@ -134,14 +136,14 @@ function OrderTable() {
           </thead>
 
           <tbody>
-            {currentPageRows.map((row) => {
+            {(sort === "ASC" ? currentPageRows : currentPageRows.slice().reverse()).map((row) => {
               return (
                 <tr
                   key={row.orderId}
                   className="border-b hover:bg-gray-50 transition"
                 >
                   <td className="px-4 py-3">{row.orderId}</td>
-                  <td className="px-4 py-3">{row.paymentId}</td>
+                  <td className="px-4 py-3">{row.paymentId ?? "VNPay"}</td>
                   <td className="px-4 py-3">{row.profileId}</td>
                   <td className="px-4 py-3">{row.deliveryAddressId}</td>
                   <td className="px-4 py-3">{formatMoney(row.shippingFee)}</td>
@@ -211,6 +213,7 @@ function OrderTable() {
 
 const OrderPage = () => {
   const [selectedOrderId, setSelectedOrderId] = React.useState<string>("all");
+  const [selectedSort, setSelectedSort] = React.useState<string>("DESC");
   const [valueFindOrder, setValueFindOrder] = React.useState<string>("");
 
   const [from, setFrom] = React.useState("");
@@ -282,29 +285,49 @@ const OrderPage = () => {
               <SelectGroup>
                 <SelectItem value={"all"}>tất cả</SelectItem>
                 <SelectItem value={"userId"}>Mã khách hàng</SelectItem>
-                <SelectItem value={"paymentId"}>Mã Thanh toán</SelectItem>
+                <SelectItem value={"orderId"}>Mã đơn hàng</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
-        <Select onValueChange={(value) => setSelectedOrderStatus(value)}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Chọn trạng thái đơn hàng" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Trạng thái đơn hàng</SelectLabel>
-              <SelectItem value="all">Tất cả</SelectItem>
-              {Object.entries(OrderStatusTypeLabel).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
-                  {label}
-                </SelectItem>
-              ))}
+        <div className="flex gap-x-2">
+          <Select
+            value={selectedSort}
+            onValueChange={(value) => setSelectedSort(value)}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sắp xếp theo..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value={"DESC"}>Mới nhất</SelectItem>
+                <SelectItem value={"ASC"}>Cũ nhất</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          <Select onValueChange={(value) => setSelectedOrderStatus(value)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Chọn trạng thái đơn hàng" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Trạng thái đơn hàng</SelectLabel>
+                <SelectItem value="all">Tất cả</SelectItem>
+                {Object.entries(OrderStatusTypeLabel)
+                  .filter(([v]) => v !== "RETURNED")
+                  .map(([key, label]) => (
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
+                  ))}
+
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
       </div>
 
       <div className="flex justify-end">
@@ -357,7 +380,7 @@ const OrderPage = () => {
 
       {/* table order */}
       <div>
-        <OrderTable />
+        <OrderTable sort={selectedSort}/>
       </div>
     </div>
   );
@@ -384,6 +407,17 @@ function EditCategoryModal({
     if (!initialData || !selectStatus) return;
     try {
       setLoading(true);
+      if (selectStatus === "DELIVERED" && !initialData.paymentId) {
+        const res = await confirmCashPayment(initialData.orderId)
+        if (res.code === 1) {
+          toast("xác nhận thành công");
+          window.location.reload()
+        }
+        else
+          toast("xác nhận thất bại");
+        close();
+      }
+
       await UpdateOrderStatusMock(initialData.orderId, selectStatus);
       closeModal();
     } finally {
@@ -431,7 +465,7 @@ function EditCategoryModal({
               <SelectGroup>
                 <SelectLabel>Trạng thái</SelectLabel>
                 {Object.entries(OrderStatusTypeLabel)
-                  .filter(([value]) => value !== "DELIVERED")
+                  .filter(([value]) => (value !== "RETURNED"))
                   .map(
                     ([key, label], index) => (
                       <SelectItem key={index} value={key}>

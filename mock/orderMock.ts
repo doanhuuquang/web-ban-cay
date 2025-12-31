@@ -71,11 +71,12 @@ export async function getOrderByIdOrProfileMock(stype: string, param: string) {
         setAllOrder(res1.order);
     }
 
-    if (stype === "paymentId") {
+    if (stype === "orderId") {
 
         const res2 = await getOrderId(param);
         if (res2.code == 1)
             setOrder(res2.order);
+        else setOrder(null);
     }
 
     setLoading(false);

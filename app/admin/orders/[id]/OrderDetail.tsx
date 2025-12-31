@@ -33,11 +33,12 @@ import { User } from "@/lib/models/user";
 import { DeliveryAddress } from "@/lib/models/delivery-address";
 import { getDeliveryAddressByOrderId } from "@/lib/services/address-service";
 import { Button } from "@/components/ui/button";
-import { confirmPayment } from "@/lib/services/payment-service";
+import { confirmCashPayment } from "@/lib/services/payment-service";
 import { toast } from "sonner";
 
 export default function OrderDetail({ id }: { id: string }) {
     const data = storeOrder((s) => s.orderOne)
+    console.log(data)
     const isLoading = storeOrder((s) => s.loading)
 
     const [valueAddressId, setValueAddressId] = useState<DeliveryAddress | null>(null)
@@ -74,7 +75,7 @@ export default function OrderDetail({ id }: { id: string }) {
         fetchProduct1();
     }, [data]);
 
-    if (isLoading || !valuePaymentId )
+    if (isLoading)
         return (<div className="text-center">loading...</div>)
 
     if (!data) return (<div className="text-center">không có dữ liệu</div>)
@@ -116,11 +117,15 @@ export default function OrderDetail({ id }: { id: string }) {
                                 {data.orderStatus}
                             </div>
 
-                            {valuePaymentId.paymentStatus === "PAID" && (
+                            {(valuePaymentId?.paymentStatus === "PAID" || !data.paymentId) ? (
                                 <div className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white text-sm font-semibold px-3 py-1 shadow-md">
                                     ✓ Đã thanh toán
                                 </div>
-                            )}
+                            ) :
+
+                                (
+                                    <Button onClick={() => setModalOpenConfirmPayment(true)} className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-red-400 to-red-500 text-white text-sm font-semibold px-3 py-1 shadow-md">chưa thanh toán</Button>
+                                )}
 
                         </div>
                         <div className="text-sm text-gray-600 flex items-center gap-5 mt-2">
@@ -206,7 +211,9 @@ export default function OrderDetail({ id }: { id: string }) {
                                             <span className="flex items-center gap-2">
                                                 <ReceiptText className="w-5 h-5" /> Giá sản phẩm
                                             </span>
-                                            <span>{formatMoney(data.totalAmount - data.shippingFee)}</span>
+                                            <span>{formatMoney(
+                                                data.orderItemResponses.reduce((sum, p) => (sum + p.price), 0)
+                                            )}</span>
                                         </div>
 
                                         <div className="flex justify-between border-b py-2 mb-5 text-gray-600">
@@ -231,89 +238,67 @@ export default function OrderDetail({ id }: { id: string }) {
                                 </div>
                             </div>
 
-
-                            {/* Payment */}
-                            <div className="w-full border mt-4 p-6 bg-white rounded-lg shadow-sm">
-                                <div className="w-full px-3 mx-auto">
-                                    <h1 className="flex items-center gap-2 font-semibold text-2xl w-full pb-5">
-                                        <Receipt className="w-6 h-6" />
-                                        Tình trạng thanh toán
-                                    </h1>
-
-                                    <div className="font-semibold space-y-2 text-gray-600">
-
-                                        <div className="flex justify-between border-b py-2 mb-2">
-                                            <span className="flex items-center gap-2">
-                                                <ReceiptText className="w-5 h-5" /> Phương thức thanh toán
-                                            </span>
-                                            <span>{valuePaymentId?.paymentMethod || "—"}</span>
-                                        </div>
-
-                                        <div className="flex justify-between border-b py-2 mb-2">
-                                            <span className="flex items-center gap-2">
-                                                <Truck className="w-5 h-5" /> Trạng thái thanh toán
-                                            </span>
-                                            <span>{valuePaymentId?.paymentStatus || "—"}</span>
-                                        </div>
-
-                                        <div className="flex justify-between border-b py-2 mb-2">
-                                            <span className="flex items-center gap-2">
-                                                <Wallet className="w-5 h-5" /> Số tiền
-                                            </span>
-                                            <span>{formatMoney(Number(valuePaymentId?.amount))}</span>
-                                        </div>
-
-                                        <div className="flex justify-between border-b py-2 mb-2">
-                                            <span className="flex items-center gap-2">
-                                                <Tag className="w-5 h-5" /> Mã giao dịch
-                                            </span>
-                                            <span>{valuePaymentId?.vnpTxnRef || "—"}</span>
-                                        </div>
-
-                                        <div className="flex justify-between border-b py-2 mb-2">
-                                            <span className="flex items-center gap-2">
-                                                <Calendar className="w-5 h-5" /> Ngày tạo giao dịch
-                                            </span>
-                                            <span>
-                                                {valuePaymentId?.paymentDate
-                                                    ? new Date(valuePaymentId.paymentDate).toLocaleString("vi-VN")
-                                                    : "—"}
-                                            </span>
-                                        </div>
-
-                                        <div className="flex justify-between border-b py-2 mb-2">
-                                            <span className="flex items-center gap-2">
-                                                <CreditCard className="w-5 h-5" /> Loại thẻ
-                                            </span>
-                                            <span>{valuePaymentId?.cardType || "—"}</span>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            {/* Payment */}
-                            {valuePaymentId?.paymentStatus === "UNPAID" &&
-                                (<div className="w-full border mt-4 p-6 bg-white rounded-lg shadow-sm">
+                            {
+                                data.paymentId
+                                && (<div className="w-full border mt-4 p-6 bg-white rounded-lg shadow-sm">
                                     <div className="w-full px-3 mx-auto">
-                                        <h2 className="flex items-center gap-2 font-semibold text-xl w-full pb-5">
+                                        <h1 className="flex items-center gap-2 font-semibold text-2xl w-full pb-5">
                                             <Receipt className="w-6 h-6" />
-                                            Xác nhận đã thanh toán bằng {valuePaymentId?.paymentMethod === "CASH" ? (
-                                                <span className="flex items-center gap-2 text-green-500">
-                                                    <Wallet className="w-5 h-5" /> tiền mặt :
-                                                </span>
-                                            ) : (
+                                            Tình trạng thanh toán
+                                        </h1>
+
+                                        <div className="font-semibold space-y-2 text-gray-600">
+
+                                            <div className="flex justify-between border-b py-2 mb-2">
                                                 <span className="flex items-center gap-2">
-                                                    <CreditCard className="w-5 h-5" /> Tài khoản :
+                                                    <ReceiptText className="w-5 h-5" /> Phương thức thanh toán
                                                 </span>
-                                            )}
-                                            <Button onClick={() => setModalOpenConfirmPayment(true)} className="rounded-md ml-4">Xác nhận</Button>
-                                        </h2>
+                                                <span>{valuePaymentId?.paymentMethod || "—"}</span>
+                                            </div>
+
+                                            <div className="flex justify-between border-b py-2 mb-2">
+                                                <span className="flex items-center gap-2">
+                                                    <Truck className="w-5 h-5" /> Trạng thái thanh toán
+                                                </span>
+                                                <span>{valuePaymentId?.paymentStatus || "—"}</span>
+                                            </div>
+
+                                            <div className="flex justify-between border-b py-2 mb-2">
+                                                <span className="flex items-center gap-2">
+                                                    <Wallet className="w-5 h-5" /> Số tiền
+                                                </span>
+                                                <span>{formatMoney(Number(valuePaymentId?.amount))}</span>
+                                            </div>
+
+                                            <div className="flex justify-between border-b py-2 mb-2">
+                                                <span className="flex items-center gap-2">
+                                                    <Tag className="w-5 h-5" /> Mã giao dịch
+                                                </span>
+                                                <span>{valuePaymentId?.vnpTxnRef || "—"}</span>
+                                            </div>
+
+                                            <div className="flex justify-between border-b py-2 mb-2">
+                                                <span className="flex items-center gap-2">
+                                                    <Calendar className="w-5 h-5" /> Ngày tạo giao dịch
+                                                </span>
+                                                <span>
+                                                    {valuePaymentId?.paymentDate
+                                                        ? new Date(valuePaymentId.paymentDate).toLocaleString("vi-VN")
+                                                        : "—"}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex justify-between border-b py-2 mb-2">
+                                                <span className="flex items-center gap-2">
+                                                    <CreditCard className="w-5 h-5" /> Loại thẻ
+                                                </span>
+                                                <span>{valuePaymentId?.cardType || "—"}</span>
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                                 )}
-
 
                         </div>
                     </div>
@@ -449,7 +434,7 @@ export default function OrderDetail({ id }: { id: string }) {
                 && <ConfirmPaymentModal
                     close={() => setModalOpenConfirmPayment(false)}
                     id={data.orderId}
-                    isCash={valuePaymentId.paymentMethod === "CASH"} />}
+                />}
         </div>
     );
 }
@@ -469,10 +454,10 @@ const headerTitleTable = [
     "Số lượng",
 ];
 
-function ConfirmPaymentModal({ close, id, isCash }: { close: () => void, id: string, isCash: boolean }) {
+function ConfirmPaymentModal({ close, id }: { close: () => void, id: string }) {
 
     const handleConfirmPayment = async () => {
-        const res = await confirmPayment(id, isCash)
+        const res = await confirmCashPayment(id)
         if (res.code === 1) {
             toast("xác nhận thành công");
             window.location.reload()
@@ -505,7 +490,7 @@ function ConfirmPaymentModal({ close, id, isCash }: { close: () => void, id: str
                     <p className="text-gray-600 text-sm">
                         Bạn có chắc chắn muốn xác nhận đơn hàng
                         <span className="font-semibold"> #{id}</span> đã được thanh toán
-                        {isCash ? " bằng tiền mặt" : " qua thẻ / online"} không?
+                        và giao hàng thành công không?
                     </p>
 
                     <div className="flex gap-3 mt-4">
