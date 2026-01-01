@@ -118,20 +118,8 @@ const data = {
       icon: BadgeDollarSign,
       items: [
         {
-          title: "Flash sale",
-          url: "#",
-        },
-        {
-          title: "Tạo mã giảm giá",
-          url: "#",
-        },
-        {
-          title: "Giảm giá theo mùa",
-          url: "#",
-        },
-        {
-          title: "Giảm giá theo danh mục",
-          url: "#",
+          title: "Mã giảm giá",
+          url: "/admin/coupons",
         },
       ],
     },

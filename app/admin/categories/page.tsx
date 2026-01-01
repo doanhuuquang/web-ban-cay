@@ -167,6 +167,83 @@ function CategoryTable({ sort }: { sort: string }) {
   );
 }
 
+export default function CategoryPage() {
+  const [valueSearch, setValueSearch] = React.useState<string>("");
+  const [selectedSort, setSelectedSort] = React.useState<string>("DESC");
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      await getAllCategoryMock();
+    };
+
+    fetchCategory();
+  }, []);
+
+  const [modalOpen, setModalOpen] = React.useState<boolean>(false);
+
+  useEffect(() => {
+    const feactGetCategory = async (valueSearch: string) => {
+      if (!valueSearch) await getAllCategoryMock();
+      else await getCategoryByIdOrNameMock(valueSearch);
+    };
+
+    feactGetCategory(valueSearch);
+  }, [valueSearch]);
+
+  return (
+    <div className="container p-6 min-h-screen">
+      <h1 className="text-2xl font-semibold mb-6">Danh mục sản phẩm</h1>
+      {/* HEADER */}
+      <div className="flex items-center justify-between p-3 border mb-2 rounded-xl">
+        <input
+          placeholder="Tìm kiếm theo ID"
+          value={valueSearch}
+          onChange={(e) => setValueSearch(e.target.value)}
+          className="border rounded-md px-3 py-2 text-sm w-80 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+
+        <div className="flex gap-x-5">
+          <Select
+            value={selectedSort}
+            onValueChange={(value) => setSelectedSort(value)}
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Sắp xếp theo..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value={"DESC"}>Mới nhất</SelectItem>
+                <SelectItem value={"ASC"}>Cũ nhất</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-md text-sm font-medium flex gap-2"
+            >
+              <Plus size={18} />
+              Thêm danh mục
+            </button>
+
+            {modalOpen && (
+              <CategoryModal
+                closeModal={() => {
+                  setModalOpen(false);
+                }}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+      <CategoryTable sort={selectedSort} />
+    </div>
+  );
+}
+
+
+//modal
 type CategoryModalUpdate = {
   closeModal: () => void;
   initialData: Category | null;
@@ -422,81 +499,6 @@ function DeleteCategoryModal({ closeModal, initialData }: CategoryModalUpdate) {
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-export default function CategoryPage() {
-  const [valueSearch, setValueSearch] = React.useState<string>("");
-  const [selectedSort, setSelectedSort] = React.useState<string>("DESC");
-
-  useEffect(() => {
-    const fetchCategory = async () => {
-      await getAllCategoryMock();
-    };
-
-    fetchCategory();
-  }, []);
-
-  const [modalOpen, setModalOpen] = React.useState<boolean>(false);
-
-  useEffect(() => {
-    const feactGetCategory = async (valueSearch: string) => {
-      if (!valueSearch) await getAllCategoryMock();
-      else await getCategoryByIdOrNameMock(valueSearch);
-    };
-
-    feactGetCategory(valueSearch);
-  }, [valueSearch]);
-
-  return (
-    <div className="container p-6 min-h-screen">
-      <h1 className="text-2xl font-semibold mb-6">Danh mục sản phẩm</h1>
-      {/* HEADER */}
-      <div className="flex items-center justify-between p-3 border mb-2 rounded-xl">
-        <input
-          placeholder="Tìm kiếm theo ID"
-          value={valueSearch}
-          onChange={(e) => setValueSearch(e.target.value)}
-          className="border rounded-md px-3 py-2 text-sm w-80 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
-
-        <div className="flex gap-x-5">
-          <Select
-            value={selectedSort}
-            onValueChange={(value) => setSelectedSort(value)}
-          >
-            <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Sắp xếp theo..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value={"DESC"}>Mới nhất</SelectItem>
-                <SelectItem value={"ASC"}>Cũ nhất</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setModalOpen(true)}
-              className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-md text-sm font-medium flex gap-2"
-            >
-              <Plus size={18} />
-              Thêm danh mục
-            </button>
-
-            {modalOpen && (
-              <CategoryModal
-                closeModal={() => {
-                  setModalOpen(false);
-                }}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-      <CategoryTable sort={selectedSort} />
     </div>
   );
 }

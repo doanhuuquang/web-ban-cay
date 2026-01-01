@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import {
   Plus,
   Eye,
-  EyeOff,
   Lock,
   Unlock,
 } from "lucide-react";
@@ -58,21 +57,20 @@ function CustomerTable({ sort }: { sort: string }) {
                   <td className="px-4 py-3">{row.id}</td>
                   <td className="px-4 py-3">{row.email}</td>
                   <td className="px-4 py-3">{row.roles.map((role, index) => <p key={index}>{role.roleName}</p>)}</td>
-                  <td className="px-4 py-3">{row.roles.some(r => r.roleName !== "ADMIN") ? (
-                    <Link href={`/admin/users/customer/${row.id}`}><Eye className="w-5 h-5 text-gray-400" /></Link>
-                  ) : (
-                    <EyeOff className="w-5 h-5 text-gray-400" />
+                  <td className="px-4 py-3">{row.roles.some(r => r.roleName !== "ADMIN") && (
+                    <Link href={`/admin/users/${row.id}`}><Eye className="w-5 h-5 text-gray-400" /></Link>
                   )}</td>
                   <td>
-                    <Button variant="ghost" size="icon-lg"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleUpdateStateLock(row);
-                      }}>
-                      {row.enabled ?
-                        (<Lock className="w-5 h-5 text-gray-400" />)
-                        : <Unlock className="w-5 h-5 text-gray-400" />}
-                    </Button>
+                    {row.roles.some(r => r.roleName !== "ADMIN") &&
+                      (<Button variant="ghost" size="icon-lg"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleUpdateStateLock(row);
+                        }}>
+                        {row.enabled ?
+                          (<Lock className="w-5 h-5 text-gray-400" />)
+                          : <Unlock className="w-5 h-5 text-gray-400" />}
+                      </Button>)}
                   </td>
 
                   {
