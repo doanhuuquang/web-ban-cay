@@ -6,6 +6,7 @@ import { getProductById } from "@/lib/services/product-service";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import imgDef from "@/public/assets/images/products/hoacuc-1-gplant.jpg"
 
 import { formatMoney } from "@/lib/helpers/format-money";
 
@@ -33,7 +34,7 @@ export default function CheckoutProductCard({
     <div className="w-full h-fit flex items-center gap-4 relative">
       <div className="w-full max-w-20 relative aspect-3/4">
         <Image
-          src={product.images[0].url}
+          src={product?.images[0]?.url ?? imgDef}
           alt={product.productName}
           fill
           className="absolute top-0 left-0 object-center object-contain"

@@ -17,6 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
+import imgdefault from "@/public/assets/images/products/hoacuc-1-gplant.jpg"
 
 export default function ProductCard({
   product,
@@ -52,7 +53,7 @@ export default function ProductCard({
                 : ADD_ITEM_TO_CART_SUCCESS_MESSAGE,
             action: {
               label: "Oke",
-              onClick: () => {},
+              onClick: () => { },
             },
           }
         );
@@ -70,14 +71,14 @@ export default function ProductCard({
       <div className="w-full relative">
         <div className="w-full h-full relative aspect-3/4 overflow-hidden">
           <Image
-            src={product.images[0].url}
+            src={product?.images?.[0]?.url ?? imgdefault}
             alt="image"
             fill
             className="absolute top-0 left-0 z-1 object-center object-cover"
           />
 
           <Image
-            src={product.images[1].url}
+            src={product?.images[1]?.url ?? imgdefault}
             alt="image"
             fill
             className="absolute top-0 left-0 object-center object-cover z-2 opacity-0 hover:opacity-100 transition-all"

@@ -65,6 +65,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
+import imgDef from "@/public/assets/images/products/hoacuc-1-gplant.jpg"
 
 export default function OrderDetail({ orderId }: { orderId: string }) {
   const [isLoadingOrder, setIsLoadingOrder] = React.useState<boolean>(true);
@@ -410,7 +411,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
             {orderItems.map((item, index) => (
               <div key={index} className="flex gap-4">
                 <Image
-                  src={item.product.images[0].url}
+                  src={item?.product?.images[0]?.url ?? imgDef}
                   alt={item.product.productName}
                   width={50}
                   height={50}

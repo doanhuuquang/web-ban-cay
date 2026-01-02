@@ -1,215 +1,504 @@
 "use client";
 
 import {
-  Pencil,
-  MoreVertical,
-  ChevronsLeft,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsRight,
-} from "lucide-react";
-import React from "react";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-type categoriesItemProps = {
-  id: string;
-  name: string;
-  desc: string;
-  image: string;
-  totalProducts?: string;
-  earning?: string;
-};
+import { Plus, Trash, SquarePen } from "lucide-react";
+import React, { useEffect } from "react";
 
-const categories: categoriesItemProps[] = [
-  {
-    id: "1",
-    name: "Cây ngoài trời",
-    desc: "Các loại cây cảnh trồng sân vườn, ban công, chịu nắng tốt",
-    image: "🌳",
-    totalProducts: "128",
-    earning: "18.500.000₫",
-  },
-  {
-    id: "2",
-    name: "Cây trong nhà",
-    desc: "Cây trang trí nội thất, để bàn, lọc không khí",
-    image: "🪴",
-    totalProducts: "96",
-    earning: "22.300.000₫",
-  },
-  {
-    id: "3",
-    name: "Dụng cụ & vật tư",
-    desc: "Dụng cụ làm vườn, đất trồng, phân bón, bình tưới",
-    image: "🧤",
-    totalProducts: "74",
-    earning: "12.800.000₫",
-  },
-  {
-    id: "4",
-    name: "Hạt giống",
-    desc: "Hạt giống rau, hoa, cây cảnh các loại",
-    image: "🌱",
-    totalProducts: "52",
-    earning: "6.400.000₫",
-  },
-  {
-    id: "5",
-    name: "Chậu cây",
-    desc: "Chậu trồng cây gốm, sứ, nhựa, xi măng trang trí",
-    image: "🏺",
-    totalProducts: "61",
-    earning: "9.750.000₫",
-  },
-];
+import {
+  getAllCategoryMock,
+  addCategoryMock,
+  updateCategoryMock,
+  deleteCategoryMock,
+  getCategoryByIdOrNameMock,
+} from "@/mock/categoryMock";
+import storeCategory from "@/store/storeCategory";
+import { Category } from "@/lib/models/category";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type CategoryTableProps = {
-  rows: categoriesItemProps[];
-};
+function CategoryTable({ sort }: { sort: string }) {
+  const isloading = storeCategory((s) => s.loading);
+  const currentPageRows = storeCategory((s) => s.categoryAll);
 
-function CategoryTable({ rows }: CategoryTableProps) {
-  const [pageIndex, setPageIndex] = React.useState(0);
-  const [pageSize, setPageSize] = React.useState(10);
+  const [modalOpenUPdate, setModalOpenUpdate] = React.useState<boolean>(false);
+  const [valuesUpdate, setValuesUpdate] = React.useState<Category | null>(null);
 
-  const pageCount = Math.ceil(rows.length / pageSize);
+  const [modalOpenDelete, setModalOpenDelete] = React.useState<boolean>(false);
 
-  const currentPageRows = rows.slice(
-    pageIndex * pageSize,
-    pageIndex * pageSize + pageSize
-  );
+  const handlerUpdateCategory = (data: Category) => {
+    setModalOpenUpdate(true);
+    setValuesUpdate(data);
+  };
 
-  React.useEffect(() => {
-    setPageIndex(0);
-  }, [rows]);
-  return (
-    <div className="bg-white rounded-xl shadow-md border">
-      {/* HEADER */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <input
-          placeholder="Tìm kiếm danh mục..."
-          className="border rounded-md px-3 py-2 text-sm w-60 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-        />
+  const handlerDeleteCategory = (data: Category) => {
+    setModalOpenDelete(true);
+    setValuesUpdate(data);
+  };
 
-        <div className="flex items-center gap-3">
-          <button className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-            + Thêm danh mục
-          </button>
+  if (isloading)
+    return (
+      <div className="container p-6 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải dữ liệu...</p>
         </div>
       </div>
+    );
 
+  if (!currentPageRows)
+    return <div className="text-center"> không có dữ liệu</div>;
+
+  return (
+    <div className="bg-white rounded-xl shadow-md border overflow-hidden">
       {/* TABLE */}
-      <table className="w-full text-sm">
+      <table className="w-full text-sm ">
         <thead className="bg-gray-100 text-gray-700">
           <tr>
-            <th className="p-4 text-left">Danh mục</th>
-            <th className="p-4 text-center">Tổng sản phẩm</th>
-            <th className="p-4 text-center">Tổng thu nhập</th>
+            <th className="p-4 text-left ">Danh mục</th>
+            <th className="p-4 text-center">Loại sản phẩm</th>
+            <th className="p-4 text-center">Mô tả</th>
+            <th className="p-4 text-center">Ngày Tạo</th>
+            <th className="p-4 text-center">Ngày Update</th>
             <th className="p-4 text-center">Tuỳ chọn</th>
           </tr>
         </thead>
 
         <tbody>
-          {currentPageRows.map((row) => (
-            <tr key={row.id} className="border-t hover:bg-gray-50 transition">
+          {(sort === "DESC" ? currentPageRows.slice().reverse() : currentPageRows).map((row) => (
+            <tr
+              key={row.categoryId}
+              className="border-t hover:bg-gray-50 transition"
+            >
               <td className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-md bg-gray-100 flex items-center justify-center text-lg">
-                    {row.image}
-                  </div>
                   <div>
-                    <div className="font-medium text-gray-900">{row.name}</div>
-                    <div className="text-gray-500 text-xs">{row.desc}</div>
+                    <div className="font-medium text-gray-900">
+                      {row.categoryId}
+                    </div>
                   </div>
                 </div>
               </td>
 
-              <td className="p-4 text-center text-gray-600">
-                {row.totalProducts}
+              <td className="p-4 text-center font-medium">
+                {row.categoryName}
               </td>
 
-              <td className="p-4 text-center font-medium">{row.earning}</td>
+              <td className="p-4 text-center text-gray-600 font-medium">
+                {row.description}
+              </td>
+              <td className="p-4 text-center text-gray-600 font-medium">
+                {/* {row.createAt.toString()} */}
+                {row.createAt ? new Date(row.createAt).toLocaleString() : "-"}
+              </td>
+              <td className="p-4 text-center text-gray-600 font-medium">
+                {/* {row.updateAt.toString()} */}
+                {row.updateAt ? new Date(row.updateAt).toLocaleString() : "-"}
+              </td>
 
               <td className="p-4">
                 <div className="flex items-center justify-center gap-3 text-gray-500">
-                  <Pencil className="w-4 h-4 cursor-pointer hover:text-indigo-600" />
-                  <MoreVertical className="w-4 h-4 cursor-pointer hover:text-indigo-600" />
+                  <div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlerUpdateCategory(row);
+                          }}
+                          size={"icon"}
+                          variant="ghost"
+                        >
+                          <SquarePen className="size-5 " />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Sửa sản phẩm</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  <div>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlerDeleteCategory(row);
+                          }}
+                          className="bg-white hover:bg-white"
+                          size={"icon"}
+                        >
+                          <Trash className="w-5 h-5 cursor-pointer text-red-600 hover:text-red-700" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Xoá danh mục</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {modalOpenUPdate && (
+        <EditCategoryModal
+          closeModal={() => {
+            setModalOpenUpdate(false);
+          }}
+          initialData={valuesUpdate}
+        />
+      )}
 
-      {/* FOOTER / PAGINATION */}
-      <div className="flex items-center justify-between px-2 my-3">
-        <div className="text-gray-600 text-sm">
-          Trang {pageIndex + 1} trên {pageCount} — Tổng {rows.length} hàng
-        </div>
-
-        <div className="flex items-center space-x-6">
-          {/* PAGE SIZE */}
-          <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Số hàng / trang</p>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPageIndex(0);
-              }}
-              className="h-8 border rounded px-2"
-            >
-              {[10, 20, 30, 50].map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* PAGE CONTROLS */}
-          <div className="flex items-center space-x-2">
-            <button
-              className="border rounded p-1 disabled:opacity-50"
-              onClick={() => setPageIndex(0)}
-              disabled={pageIndex === 0}
-            >
-              <ChevronsLeft size={18} />
-            </button>
-
-            <button
-              className="border rounded p-1 disabled:opacity-50"
-              onClick={() => setPageIndex((p) => p - 1)}
-              disabled={pageIndex === 0}
-            >
-              <ChevronLeft size={18} />
-            </button>
-
-            <button
-              className="border rounded p-1 disabled:opacity-50"
-              onClick={() => setPageIndex((p) => p + 1)}
-              disabled={pageIndex === pageCount - 1}
-            >
-              <ChevronRight size={18} />
-            </button>
-
-            <button
-              className="border rounded p-1 disabled:opacity-50"
-              onClick={() => setPageIndex(pageCount - 1)}
-              disabled={pageIndex === pageCount - 1}
-            >
-              <ChevronsRight size={18} />
-            </button>
-          </div>
-        </div>
-      </div>
+      {modalOpenDelete && (
+        <DeleteCategoryModal
+          closeModal={() => {
+            setModalOpenDelete(false);
+          }}
+          initialData={valuesUpdate}
+        />
+      )}
     </div>
   );
 }
 
 export default function CategoryPage() {
+  const [valueSearch, setValueSearch] = React.useState<string>("");
+  const [selectedSort, setSelectedSort] = React.useState<string>("DESC");
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      await getAllCategoryMock();
+    };
+
+    fetchCategory();
+  }, []);
+
+  const [modalOpen, setModalOpen] = React.useState<boolean>(false);
+
+  useEffect(() => {
+    const feactGetCategory = async (valueSearch: string) => {
+      if (!valueSearch) await getAllCategoryMock();
+      else await getCategoryByIdOrNameMock(valueSearch);
+    };
+
+    feactGetCategory(valueSearch);
+  }, [valueSearch]);
+
   return (
     <div className="container p-6 min-h-screen">
       <h1 className="text-2xl font-semibold mb-6">Danh mục sản phẩm</h1>
-      <CategoryTable rows={categories} />
+      {/* HEADER */}
+      <div className="flex items-center justify-between p-3 border mb-2 rounded-xl">
+        <input
+          placeholder="Tìm kiếm theo ID"
+          value={valueSearch}
+          onChange={(e) => setValueSearch(e.target.value)}
+          className="border rounded-md px-3 py-2 text-sm w-80 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        />
+
+        <div className="flex gap-x-5">
+          <Select
+            value={selectedSort}
+            onValueChange={(value) => setSelectedSort(value)}
+          >
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Sắp xếp theo..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value={"DESC"}>Mới nhất</SelectItem>
+                <SelectItem value={"ASC"}>Cũ nhất</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-md text-sm font-medium flex gap-2"
+            >
+              <Plus size={18} />
+              Thêm danh mục
+            </button>
+
+            {modalOpen && (
+              <CategoryModal
+                closeModal={() => {
+                  setModalOpen(false);
+                }}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+      <CategoryTable sort={selectedSort} />
+    </div>
+  );
+}
+
+
+//modal
+type CategoryModalUpdate = {
+  closeModal: () => void;
+  initialData: Category | null;
+};
+
+function CategoryModal({ closeModal }: { closeModal: () => void }) {
+  const [formState, setFormState] = React.useState({
+    categoryName: "",
+    description: "",
+  });
+
+  const [errors, setErrors] = React.useState("");
+
+  const validateForm = () => {
+    if (formState.categoryName && formState.description) {
+      setErrors("");
+      return true;
+    } else {
+      const errorFields: string[] = [];
+      if (!formState.categoryName) errorFields.push("Tên danh mục");
+      if (!formState.description) errorFields.push("Mô tả");
+      setErrors(errorFields.join(", "));
+      return false;
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormState({ ...formState, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    const now = new Date();
+
+    const data = {
+      categoryName: formState.categoryName,
+      description: formState.description,
+      createAt: now,
+      updateAt: now,
+    };
+
+    await addCategoryMock(data);
+
+    closeModal();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) closeModal();
+      }}
+    >
+      <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 animate-in fade-in zoom-in-95 duration-200">
+        <h2 className="text-lg font-semibold mb-4">Thêm danh mục</h2>
+        <form className="space-y-4">
+          {/* Tên danh mục */}
+          <div className="flex flex-col">
+            <label htmlFor="categoryName" className="font-medium mb-1">
+              Loại sản phẩm
+            </label>
+            <input
+              id="categoryName"
+              name="categoryName"
+              type="text"
+              onChange={handleChange}
+              value={formState.categoryName}
+              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          {/* Mô tả */}
+          <div className="flex flex-col">
+            <label htmlFor="description" className="font-medium mb-1">
+              Mô tả
+            </label>
+            <input
+              id="description"
+              name="description"
+              type="text"
+              value={formState.description}
+              onChange={handleChange}
+              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+          >
+            Thêm mới
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function EditCategoryModal({ closeModal, initialData }: CategoryModalUpdate) {
+  const [formState, setFormState] = React.useState(initialData);
+
+  const [errors, setErrors] = React.useState("");
+
+  const validateForm = () => {
+    if (!formState) return;
+    if (formState.categoryName && formState.description) {
+      setErrors("");
+      return true;
+    } else {
+      const errorFields: string[] = [];
+      if (!formState.categoryName) errorFields.push("Tên danh mục");
+      if (!formState.description) errorFields.push("Mô tả");
+      setErrors(errorFields.join(", "));
+      return false;
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!formState) return;
+    setFormState({ ...formState, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm() || !formState) return;
+
+    const now = new Date();
+
+    const data = {
+      categoryId: formState.categoryId,
+      categoryName: formState.categoryName,
+      description: formState.description,
+      createAt: initialData ? initialData.createAt : now,
+      updateAt: now,
+    };
+
+    await updateCategoryMock(data);
+
+    closeModal();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) closeModal();
+      }}
+    >
+      <div className="bg-white w-full max-w-md rounded-xl shadow-lg p-6 animate-in fade-in zoom-in-95 duration-200">
+        <h2 className="text-lg font-semibold mb-4">Sửa danh mục</h2>
+
+        <form className="space-y-4">
+          {/* Tên danh mục */}
+          <div className="flex flex-col">
+            <label htmlFor="categoryName" className="font-medium mb-1">
+              Loại sản phẩm
+            </label>
+            <input
+              id="categoryName"
+              name="categoryName"
+              type="text"
+              onChange={handleChange}
+              value={formState ? formState.categoryName : ""}
+              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          {/* Mô tả */}
+          <div className="flex flex-col">
+            <label htmlFor="description" className="font-medium mb-1">
+              Mô tả
+            </label>
+            <input
+              id="description"
+              name="description"
+              type="text"
+              value={formState ? formState.description : ""}
+              onChange={handleChange}
+              className="border rounded-md p-2 focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          {errors && (
+            <div className="mt-2 rounded-md bg-red-50 border border-red-300 text-red-700 px-3 py-2 text-sm">
+              {`Vui lòng nhập: ${errors}`}
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+          >
+            Chỉnh sửa sản phẩm
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function DeleteCategoryModal({ closeModal, initialData }: CategoryModalUpdate) {
+  const handleDelete = async () => {
+    if (!initialData) return closeModal();
+
+    await deleteCategoryMock(initialData.categoryId);
+    closeModal();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
+      onClick={closeModal}
+    >
+      <div
+        className="bg-white w-full max-w-md rounded-xl shadow-lg p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-lg font-semibold mb-4 text-red-600">
+          Xóa danh mục
+        </h2>
+
+        <ul className="mt-2 mb-4 text-sm text-gray-700">
+          <li>
+            <strong>ID:</strong> {initialData?.categoryId}
+          </li>
+          <li>
+            <strong>Tên:</strong> {initialData?.categoryName}
+          </li>
+        </ul>
+
+        <div className="flex gap-2">
+          <button
+            className="flex-1 bg-gray-300 py-2 rounded-md"
+            onClick={closeModal}
+          >
+            Huỷ
+          </button>
+
+          <button
+            className="flex-1 bg-red-600 text-white py-2 rounded-md"
+            onClick={handleDelete}
+          >
+            Xoá
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
