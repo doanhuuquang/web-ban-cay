@@ -6,8 +6,16 @@ import {
   ACCOUNT_PATH,
   COUPONS_PATH,
 } from "@/lib/constants/path";
+import { useAuth } from "@/lib/contexts/auth-context";
 import { cn } from "@/lib/utils";
-import { ChevronRight, MapPin, Tickets, Truck, User } from "lucide-react";
+import {
+  ChevronRight,
+  MapPin,
+  ShieldUser,
+  Tickets,
+  Truck,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -62,6 +70,8 @@ function SidebarItem({
 }
 
 export default function AccountSidebar({ className }: { className?: string }) {
+  const { user } = useAuth();
+
   return (
     <div className={cn("w-full h-fit overflow-hidden divide-y", className)}>
       {sidebarItems.map((item, index) => {
@@ -74,6 +84,13 @@ export default function AccountSidebar({ className }: { className?: string }) {
           />
         );
       })}
+      {user && user.roles.find((role) => role.roleName === "ADMIN") && (
+        <SidebarItem
+          title={"Đến trang quản trị"}
+          url={"/admin/dashboard"}
+          icon={ShieldUser}
+        />
+      )}
     </div>
   );
 }

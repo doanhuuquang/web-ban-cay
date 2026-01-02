@@ -152,7 +152,11 @@ export default function OrderPage() {
         profileId: user.userProfile!.profileId,
       });
 
-      setOrders(response.orders);
+      const orders = response.orders.sort((a, b) => {
+        return Number(b.orderId) - Number(a.orderId);
+      });
+
+      setOrders(orders);
     };
 
     fetchOrders();

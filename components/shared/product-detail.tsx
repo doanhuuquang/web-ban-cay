@@ -44,6 +44,7 @@ function AddToCartButtons({
   };
 
   const handleIncreaseQuantity = () => {
+    if (quantity >= product.inventory.available) return;
     setQuantity((prev) => prev + 1);
   };
 
