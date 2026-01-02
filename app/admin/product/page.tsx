@@ -653,7 +653,11 @@ function ProductTable({ products }: { products: Product[] }) {
                   <td className="px-4 py-3">{product.productId}</td>
                   <td className="px-4 py-3">
                     <Image
-                      src={product.images[0].url}
+                      src={
+                        product.images.length > 0
+                          ? product.images[0].url
+                          : "/assets/images/products/placeholder.png"
+                      }
                       alt={product.productName}
                       width={50}
                       height={50}

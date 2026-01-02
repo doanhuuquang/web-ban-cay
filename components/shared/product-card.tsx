@@ -17,7 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
-import imgdefault from "@/public/assets/images/products/hoacuc-1-gplant.jpg"
+import imgdefault from "@/public/assets/images/products/hoacuc-1-gplant.jpg";
 
 export default function ProductCard({
   product,
@@ -53,7 +53,7 @@ export default function ProductCard({
                 : ADD_ITEM_TO_CART_SUCCESS_MESSAGE,
             action: {
               label: "Oke",
-              onClick: () => { },
+              onClick: () => {},
             },
           }
         );
@@ -69,21 +69,32 @@ export default function ProductCard({
       className={cn("w-full cursor-pointer bg-background", className)}
     >
       <div className="w-full relative">
-        <div className="w-full h-full relative aspect-3/4 overflow-hidden">
-          <Image
-            src={product?.images?.[0]?.url ?? imgdefault}
-            alt="image"
-            fill
-            className="absolute top-0 left-0 z-1 object-center object-cover"
-          />
+        {product.images.length > 0 ? (
+          <div className="w-full h-full relative aspect-3/4 overflow-hidden">
+            <Image
+              src={product?.images?.[0]?.url ?? imgdefault}
+              alt="image"
+              fill
+              className="absolute top-0 left-0 z-1 object-center object-cover"
+            />
 
-          <Image
-            src={product?.images[1]?.url ?? imgdefault}
-            alt="image"
-            fill
-            className="absolute top-0 left-0 object-center object-cover z-2 opacity-0 hover:opacity-100 transition-all"
-          />
-        </div>
+            <Image
+              src={product?.images[1]?.url ?? imgdefault}
+              alt="image"
+              fill
+              className="absolute top-0 left-0 object-center object-cover z-2 opacity-0 hover:opacity-100 transition-all"
+            />
+          </div>
+        ) : (
+          <div className="w-full h-full relative aspect-3/4 overflow-hidden">
+            <Image
+              src={"/assets/images/products/placeholder.png"}
+              alt="image"
+              fill
+              className="object-center object-cover"
+            />
+          </div>
+        )}
       </div>
       <div className="w-full py-4 space-y-3">
         {product.discount !== null && product.discount > 0 && (
