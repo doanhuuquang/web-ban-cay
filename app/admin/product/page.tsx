@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ChevronsRight,
   Eye,
+  Plus,
 } from "lucide-react";
 import {
   Tooltip,
@@ -22,6 +23,7 @@ import {
 import { useAuth } from "@/lib/contexts/auth-context";
 import {
   addProduct,
+  addProductImage,
   deleteProductById,
   getProducts,
   updateProduct,
@@ -78,18 +80,23 @@ import {
   ERROR_MESSAGES,
 } from "@/lib/constants/error-messages";
 import { DELETE_PRODUCT_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
+import Image from "next/image";
 
 function UpdateProduct({ product }: { product: Product }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
-  const [categoryName, setCategoryName] = React.useState<Category[]>([]);
   const [open, setOpen] = React.useState(false);
 
+  const [newImageUrl, setNewImageUrl] = React.useState<string>("");
+  const [productImages, setProductImages] = React.useState<string[]>(
+    product.images.map((img) => img.url)
+  );
+
   const formSchema = z.object({
-    productName: z.string().min(2).max(100),
+    productName: z.string().min(7).max(200),
     description: z.string().min(2).max(100),
     bio: z.string().min(2).max(100000),
     price: z.number().min(0),
-    discount: z.number().min(0),
+    discount: z.number().min(0).max(100),
     specialPrice: z.number().min(0),
     origin: z.string().min(2).max(100),
     quantity: z.number().min(0),
@@ -143,7 +150,12 @@ function UpdateProduct({ product }: { product: Product }) {
         },
       });
 
-      if (code === 200) {
+      const addImagesCode = await addProductImage({
+        productId: product.productId,
+        imageUrls: productImages,
+      });
+
+      if (code === 200 && addImagesCode === 200) {
         toast.success("Cập nhật thành công");
         setOpen(false);
         window.location.reload();
@@ -154,6 +166,15 @@ function UpdateProduct({ product }: { product: Product }) {
       toast.error("Lỗi khi cập nhật");
     }
   }
+
+  const handleRemoveImage = (index: number) => {
+    const newImages = productImages.filter((_, i) => i !== index);
+    setProductImages(newImages);
+  };
+
+  const handleAddImages = (imageUrl: string) => {
+    setProductImages(() => [...productImages, imageUrl]);
+  };
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -188,6 +209,64 @@ function UpdateProduct({ product }: { product: Product }) {
           <SheetDescription>Chỉnh sửa sản phẩm</SheetDescription>
         </SheetHeader>
         <div className="grid flex-1 auto-rows-min gap-6 px-4 overflow-y-auto">
+          <div className="flex items-center gap-4 flex-wrap">
+            {productImages.length > 0 &&
+              productImages.map((image, index) => (
+                <div
+                  key={index}
+                  onClick={() => handleRemoveImage(index)}
+                  className="group relative cursor-pointer"
+                >
+                  <div className="w-full h-full bg-black/40 absolute flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <Trash className="text-white" />
+                  </div>
+
+                  <Image
+                    src={image}
+                    alt={product.productName}
+                    width={50}
+                    height={50}
+                  />
+                </div>
+              ))}
+
+            <Dialog>
+              <form>
+                <DialogTrigger asChild>
+                  <div className="w-[50px] h-[75px] border flex items-center justify-center cursor-pointer hover:bg-muted/50 transition">
+                    <Plus />
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Thêm ảnh sản phẩm</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4">
+                    <Input
+                      type="text"
+                      placeholder="Nhập URL ảnh sản phẩm"
+                      onChange={(e) => setNewImageUrl(e.target.value)}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">Hủy</Button>
+                    </DialogClose>
+                    <Button
+                      disabled={newImageUrl === ""}
+                      onClick={() => {
+                        handleAddImages(newImageUrl);
+                        setNewImageUrl("");
+                      }}
+                    >
+                      Thêm
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </form>
+            </Dialog>
+          </div>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
@@ -265,7 +344,7 @@ function UpdateProduct({ product }: { product: Product }) {
                 name="discount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Giảm giá</FormLabel>
+                    <FormLabel>Giảm giá (%)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -548,6 +627,7 @@ function ProductTable({ products }: { products: Product[] }) {
           <thead className="bg-gray-100 border-b">
             <tr className="font-semibold text-gray-700">
               <th className="px-4 py-3">Id</th>
+              <th className="px-4 py-3">Ảnh</th>
               <th className="px-4 py-3">Tên sản phẩm</th>
               <th className="px-4 py-3">Mô tả sản phẩm</th>
               <th className="px-4 py-3">Danh mục</th>
@@ -571,6 +651,14 @@ function ProductTable({ products }: { products: Product[] }) {
                   className="border-b hover:bg-gray-50 transition"
                 >
                   <td className="px-4 py-3">{product.productId}</td>
+                  <td className="px-4 py-3">
+                    <Image
+                      src={product.images[0].url}
+                      alt={product.productName}
+                      width={50}
+                      height={50}
+                    />
+                  </td>
                   <td className="px-4 py-3">{product.productName}</td>
                   <td className="px-4 py-3">{product.description}</td>
                   <td className="px-4 py-3">{product.category.categoryName}</td>
@@ -685,13 +773,15 @@ function ProductTable({ products }: { products: Product[] }) {
 
 function AddProduct({ closeModal }: { closeModal: () => void }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
+  const [productImages, setProductImages] = React.useState<string[]>([]);
+  const [newImageUrl, setNewImageUrl] = React.useState<string>("");
 
   const formSchema = z.object({
-    productName: z.string().min(2).max(100),
+    productName: z.string().min(7).max(200),
     description: z.string().min(2).max(100),
     bio: z.string().min(2).max(100000),
     price: z.number().min(0),
-    discount: z.number().min(0),
+    discount: z.number().min(0).max(100),
     specialPrice: z.number().min(0),
     origin: z.string().min(2).max(100),
     quantity: z.number().min(0),
@@ -729,15 +819,9 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
     },
   });
 
-  React.useEffect(() => {
-    if (categories.length > 0) {
-      form.setValue("categoryId", categories[0].categoryId);
-    }
-  }, []);
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const code = await addProduct({
+      const { code, product } = await addProduct({
         data: {
           productName: values.productName,
           description: values.description,
@@ -758,7 +842,14 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
         },
       });
 
-      if (code === 201) {
+      if (product === null) return;
+
+      const addImagesCode = await addProductImage({
+        productId: product.productId,
+        imageUrls: productImages,
+      });
+
+      if (code === 201 && addImagesCode === 200) {
         toast.success("Thêm sản phẩm thành công");
         window.location.reload();
       } else {
@@ -769,8 +860,15 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
     }
   }
 
-  // const handleChange = () => {};
-  // const handleSubmit = () => {};
+  const handleRemoveImage = (index: number) => {
+    const newImages = productImages.filter((_, i) => i !== index);
+    setProductImages(newImages);
+  };
+
+  const handleAddImages = (imageUrl: string) => {
+    setProductImages(() => [...productImages, imageUrl]);
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
@@ -782,6 +880,60 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
         <p className="font-semibold w-full text-center text-2xl">
           Thêm sản phẩm
         </p>
+
+        <div className="flex items-center gap-4 flex-wrap">
+          {productImages.length > 0 &&
+            productImages.map((image, index) => (
+              <div
+                key={index}
+                onClick={() => handleRemoveImage(index)}
+                className="group relative cursor-pointer"
+              >
+                <div className="w-full h-full bg-black/40 absolute flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <Trash className="text-white" />
+                </div>
+
+                <Image src={image} alt={image} width={50} height={50} />
+              </div>
+            ))}
+
+          <Dialog>
+            <form>
+              <DialogTrigger asChild>
+                <div className="w-[50px] h-[75px] border flex items-center justify-center cursor-pointer hover:bg-muted/50 transition">
+                  <Plus />
+                </div>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Thêm ảnh sản phẩm</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4">
+                  <Input
+                    type="text"
+                    placeholder="Nhập URL ảnh sản phẩm"
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                  />
+                </div>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Hủy</Button>
+                  </DialogClose>
+                  <Button
+                    disabled={newImageUrl === ""}
+                    onClick={() => {
+                      handleAddImages(newImageUrl);
+                      setNewImageUrl("");
+                    }}
+                  >
+                    Thêm
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </form>
+          </Dialog>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
@@ -855,7 +1007,7 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
               name="discount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Giảm giá</FormLabel>
+                  <FormLabel>Giảm giá (%)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"

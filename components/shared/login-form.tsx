@@ -41,7 +41,7 @@ const inputClassName =
 // Form schema
 const formSchema = z.object({
   email: email("Vui lòng nhập địa chỉ email hợp lệ."),
-  password: z.string().min(6, {
+  password: z.string().min(8, {
     message: "Mật khẩu phải có ít nhất 8 ký tự.",
   }),
 });

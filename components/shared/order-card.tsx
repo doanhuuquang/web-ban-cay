@@ -127,7 +127,13 @@ export default function OrderCard({ order }: { order: Order }) {
             {formatMoney(order.totalAmount)}
           </span>
           <span className="text-xs ml-2">
-            ({PaymenStatusTypeLabel[payment ? payment.paymentStatus : "UNPAID"]}
+            (
+            {
+              PaymenStatusTypeLabel[
+                (payment?.paymentStatus ??
+                  "UNPAID") as keyof typeof PaymenStatusTypeLabel
+              ]
+            }
             )
           </span>
         </div>

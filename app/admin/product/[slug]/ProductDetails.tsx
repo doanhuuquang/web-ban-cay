@@ -8,6 +8,7 @@ import {
   ArrowBigLeft,
   CalendarMinus2,
   CircleDollarSign,
+  ImageIcon,
   Info,
   MessageSquareText,
   Package,
@@ -15,6 +16,7 @@ import {
   Tag,
   TrendingUp,
 } from "lucide-react";
+import Image from "next/image";
 
 export default function ProductDetails({ slug }: { slug: string }) {
   const product: Product | null = storeProduct((state) => state.productDetails);
@@ -31,7 +33,7 @@ export default function ProductDetails({ slug }: { slug: string }) {
 
     fetchProduct();
   }, [slug]);
-  
+
   const isLoading = storeProduct((state) => state.loading);
 
   if (isLoading) return <div>loading...</div>;
@@ -297,6 +299,30 @@ export default function ProductDetails({ slug }: { slug: string }) {
               Giá cuối cùng cho khách hàng
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Images */}
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="flex items-center mb-6 pb-4 border-b">
+          <ImageIcon className="w-5 h-5 mr-2 text-green-600" />
+          <h2 className="text-lg font-semibold text-gray-800">Ảnh sản phẩm</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {product.images.map((image, index) => (
+            <div
+              key={index}
+              className="w-full aspect-3/4 relative rounded-lg overflow-hidden border border-gray-200"
+            >
+              <Image
+                src={image.url}
+                alt={product.productName}
+                fill
+                className="object-cover"
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>
