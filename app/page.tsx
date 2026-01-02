@@ -7,7 +7,6 @@ import Link from "next/link";
 
 import Image from "next/image";
 
-import { categoryItems } from "@/lib/constants/category-items";
 import {
   CarouselCustom,
   CategoryCustomItem,
@@ -17,28 +16,41 @@ import { gplantOfferItems } from "@/lib/constants/gplant-offers";
 import { whatsTrendingItems } from "@/lib/constants/whats-trending-items";
 import { tipsAndIdeasItems } from "@/lib/constants/tips-and-ideas-items";
 import { Input } from "@/components/ui/input";
+import { Category } from "@/lib/models/category";
+import { getCategories } from "@/lib/services/category-service";
+import { Product } from "@/lib/models/product";
+import { getProducts } from "@/lib/services/product-service";
+import ProductCard from "@/components/shared/product-card";
 
 function CategoriesSection() {
+  const [categories, setCategories] = React.useState<Category[]>([]);
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      const response = await getCategories();
+
+      if (response.categories) setCategories(response.categories);
+    };
+
+    fetchCategories();
+  }, []);
+
   return (
     <div className="w-full max-w-[1400px] m-auto p-4">
       <CarouselCustom itemSize={"sm"}>
-        {categoryItems.map((item, index) => (
+        {categories.map((item, index) => (
           <div key={index}>
             <CategoryCustomItem>
-              <Link href={item.href}>
+              <Link href={"/"}>
                 <div
                   className={cn(
                     "w-full aspect-square rounded-xs relative overflow-hidden bg-muted"
                   )}
                 >
-                  {/* <Image
-                    src={item.imageSrc}
-                    alt="kjsdv"
-                    fill
-                    className="absolute top-0 left-0 z-0 object-cover object-center"
-                  /> */}
                   <div className="w-full h-fit p-2 absolute bottom-0 z-1 text-center">
-                    <p className="hover:underline text-sm h-10">{item.title}</p>
+                    <p className="hover:underline text-sm h-10">
+                      {item.categoryName}
+                    </p>
                   </div>
                 </div>
               </Link>
@@ -183,46 +195,38 @@ function GplantOffersSection() {
 }
 
 function ToDayBestDealsSection() {
-  const buttons = [
-    "Sản phẩm có giá mới thấp hơn",
-    "Deals hời chớp nhoáng",
-    "Dọn kho",
-    "Giá rẻ nhất",
-  ];
-  const [selectedButtonIndex, setSelectedButtonIndex] = React.useState(0);
+  const [products, setProducts] = React.useState<Product[]>([]);
+
+  React.useEffect(() => {
+    const fetchProductsByCategory = async () => {
+      const response = await getProducts();
+
+      const products = response.products
+        .filter((p) => p.discount > 0)
+        .sort((a, b) => b.discount - a.discount);
+
+      if (response.products) setProducts(products);
+    };
+
+    fetchProductsByCategory();
+  }, []);
 
   return (
     <div className="w-full h-fit">
       <div className="w-full h-full max-w-[1400px] m-auto p-4 space-y-5">
         <h1 className="font-bold text-2xl">Ưu đãi tốt nhất hôm nay</h1>
 
-        <div className="flex gap-4 overflow-x-scroll scrollbar-hide">
-          {buttons.map((button, index) => (
-            <Button
-              key={index}
-              variant={"secondary"}
-              className={cn(
-                "rounded-full font-semibold p-5",
-                index === selectedButtonIndex && "border border-foreground"
-              )}
-              onClick={() => setSelectedButtonIndex(index)}
-            >
-              {button}
-            </Button>
-          ))}
-        </div>
-
         <div className="lg:grid lg:grid-cols-4 gap-4 max-md:space-y-5">
           <div className="col-span-3">
-            {/* <CarouselCustom itemSize={"lg"}>
-              {productItemsSample.map((product, index) => (
+            <CarouselCustom itemSize={"lg"}>
+              {products.map((product, index) => (
                 <div key={index}>
                   <CategoryCustomItem>
                     <ProductCard product={product} />
                   </CategoryCustomItem>
                 </div>
               ))}
-            </CarouselCustom> */}
+            </CarouselCustom>
           </div>
 
           <Link

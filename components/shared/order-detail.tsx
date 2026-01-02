@@ -37,6 +37,7 @@ import { formatMoney } from "@/lib/helpers/format-money";
 import { Address } from "@/lib/models/address";
 import { DeliveryAddress } from "@/lib/models/delivery-address";
 import { Order } from "@/lib/models/order";
+import { Payment } from "@/lib/models/payment";
 import { Product } from "@/lib/models/product";
 import {
   getAddressByUserProfileId,
@@ -47,8 +48,10 @@ import {
   getOrderById,
   updateOrderAddress,
 } from "@/lib/services/order-service";
+import { getPaymentByOrderId } from "@/lib/services/payment-service";
 import { getProductById } from "@/lib/services/product-service";
 import { OrderStatusTypeLabel } from "@/lib/type/order-status";
+import { PaymenStatusTypeLabel } from "@/lib/type/payment-status";
 import { format } from "date-fns";
 import {
   ArrowLeft,
@@ -85,6 +88,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
     React.useState<boolean>(false);
   const [isShowCancelOrderDialog, setIsShowCancelOrderDialog] =
     React.useState<boolean>(false);
+  const [payment, setPayment] = React.useState<Payment | null>(null);
 
   const orderSteps: OrderProgressStep[] = [];
 
@@ -179,6 +183,17 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
     };
 
     fetchDeliveryAddresses();
+  }, [order]);
+
+  React.useEffect(() => {
+    if (!order) return;
+
+    const fetchPayment = async () => {
+      const response = await getPaymentByOrderId(order.orderId);
+      if (response.payment) setPayment(response.payment);
+    };
+
+    fetchPayment();
   }, [order]);
 
   const handleUpdateDeliveryAddress = async () => {
@@ -442,9 +457,20 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
 
             <div className="flex gap-4 items-baseline justify-between">
               <p className="text-muted-foreground">Tổng</p>
-              <span className="font-bold text-lg">
-                {formatMoney(order.totalAmount)}
-              </span>
+              <p className="space-x-2">
+                <span className="text-xs text-muted-foreground">
+                  (
+                  {
+                    PaymenStatusTypeLabel[
+                      payment ? payment.paymentStatus : "UNPAID"
+                    ]
+                  }
+                  )
+                </span>
+                <span className="font-bold text-lg">
+                  {formatMoney(order.totalAmount)}
+                </span>
+              </p>
             </div>
           </div>
 

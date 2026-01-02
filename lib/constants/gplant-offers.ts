@@ -1,22 +1,22 @@
 export const gplantOfferItems = [
   {
     title: "Mua 1 tặng 1 – Cây để bàn",
-    imageSrc: "/assets/images/offers/bogo.svg",
+    imageSrc: "/assets/images/offers/bogo.jpg",
     href: "/offers/buy-1-get-1",
   },
   {
     title: "Giảm 30% cây lọc không khí",
-    imageSrc: "/assets/images/offers/air-purify-sale.svg",
+    imageSrc: "/assets/images/offers/air-purify-sale-1.png",
     href: "/offers/air-purifying-sale",
   },
   {
     title: "Combo văn phòng chỉ từ 199K",
-    imageSrc: "/assets/images/offers/office-combo.svg",
+    imageSrc: "/assets/images/offers/office-combo.jpg",
     href: "/offers/office-combo",
   },
   {
     title: "Sale 50% cho cây bị lỗi lá nhẹ",
-    imageSrc: "/assets/images/offers/seconds.svg",
+    imageSrc: "/assets/images/offers/seconds-1.png",
     href: "/offers/clearance",
   },
   {
