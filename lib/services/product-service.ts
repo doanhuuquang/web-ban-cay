@@ -193,11 +193,40 @@ const addProduct = async ({
     avgRating: number;
     createAt: Date;
   };
-}): Promise<number> => {
+}): Promise<{
+  code: number;
+  product: Product | null;
+}> => {
   try {
     const addProductsUrl = `/products/product/add`;
     const response = await instance.post(addProductsUrl, data);
 
+    return {
+      code: response.data.code,
+      product: Product.fromJson(response.data.data),
+    };
+  } catch (error) {
+    console.log(error);
+    if (error instanceof axios.AxiosError) {
+      return error.response?.data.code;
+    }
+    return {
+      code: -1,
+      product: null,
+    };
+  }
+};
+
+const addProductImage = async ({
+  productId,
+  imageUrls,
+}: {
+  productId: string;
+  imageUrls: string[];
+}): Promise<number> => {
+  try {
+    const addProductImageUrl = `/images/${productId}/images/url`;
+    const response = await instance.post(addProductImageUrl, imageUrls);
     return response.data.code;
   } catch (error) {
     if (error instanceof axios.AxiosError) {
@@ -215,4 +244,5 @@ export {
   updateProduct,
   deleteProductById,
   addProduct,
+  addProductImage,
 };
