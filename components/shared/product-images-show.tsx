@@ -11,6 +11,19 @@ export default function ProductImagesShow({
 }) {
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
 
+  if (imageUrls.length === 0) {
+    return (
+      <div className="w-full h-full relative aspect-3/4 overflow-hidden">
+        <Image
+          src={"/assets/images/products/placeholder.png"}
+          alt="image"
+          fill
+          className="object-center object-cover"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-fit flex lg:flex-col flex-row-reverse gap-4">
       <div className="grow relative aspect-3/4">
