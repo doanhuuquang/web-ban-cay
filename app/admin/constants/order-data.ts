@@ -1,19 +1,4 @@
-export type OrderItemProps = {
-  id: string;
-  name: string;
-  customer: string;
-  customerID: string;
-  date: string;
-  quantity: string;
-  price: string;
-  status:
-    | "Thành công"
-    | "Thất bại"
-    | "Chờ xử lý"
-    | "Đã huỷ"
-    | "Đang giao hàng"
-    | "Chờ lấy hàng";
-};
+
 
 export const orders: OrderItemProps[] = [
   {

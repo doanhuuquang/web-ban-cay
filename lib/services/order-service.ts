@@ -1,6 +1,6 @@
 import { Order } from "@/lib/models/order";
 import instance from "@/lib/services/axios-config";
-import axios from "axios";
+import { Payment } from "../models/payment";
 
 const placeOrderFromCart = async (data: {
   profileId: string;
@@ -79,6 +79,139 @@ const getOrderById = async ({
   }
 };
 
+
+const getOrderAll = async (): Promise<{
+  code: number;
+  order: Order[] | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `orders/all`;
+    const response = await instance.get(getOrderByIdUrl);
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  } catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
+
+const getOrderStatus = async (param: string): Promise<{
+  code: number;
+  order: Order[] | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `orders/status`;
+    const response = await instance.get(getOrderByIdUrl, {
+      params: { orderStatus: param }
+    });
+
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  }
+  catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
+
+const getOrderId = async (orderId: string): Promise<{
+  code: number;
+  order: Order | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `orders/order/${orderId}`;
+    const response = await instance.get(getOrderByIdUrl);
+
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  }
+  catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
+const getPaymentById = async (paymentId: string): Promise<{
+  code: number;
+  payment: Payment | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `payment/${paymentId}`;
+    const response = await instance.get(getOrderByIdUrl);
+
+    return {
+      code: 1,
+      payment: response.data.data
+    };
+  }
+  catch {
+    return {
+      code: -1,
+      payment: null,
+    };
+  }
+};
+
+const updateStatusOrder = async (orderId: string, orderStatus: string): Promise<{
+  code: number;
+  order: Order | null;
+}> => {
+  try {
+    console.log(orderId,orderStatus)
+    const getOrderByIdUrl = `orders/order/updateStatus`;
+    const response = await instance.put(getOrderByIdUrl,null,{
+      params:{orderStatus:orderStatus,orderId:orderId}
+    });
+
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  }
+  catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
+
+const getOrderProfileId = async (profileId: string): Promise<{
+  code: number;
+  order: Order[] | null;
+}> => {
+  try {
+    const getOrderByIdUrl = `orders/profile/${profileId}`;
+    const response = await instance.get(getOrderByIdUrl);
+
+    return {
+      code: 1,
+      order: response.data.data
+    };
+  }
+  catch {
+    return {
+      code: -1,
+      order: null,
+    };
+  }
+};
+
 const updateOrderAddress = async ({
   orderId,
   addressId,
@@ -111,30 +244,15 @@ const cancelOrder = async ({
   }
 };
 
-const getOrders = async (): Promise<{ code: number; orders: Order[] }> => {
-  try {
-    const getOrderUrl = `/orders/all`;
-    const response = await instance.get(getOrderUrl);
-    const orders = response.data.data.map((order: Order) =>
-      Order.fromJson(order)
-    );
-    return { code: response.data.code, orders: orders };
-  } catch (error) {
-    if (error instanceof axios.AxiosError) {
-      return {
-        code: error.response?.data.code,
-        orders: [],
-      };
-    }
-    return { code: -1, orders: [] };
-  }
-};
-
 export {
   placeOrderFromCart,
   getOrdersByProfileId,
   getOrderById,
   updateOrderAddress,
   cancelOrder,
-  getOrders,
+  getOrderAll,
+  getOrderStatus,
+  getOrderId,
+  getOrderProfileId,updateStatusOrder,
+  getPaymentById
 };

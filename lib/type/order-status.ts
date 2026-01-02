@@ -1,16 +1,14 @@
 export type OrderStatusType =
   | "PENDING"
-  | "SHIPPING"
-  | "DELIVERING"
-  | "COMPLETED"
+  | "SHIPPED"
+  | "DELIVERED"
   | "CANCELLED"
   | "RETURNED";
 
 export const OrderStatusTypeLabel: Record<OrderStatusType, string> = {
   PENDING: "Chờ xác nhận",
-  SHIPPING: "Vận chuyển",
-  DELIVERING: "Chờ giao hàng",
-  COMPLETED: "Hoàn thành",
+  SHIPPED: "Vận chuyển",
+  DELIVERED: "Đã giao thành công",
   CANCELLED: "Đã hủy",
   RETURNED: "Trả hàng/Hoàn tiền",
 };

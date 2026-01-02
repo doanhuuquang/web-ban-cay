@@ -80,10 +80,6 @@ const data = {
           title: "Danh sách đơn hàng",
           url: "",
         },
-        {
-          title: "Chi tiết đơn hàng",
-          url: "/admin/orders/detail",
-        },
       ],
     },
     {
@@ -92,11 +88,7 @@ const data = {
       icon: User,
       items: [
         {
-          title: "Nhân viên",
-          url: "/admin/users/staff",
-        },
-        {
-          title: "Khách hàng",
+          title: "Tài khoản",
           url: "/admin/users/customer",
         },
       ],
@@ -126,20 +118,8 @@ const data = {
       icon: BadgeDollarSign,
       items: [
         {
-          title: "Flash sale",
-          url: "#",
-        },
-        {
-          title: "Tạo mã giảm giá",
-          url: "#",
-        },
-        {
-          title: "Giảm giá theo mùa",
-          url: "#",
-        },
-        {
-          title: "Giảm giá theo danh mục",
-          url: "#",
+          title: "Mã giảm giá",
+          url: "/admin/coupons",
         },
       ],
     },

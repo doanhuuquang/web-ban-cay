@@ -1,15 +1,9 @@
-import ProductDetail from "../../_components/product-detail";
+import ProductDetails from "./ProductDetails";
 
-export default async function ProductDetailPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
+export default async function ProductDetailPage({params} : {
+    params: Promise< {slug: string}>
 }) {
-  const slug = await (await params).slug;
+    const slug =  (await params).slug;
 
-  return (
-    <>
-      <ProductDetail slug={slug} />
-    </>
-  );
+    return <ProductDetails slug={slug}/>
 }
