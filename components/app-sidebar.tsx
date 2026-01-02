@@ -94,7 +94,7 @@ const data = {
       ],
     },
     {
-      title: "Đánh giá sản phẩm",
+      title: "Báo cáo",
       url: "#",
       icon: Star,
       items: [
