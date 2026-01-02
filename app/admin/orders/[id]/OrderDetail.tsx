@@ -4,7 +4,6 @@ import {
     User as HH,
     Calendar,
     CircleUser,
-    ClipboardCheck,
     CreditCard,
     FileText,
     Mail,
@@ -27,7 +26,7 @@ import storeOrder from "@/store/storeOder";
 import { OrderStatusType } from "@/lib/type/order-status";
 import { formatMoney } from "@/lib/helpers/format-money";
 import { Payment } from "@/lib/models/payment";
-import { getPaymentById } from "@/lib/services/order-service";
+import { downloadOrderPdf, getPaymentById } from "@/lib/services/order-service";
 import { getUserProfileById } from "@/lib/services/user-service";
 import { User } from "@/lib/models/user";
 import { DeliveryAddress } from "@/lib/models/delivery-address";
@@ -35,10 +34,10 @@ import { getDeliveryAddressByOrderId } from "@/lib/services/address-service";
 import { Button } from "@/components/ui/button";
 import { confirmCashPayment } from "@/lib/services/payment-service";
 import { toast } from "sonner";
+import { da } from "zod/v4/locales";
 
 export default function OrderDetail({ id }: { id: string }) {
     const data = storeOrder((s) => s.orderOne)
-    console.log(data)
     const isLoading = storeOrder((s) => s.loading)
 
     const [valueAddressId, setValueAddressId] = useState<DeliveryAddress | null>(null)
@@ -74,6 +73,16 @@ export default function OrderDetail({ id }: { id: string }) {
 
         fetchProduct1();
     }, [data]);
+
+    const handleDowloadPdf = async () => {
+        if (!data) return;
+        const res = await downloadOrderPdf(data.orderId);
+        if (res === 1) {
+            toast("tải file pdf thành công")
+        }
+        else
+            toast("tải file pdf thất bại")
+    }
 
     if (isLoading)
         return (<div className="text-center">loading...</div>)
@@ -137,6 +146,10 @@ export default function OrderDetail({ id }: { id: string }) {
                             </div>
                         </div>
                     </div>
+                    <Button onClick={(e) => {
+                        e.preventDefault()
+                        handleDowloadPdf()
+                    }} className="rounded-md bg-amber-500 hover:bg-amber-500/85">Xuất đơn</Button>
                 </div>
 
                 <div className="grid grid-cols-3 gap-6">

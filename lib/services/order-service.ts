@@ -171,10 +171,10 @@ const updateStatusOrder = async (orderId: string, orderStatus: string): Promise<
   order: Order | null;
 }> => {
   try {
-    console.log(orderId,orderStatus)
+    console.log(orderId, orderStatus)
     const getOrderByIdUrl = `orders/order/updateStatus`;
-    const response = await instance.put(getOrderByIdUrl,null,{
-      params:{orderStatus:orderStatus,orderId:orderId}
+    const response = await instance.put(getOrderByIdUrl, null, {
+      params: { orderStatus: orderStatus, orderId: orderId }
     });
 
     return {
@@ -244,6 +244,35 @@ const cancelOrder = async ({
   }
 };
 
+const downloadOrderPdf = async (orderId: string): Promise<number> => {
+  try {
+    const response = await instance.post(
+      `/report/report-order-pdf/${orderId}`,
+      {}, // body rỗng nếu API không cần
+      {
+        responseType: "blob",
+        headers: {
+          Accept: "application/pdf",
+        },
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `order-${orderId}.pdf`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    return 1;
+  } catch (e) {
+    console.log(e);
+    return -1;
+  }
+};
+
+
+
 export {
   placeOrderFromCart,
   getOrdersByProfileId,
@@ -253,6 +282,7 @@ export {
   getOrderAll,
   getOrderStatus,
   getOrderId,
-  getOrderProfileId,updateStatusOrder,
-  getPaymentById
+  getOrderProfileId, updateStatusOrder,
+  getPaymentById,
+  downloadOrderPdf
 };
