@@ -54,9 +54,10 @@ const data = {
           title: "Danh sách sản phẩm",
           url: "/admin/product",
         },
+
         {
-          title: "Số lượng tồn kho",
-          url: "#",
+          title: "sản phẩm sắp hết hàng",
+          url: "/admin/inventory-product",
         },
       ],
     },
