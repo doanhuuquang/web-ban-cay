@@ -54,9 +54,10 @@ const data = {
           title: "Danh sách sản phẩm",
           url: "/admin/product",
         },
+
         {
-          title: "Số lượng tồn kho",
-          url: "#",
+          title: "sản phẩm sắp hết hàng",
+          url: "/admin/inventory-product",
         },
       ],
     },
@@ -94,21 +95,30 @@ const data = {
       ],
     },
     {
-      title: "Đánh giá sản phẩm",
+      title: "Báo cáo",
       url: "#",
       icon: Star,
       items: [
         {
-          title: "Review",
-          url: "#",
+          title: "Doanh thu hàng năm",
+          url: "/admin/revenue/annual-revenue",
+        },
+
+        {
+          title: "Doanh thu theo danh mục",
+          url: "/admin/revenue/category-revenue",
         },
         {
-          title: "Chặn spam",
-          url: "#",
+          title: "Doanh thu hàng tháng",
+          url: "/admin/revenue/monthly-revenue",
         },
         {
-          title: "Theo dõi rating",
-          url: "#",
+          title: "Doanh thu theo sản phẩm",
+          url: "/admin/revenue/product-revenue",
+        },
+        {
+          title: "Doanh thu hàng quý",
+          url: "/admin/revenue/quarterly-revenue",
         },
       ],
     },
