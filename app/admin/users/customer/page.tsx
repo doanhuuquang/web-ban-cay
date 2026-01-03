@@ -105,14 +105,17 @@ export default function CustomerPage() {
   }, [])
 
   useEffect(() => {
-    const fetchById = async () => {
-      if (!stringById)
-        await getAllAccountMock();
-      else
-        await getUserByIdAccountMock(stringById)
-    }
+    const timeout = setTimeout(() => {
+      const fetchById = async () => {
+        if (!stringById)
+          await getAllAccountMock();
+        else
+          await getUserByIdAccountMock(stringById)
+      }
 
-    fetchById();
+      fetchById();
+    }, 300);
+    return ()=>clearTimeout(timeout);
   }, [stringById])
 
 

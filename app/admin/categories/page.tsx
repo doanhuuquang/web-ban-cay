@@ -182,13 +182,18 @@ export default function CategoryPage() {
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
 
   useEffect(() => {
-    const feactGetCategory = async (valueSearch: string) => {
-      if (!valueSearch) await getAllCategoryMock();
-      else await getCategoryByIdOrNameMock(valueSearch);
-    };
+    const timeout = setTimeout(() => {
+      const feactGetCategory = async (valueSearch: string) => {
+        if (!valueSearch) await getAllCategoryMock();
+        else await getCategoryByIdOrNameMock(valueSearch);
+      };
 
-    feactGetCategory(valueSearch);
+      feactGetCategory(valueSearch);
+    }, 300); 
+
+    return () => clearTimeout(timeout); 
   }, [valueSearch]);
+
 
   return (
     <div className="container p-6 min-h-screen">

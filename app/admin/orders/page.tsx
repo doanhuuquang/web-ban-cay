@@ -233,11 +233,15 @@ const OrderPage = () => {
   };
 
   React.useEffect(() => {
-    const feachOder = async () => {
-      if (!valueFindOrder) await getAllOrderMock();
-      else await getOrderByIdOrProfileMock(selectedOrderId, valueFindOrder);
-    };
-    feachOder();
+    const timeout = setTimeout(() => {
+      const feachOder = async () => {
+        if (!valueFindOrder) await getAllOrderMock();
+        else await getOrderByIdOrProfileMock(selectedOrderId, valueFindOrder);
+      };
+      feachOder();
+    }, 300);
+
+    return ()=>clearTimeout(timeout)
   }, [valueFindOrder, selectedOrderId]);
 
   React.useEffect(() => {
@@ -380,7 +384,7 @@ const OrderPage = () => {
 
       {/* table order */}
       <div>
-        <OrderTable sort={selectedSort}/>
+        <OrderTable sort={selectedSort} />
       </div>
     </div>
   );
