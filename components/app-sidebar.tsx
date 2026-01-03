@@ -78,7 +78,7 @@ const data = {
       items: [
         {
           title: "Danh sách đơn hàng",
-          url: "",
+          url: "/admin/orders",
         },
       ],
     },
