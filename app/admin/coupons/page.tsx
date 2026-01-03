@@ -167,12 +167,18 @@ const OrderPage = () => {
     };
 
     React.useEffect(() => {
-        setSelectedTypeCoupons("available");
-        const fetchFindCouponsByPrice = async () => {
-            if (!valueFindCouponsByPrice) await getAvailableCouponsMock();
-            else await getAvailableCouponsByPriceMock(valueFindCouponsByPrice);
-        };
-        fetchFindCouponsByPrice();
+
+        const timeout = setTimeout(() => {
+            setSelectedTypeCoupons("available");
+            const fetchFindCouponsByPrice = async () => {
+                if (!valueFindCouponsByPrice) await getAvailableCouponsMock();
+                else await getAvailableCouponsByPriceMock(valueFindCouponsByPrice);
+            };
+            fetchFindCouponsByPrice();
+        }, 300);
+
+        return ()=>clearTimeout(timeout);
+
     }, [valueFindCouponsByPrice]);
 
 
