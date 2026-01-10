@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { annualRevenue } from "@/lib/models/revenue";
+import { annualRevenue, DEFAULT_ANNUAL_REVENUE, getAnnualRevenueStats } from "@/lib/models/revenue";
 import { getAnnualRevenue } from "@/lib/services/revenue-service";
 import {
   CalendarRange,
@@ -22,26 +22,35 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-function AnnualRevenueStatsList() {
+function AnnualRevenueStatsList({ annualRevenueSum }: { annualRevenueSum: annualRevenue }) {
   const data = [
-    {
-      title: "Tổng doanh thu",
-      countStats: (3636363636363636).toLocaleString(),
-      icon: DollarSign,
-    },
-    {
-      title: "Tổng đơn hàng",
-      countStats: 36,
-      icon: Package,
-    },
-    {
-      title: "Tổng đơn đã bán",
-      countStats: 36,
-      icon: CheckCircle,
-    },
-    { title: "Trung bình tăng trưởng", countStats: "36%", icon: TrendingUp },
-    { title: "Quý cao nhất", countStats: "3(6)", icon: CalendarRange },
-  ];
+  {
+    title: "Tổng doanh thu",
+    countStats: formatMoney(annualRevenueSum.revenueYear),
+    icon: DollarSign,
+  },
+  {
+    title: "Tổng đơn hàng",
+    countStats: annualRevenueSum.totalOrders,
+    icon: Package,
+  },
+  {
+    title: "Tổng sản phẩm đã bán",
+    countStats: annualRevenueSum.totalProductsSold,
+    icon: CheckCircle,
+  },
+  {
+    title: "Giá trị trung bình đơn hàng",
+    countStats: formatMoney(annualRevenueSum.avgOrderValue),
+    icon: TrendingUp,
+  },
+  {
+    title: "Tốc độ tăng trưởng",
+    countStats: `${annualRevenueSum.growthRate.toFixed(2)} %`,
+    icon: CalendarRange,
+  },
+];
+
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
@@ -141,23 +150,35 @@ const OrderPage = () => {
 
   //data
   const [dataRevenues, setDataRevenues] = React.useState<annualRevenue[]>([]);
+  const [annualRevenueSum, setAnnualRevenueSum] = React.useState<annualRevenue>(DEFAULT_ANNUAL_REVENUE);
 
   React.useEffect(() => {
     const fetchData = async () => {
       setIsloading(true);
       const res = await getAnnualRevenue(yearFrom, yearTo);
-      if (res.code === 1 && res.data) setDataRevenues(res.data);
+      if (res.code === 1 && res.data)
+        setDataRevenues(res.data);
 
       setIsloading(false);
     };
     fetchData();
   }, [yearFrom, yearTo]);
 
+  React.useEffect(() => {
+    const fetchData =  () => {
+      setIsloading(true);
+      const data =  getAnnualRevenueStats(dataRevenues);
+      setAnnualRevenueSum(data);
+      setIsloading(false);
+    };
+    fetchData();
+  }, [dataRevenues]);
+
   return (
     <div className="container mx-auto px-15 pb-10 space-y-6">
       <div className="font-semibold text-3xl">Doanh Thu Hàng Năm</div>
 
-      <AnnualRevenueStatsList />
+      <AnnualRevenueStatsList annualRevenueSum={annualRevenueSum} />
 
       <div className="flex items-center justify-between w-full gap-4">
         <Select

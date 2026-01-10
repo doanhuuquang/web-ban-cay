@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { monthlyRevenue } from "@/lib/models/revenue";
+import { DEFAULT_MONTHLY_REVENUE, getMonthlyRevenueStats, monthlyRevenue } from "@/lib/models/revenue";
 import { getMonthlyRevenue } from "@/lib/services/revenue-service";
 import {
   CalendarArrowUp,
@@ -22,34 +22,34 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-function MonthRevenueStatsList() {
-  const data = [
-    {
-      title: "Tổng doanh thu",
-      countStats: (3636363636363636).toLocaleString(),
-      icon: DollarSign,
-    },
-    {
-      title: "Tháng cao nhất",
-      countStats: 3,
-      icon: CalendarArrowUp,
-    },
-    {
-      title: "Tổng số đơn",
-      countStats: 36,
-      icon: Package,
-    },
-    {
-      title: "Tổng sản phẩm đã bán",
-      countStats: 36,
-      icon: CheckCircle,
-    },
-    {
-      title: "Tăng trưởng",
-      countStats: 36,
-      icon: TrendingUp,
-    },
-  ];
+function MonthRevenueStatsList({ monthlyStats }: { monthlyStats: monthlyRevenue }) {
+const data = [
+  {
+    title: "Tổng doanh thu",
+    countStats: formatMoney(monthlyStats.revenue),
+    icon: DollarSign,
+  },
+  {
+    title: "Tháng cao nhất",
+    countStats: monthlyStats.month,
+    icon: CalendarArrowUp,
+  },
+  {
+    title: "Tổng số đơn",
+    countStats: monthlyStats.totalOrders,
+    icon: Package,
+  },
+  {
+    title: "Tổng sản phẩm đã bán",
+    countStats: monthlyStats.totalProductsSold,
+    icon: CheckCircle,
+  },
+  {
+    title: "Tăng trưởng",
+    countStats: `${monthlyStats.growthRate.toFixed(2)}%`,
+    icon: TrendingUp,
+  },
+];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
@@ -146,6 +146,7 @@ const OrderPage = () => {
 
   //data
   const [dataRevenues, setDataRevenues] = React.useState<monthlyRevenue[]>([]);
+  const [dataRevenueSum, setDataRevenueSum] = React.useState<monthlyRevenue>(DEFAULT_MONTHLY_REVENUE);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -158,10 +159,20 @@ const OrderPage = () => {
     fetchData();
   }, [yearTo]);
 
+  React.useEffect(() => {
+    const fetchData = () => {
+      setIsloading(true);
+      const res = getMonthlyRevenueStats(dataRevenues)
+      setDataRevenueSum(res)
+      setIsloading(false);
+    };
+    fetchData();
+  }, [dataRevenues]);
+
   return (
     <div className="container mx-auto px-15 pb-10 space-y-6">
       <div className="font-semibold text-3xl">Doanh Thu Hàng Tháng</div>
-      <MonthRevenueStatsList />
+      <MonthRevenueStatsList monthlyStats={dataRevenueSum}/>
 
       <div className="flex items-center justify-between w-full gap-4">
         <Select

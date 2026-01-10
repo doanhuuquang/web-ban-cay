@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { quarterlyRevenue } from "@/lib/models/revenue";
+import { DEFAULT_QUARTERLY_REVENUE, getQuarterlyRevenueStats, quarterlyRevenue } from "@/lib/models/revenue";
 import { getQuarterlyRevenue } from "@/lib/services/revenue-service";
 import {
   CheckCircle,
@@ -23,36 +23,37 @@ import {
   CalendarRange,
 } from "lucide-react";
 
-function QuarterRevenueStatsList() {
+function QuarterRevenueStatsList({ quarterlyStats }: { quarterlyStats: quarterlyRevenue }) {
+
   const data = [
     {
       title: "Tổng doanh thu",
-      countStats: (36363636).toLocaleString(),
+      countStats: formatMoney(quarterlyStats.revenueQuarter),
       icon: DollarSign,
     },
     {
       title: "Tổng số đơn",
-      countStats: 36,
+      countStats: quarterlyStats.totalOrders,
       icon: Package,
     },
     {
       title: "Tổng sản phẩm đã bán",
-      countStats: 36,
+      countStats: quarterlyStats.totalProductsSold,
       icon: CheckCircle,
     },
     {
       title: "Quý cao nhất",
-      countStats: 3,
+      countStats: quarterlyStats.quarter,
       icon: CalendarRange,
     },
     {
       title: "Bình quân (đơn hàng)",
-      countStats: 36 + "%",
+      countStats: quarterlyStats.avgOrderValue.toLocaleString(),
       icon: Sigma,
     },
     {
       title: "Tăng trưởng",
-      countStats: 36 + "%",
+      countStats: `${quarterlyStats.growthRate.toFixed(2)}%`,
       icon: TrendingUp,
     },
   ];
@@ -153,9 +154,8 @@ const OrderPage = () => {
   const [yearTo, setYearTo] = React.useState<string>(currentYear.toString());
 
   //data
-  const [dataRevenues, setDataRevenues] = React.useState<quarterlyRevenue[]>(
-    []
-  );
+  const [dataRevenues, setDataRevenues] = React.useState<quarterlyRevenue[]>([]);
+  const [dataRevenueSum, setDataRevenueSum] = React.useState<quarterlyRevenue>(DEFAULT_QUARTERLY_REVENUE);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -168,10 +168,20 @@ const OrderPage = () => {
     fetchData();
   }, [yearTo]);
 
+  React.useEffect(() => {
+    const fetchData = () => {
+      setIsloading(true);
+      const res = getQuarterlyRevenueStats(dataRevenues)
+      setDataRevenueSum(res)
+      setIsloading(false);
+    };
+    fetchData();
+  }, [dataRevenues]);
+
   return (
     <div className="container mx-auto px-15 pb-10 space-y-6">
       <div className="font-semibold text-3xl">Doanh Thu Hàng Quý</div>
-      <QuarterRevenueStatsList />
+      <QuarterRevenueStatsList quarterlyStats={dataRevenueSum} />
 
       <div className="flex items-center justify-between w-full gap-4">
         <Select

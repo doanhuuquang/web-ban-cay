@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { productRevenue } from "@/lib/models/revenue";
+import { DEFAULT_PRODUCT_REVENUE, getProductRevenueStats, productRevenue } from "@/lib/models/revenue";
 import { getProductRevenue } from "@/lib/services/revenue-service";
 import {
   CheckCircle,
@@ -22,34 +22,35 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-function ProductRevenueStatsList() {
-  const data = [
-    {
-      title: "Tổng sản phẩm đã thu",
-      countStats: (36363636).toLocaleString(),
-      icon: ScanBarcode,
-    },
-    {
-      title: "Tổng số đơn",
-      countStats: 36,
-      icon: Package,
-    },
-    {
-      title: "Tổng sản phẩm đã bán",
-      countStats: 36,
-      icon: CheckCircle,
-    },
-    {
-      title: "Sản phẩm nhiều nhất",
-      countStats: "raumania",
-      icon: TreePalm,
-    },
-    {
-      title: "Bình quân",
-      countStats: 36 + "%",
-      icon: TrendingUp,
-    },
-  ];
+function ProductRevenueStatsList({productStats}:{productStats:productRevenue}) {
+
+const data = [
+  {
+    title: "Tổng sản phẩm đã thu",
+    countStats: formatMoney(productStats.revenueProduct),
+    icon: ScanBarcode,
+  },
+  {
+    title: "Tổng số đơn",
+    countStats: productStats.totalOrders,
+    icon: Package,
+  },
+  {
+    title: "Tổng sản phẩm đã bán",
+    countStats: productStats.totalSold,
+    icon: CheckCircle,
+  },
+  {
+    title: "Sản phẩm nhiều nhất",
+    countStats: productStats.productName || "-",
+    icon: TreePalm,
+  },
+  {
+    title: "Bình quân",
+    countStats: productStats.averagePrice.toLocaleString(),
+    icon: TrendingUp,
+  },
+];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
@@ -150,6 +151,7 @@ const OrderPage = () => {
 
   //data
   const [dataRevenues, setDataRevenues] = React.useState<productRevenue[]>([]);
+  const [dataRevenueSum, setDataRevenueSum] = React.useState<productRevenue>(DEFAULT_PRODUCT_REVENUE);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -162,10 +164,21 @@ const OrderPage = () => {
     fetchData();
   }, [month, yearTo]);
 
+
+  React.useEffect(() => {
+    const fetchData =  () => {
+      setIsloading(true);
+      const res=getProductRevenueStats(dataRevenues);
+      setDataRevenueSum(res)
+      setIsloading(false);
+    };
+    fetchData();
+  }, [dataRevenues]);
+
   return (
     <div className="container mx-auto px-15 pb-10 space-y-6">
       <div className="font-semibold text-3xl">Doanh Thu Theo sản phẩm</div>
-      <ProductRevenueStatsList />
+      <ProductRevenueStatsList productStats={dataRevenueSum}/>
 
       <div className="flex items-center justify-between w-full gap-4">
         <Select
