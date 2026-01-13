@@ -10,7 +10,6 @@ const getProducts = async (): Promise<{
     const getProductsUrl = `/products/all`;
     const response = await instance.get(getProductsUrl);
 
-    console.log(response.data.data)
     const products = response.data.data.map((product: Product) =>
       Product.fromJson(product)
     );
