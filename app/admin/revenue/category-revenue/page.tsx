@@ -19,37 +19,38 @@ import {
   Sigma,
 } from "lucide-react";
 
-import { categoryRevenue } from "@/lib/models/revenue";
+import { categoryRevenue, DEFAULT_CATEGORY_REVENUE, getCategoryRevenueStats } from "@/lib/models/revenue";
 import { getCategoryRevenue } from "@/lib/services/revenue-service";
 
-function CategoriesRevenueStatsList() {
+function CategoriesRevenueStatsList({ categoryRevenueSum }: { categoryRevenueSum: categoryRevenue }) {
   const data = [
-    {
-      title: "Tổng hàng đã thu",
-      countStats: (3636363636363636).toLocaleString(),
-      icon: Package,
-    },
-    {
-      title: "Tổng số đơn",
-      countStats: 36,
-      icon: ReceiptText,
-    },
-    {
-      title: "Tổng số lượng bán",
-      countStats: 36,
-      icon: CheckCircle,
-    },
-    {
-      title: "Danh mục cao nhất",
-      countStats: "Đường Tàu",
-      icon: ChartColumnStacked,
-    },
-    {
-      title: "Bình quân",
-      countStats: 36,
-      icon: Sigma,
-    },
-  ];
+  {
+    title: "Tổng doanh thu",
+    countStats: formatMoney(categoryRevenueSum?.revenueCategory ?? 0), // format tiền
+    icon: Package,
+  },
+  {
+    title: "Tổng số đơn",
+    countStats: categoryRevenueSum?.totalOrders ?? 0,
+    icon: ReceiptText,
+  },
+  {
+    title: "Tổng số lượng bán",
+    countStats: categoryRevenueSum?.totalProductsSold ?? 0,
+    icon: CheckCircle,
+  },
+  {
+    title: "Danh mục cao nhất",
+    countStats: categoryRevenueSum?.categoryName ?? "-", // topCategory từ stats
+    icon: ChartColumnStacked,
+  },
+  {
+    title: "Bình quân giá trị đơn hàng",
+    countStats: formatMoney(categoryRevenueSum?.averageOrderValue ?? 0), // trung bình đơn hàng
+    icon: Sigma,
+  },
+];
+
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 w-full h-fit rounded-xl shadow-[0_0_12px_rgba(0,0,0,0.15)] gap-1 px-2 py-4">
@@ -152,6 +153,7 @@ const OrderPage = () => {
 
   //data
   const [dataRevenues, setDataRevenues] = React.useState<categoryRevenue[]>([]);
+  const [dataRevenueSum, setDataRevenueSum] = React.useState<categoryRevenue>(DEFAULT_CATEGORY_REVENUE);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -164,11 +166,21 @@ const OrderPage = () => {
     fetchData();
   }, [month, yearTo]);
 
+  React.useEffect(() => {
+    const fetchData =  () => {
+      setIsloading(true);
+      const data = getCategoryRevenueStats(dataRevenues)
+      setDataRevenueSum(data);
+      setIsloading(false);
+    };
+    fetchData();
+  }, [dataRevenues]);
+
   return (
     <div className="container mx-auto px-15 pb-10 space-y-6">
       <div className="font-semibold text-3xl">Doanh Thu Hàng Theo danh mục</div>
 
-      <CategoriesRevenueStatsList />
+      <CategoriesRevenueStatsList categoryRevenueSum={dataRevenueSum}/>
 
       <div className="flex items-center justify-between w-full gap-4">
         <Select

@@ -86,10 +86,17 @@ function UpdateProduct({ product }: { product: Product }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [open, setOpen] = React.useState(false);
 
-  const [newImageUrl, setNewImageUrl] = React.useState<string>("");
-  const [productImages, setProductImages] = React.useState<string[]>(
-    product.images.map((img) => img.url)
+  const [existingImages, setExistingImages] = React.useState<string[]>(() =>
+    product.images
+      .map(i => i?.downloadUrl?.trim())
+      .filter((i): i is string => Boolean(i))
+      .map(i => `http://localhost:8080${i}`)
   );
+
+
+  const [newImages, setNewImages] = React.useState<File[]>([]);
+  const [newImageFile, setNewImageFile] = React.useState<File | null>(null);
+
 
   const formSchema = z.object({
     productName: z.string().min(7).max(200),
@@ -150,10 +157,18 @@ function UpdateProduct({ product }: { product: Product }) {
         },
       });
 
-      const addImagesCode = await addProductImage({
-        productId: product.productId,
-        imageUrls: productImages,
+      const formData = new FormData();
+
+      newImages.forEach(file => {
+        formData.append("files", file);
       });
+
+      existingImages.forEach(url => {
+        formData.append("existingImages", url);
+      });
+
+      const addImagesCode = await addProductImage(product.productId, formData);
+
 
       if (code === 200 && addImagesCode === 200) {
         toast.success("Cập nhật thành công");
@@ -167,14 +182,20 @@ function UpdateProduct({ product }: { product: Product }) {
     }
   }
 
-  const handleRemoveImage = (index: number) => {
-    const newImages = productImages.filter((_, i) => i !== index);
-    setProductImages(newImages);
+  const handleRemoveExisting = (index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleAddImages = (imageUrl: string) => {
-    setProductImages(() => [...productImages, imageUrl]);
+  const handleRemoveNew = (index: number) => {
+    setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const handleAddImages = () => {
+    if (!newImageFile) return;
+    setNewImages(prev => [...prev, newImageFile]);
+    setNewImageFile(null);
+  };
+
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -210,25 +231,55 @@ function UpdateProduct({ product }: { product: Product }) {
         </SheetHeader>
         <div className="grid flex-1 auto-rows-min gap-6 px-4 overflow-y-auto">
           <div className="flex items-center gap-4 flex-wrap">
-            {productImages.length > 0 &&
-              productImages.map((image, index) => (
+            {/* Hiển thị ảnh cũ (từ server) */}
+            {existingImages
+              .filter(src => typeof src === "string" && src.length > 0)
+              .map((src, i) => (
                 <div
-                  key={index}
-                  onClick={() => handleRemoveImage(index)}
-                  className="group relative cursor-pointer"
+                  key={`existing-${i}`}
+                  className="group relative cursor-pointer w-[50px] h-[75px] overflow-hidden rounded border"
                 >
-                  <div className="w-full h-full bg-black/40 absolute flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <Trash className="text-white" />
+                  <div
+                    className="w-full h-full bg-black/40 absolute flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    onClick={() => handleRemoveExisting(i)}
+                  >
+                    <Trash className="text-white size-4" />
                   </div>
-
                   <Image
-                    src={image}
-                    alt={product.productName}
+                    src={src}
                     width={50}
-                    height={50}
+                    height={75}
+                    alt={product.productName}
+                    unoptimized
+                    className="w-full h-full object-cover"
                   />
                 </div>
               ))}
+
+            {/* Hiển thị ảnh mới (chưa upload) */}
+            {newImages.map((file, i) => (
+              <div
+                key={`new-${i}`}
+                className="group relative cursor-pointer w-[50px] h-[75px] overflow-hidden rounded border border-blue-500"
+              >
+                <div
+                  className="w-full h-full bg-black/40 absolute flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                  onClick={() => handleRemoveNew(i)}
+                >
+                  <Trash className="text-white size-4" />
+                </div>
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={file.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-blue-500 text-white text-[8px] text-center py-0.5">
+                  Mới
+                </div>
+              </div>
+            ))}
+
+
 
             <Dialog>
               <form>
@@ -243,24 +294,29 @@ function UpdateProduct({ product }: { product: Product }) {
                   </DialogHeader>
                   <div className="grid gap-4">
                     <Input
-                      type="text"
-                      placeholder="Nhập URL ảnh sản phẩm"
-                      onChange={(e) => setNewImageUrl(e.target.value)}
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          setNewImageFile(e.target.files[0]);
+                        }
+                      }}
                     />
+
                   </div>
                   <DialogFooter>
                     <DialogClose asChild>
                       <Button variant="outline">Hủy</Button>
                     </DialogClose>
+
                     <Button
-                      disabled={newImageUrl === ""}
-                      onClick={() => {
-                        handleAddImages(newImageUrl);
-                        setNewImageUrl("");
-                      }}
+                      type="button"
+                      disabled={!newImageFile}
+                      onClick={handleAddImages}
                     >
                       Thêm
                     </Button>
+
                   </DialogFooter>
                 </DialogContent>
               </form>
@@ -550,7 +606,7 @@ function DeleteProduct({ product }: { product: Product }) {
               : DELETE_PRODUCT_SUCCESS_MESSAGE,
           action: {
             label: "Oke",
-            onClick: () => {},
+            onClick: () => { },
           },
         }
       );
@@ -569,10 +625,10 @@ function DeleteProduct({ product }: { product: Product }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
-              <Button onClick={() => {}} size={"icon"} variant="ghost">
+              <Button onClick={() => { }} size={"icon"} variant="ghost">
                 <Trash
                   className="size-5 cursor-pointer hover:text-red-600 transition"
-                  onClick={() => {}}
+                  onClick={() => { }}
                 />
               </Button>
             </DialogTrigger>
@@ -654,11 +710,12 @@ function ProductTable({ products }: { products: Product[] }) {
                   <td className="px-4 py-3">
                     <Image
                       src={
-                        product.images.length > 0
-                          ? product.images[0].url
+                        product.images && product.images.length > 0
+                          ? `http://localhost:8080${product.images[0].downloadUrl}`
                           : "/assets/images/products/placeholder.png"
                       }
                       alt={product.productName}
+                      unoptimized
                       width={50}
                       height={50}
                     />
@@ -777,8 +834,10 @@ function ProductTable({ products }: { products: Product[] }) {
 
 function AddProduct({ closeModal }: { closeModal: () => void }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
-  const [productImages, setProductImages] = React.useState<string[]>([]);
-  const [newImageUrl, setNewImageUrl] = React.useState<string>("");
+
+  const [newImages, setNewImages] = React.useState<File[]>([]);
+  const [newImageFile, setNewImageFile] = React.useState<File | null>(null);
+
 
   const formSchema = z.object({
     productName: z.string().min(7).max(200),
@@ -848,10 +907,14 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
 
       if (product === null) return;
 
-      const addImagesCode = await addProductImage({
-        productId: product.productId,
-        imageUrls: productImages,
+      const formData = new FormData();
+
+      newImages.forEach(file => {
+        formData.append("files", file);
       });
+
+      const addImagesCode = await addProductImage(product.productId, formData);
+
 
       if (code === 201 && addImagesCode === 200) {
         toast.success("Thêm sản phẩm thành công");
@@ -864,14 +927,17 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
     }
   }
 
-  const handleRemoveImage = (index: number) => {
-    const newImages = productImages.filter((_, i) => i !== index);
-    setProductImages(newImages);
+  const handleRemoveNew = (index: number) => {
+    setNewImages(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleAddImages = (imageUrl: string) => {
-    setProductImages(() => [...productImages, imageUrl]);
+
+  const handleAddImages = () => {
+    if (!newImageFile) return;
+    setNewImages(prev => [...prev, newImageFile]);
+    setNewImageFile(null);
   };
+
 
   return (
     <div
@@ -886,20 +952,16 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
         </p>
 
         <div className="flex items-center gap-4 flex-wrap">
-          {productImages.length > 0 &&
-            productImages.map((image, index) => (
-              <div
-                key={index}
-                onClick={() => handleRemoveImage(index)}
-                className="group relative cursor-pointer"
-              >
-                <div className="w-full h-full bg-black/40 absolute flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <Trash className="text-white" />
-                </div>
-
-                <Image src={image} alt={image} width={50} height={50} />
-              </div>
-            ))}
+          {newImages.map((file, index) => (
+            <div key={index} onClick={() => handleRemoveNew(index)}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={URL.createObjectURL(file)}
+                alt=""
+                className="image-preview"
+              />
+            </div>
+          ))}
 
           <Dialog>
             <form>
@@ -914,9 +976,13 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
                 </DialogHeader>
                 <div className="grid gap-4">
                   <Input
-                    type="text"
-                    placeholder="Nhập URL ảnh sản phẩm"
-                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setNewImageFile(e.target.files[0]);
+                      }
+                    }}
                   />
                 </div>
                 <DialogFooter>
@@ -924,11 +990,9 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
                     <Button variant="outline">Hủy</Button>
                   </DialogClose>
                   <Button
-                    disabled={newImageUrl === ""}
-                    onClick={() => {
-                      handleAddImages(newImageUrl);
-                      setNewImageUrl("");
-                    }}
+                    type="button"
+                    disabled={!newImageFile}
+                    onClick={handleAddImages}
                   >
                     Thêm
                   </Button>
