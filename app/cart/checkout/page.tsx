@@ -78,6 +78,7 @@ import {
 } from "@/lib/constants/error-messages";
 import { PLACE_ORDER_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
 import { set } from "date-fns";
+import { vnpayConfirm } from "@/lib/services/payment-service";
 
 function AddressField({
   title,
@@ -481,7 +482,7 @@ function CheckoutSummary({
         profileId: user.userProfile.profileId,
         addressId: selectedAddress.addressId,
         paymentMethod: selectedPaymentMethod,
-        bankCode: "",
+        bankCode: "NCB",
         shippingFee: totalShippingFee,
         couponCode: selectedCoupon ? selectedCoupon.code : "",
         orderNote: note,
@@ -505,7 +506,19 @@ function CheckoutSummary({
         }
       );
 
-      router.push(`${ORDER_COMFIRMED_PATH}/${response.order?.orderId}`);
+      if (
+        selectedPaymentMethod === "VNPAY" &&
+        response.code === API_SUCCESS_CODE.PLACE_ORDER_SUCCESS &&
+        response.order
+      ) {
+        const redirectUrl = await vnpayConfirm(response.order.orderId);
+        router.push(redirectUrl);
+      } else if (
+        response.code === API_SUCCESS_CODE.PLACE_ORDER_SUCCESS &&
+        response.order
+      ) {
+        router.push(`/cart/checkout/order-confirmed/${response.order.orderId}`);
+      }
     } finally {
       setIsOrderPlacing(false);
     }

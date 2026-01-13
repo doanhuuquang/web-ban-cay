@@ -1,4 +1,5 @@
 export type OrderStatusType =
+  | "CREATED"
   | "PENDING"
   | "SHIPPED"
   | "DELIVERED"
@@ -6,6 +7,7 @@ export type OrderStatusType =
   | "RETURNED";
 
 export const OrderStatusTypeLabel: Record<OrderStatusType, string> = {
+  CREATED: "Đã tạo đơn",
   PENDING: "Chờ xác nhận",
   SHIPPED: "Vận chuyển",
   DELIVERED: "Đã giao thành công",

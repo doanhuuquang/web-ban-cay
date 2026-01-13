@@ -7,7 +7,7 @@ const getPaymentByOrderId = async (
 ): Promise<{ code: number; payment?: Payment }> => {
   try {
     const response = await instance.get(`/payment/order/${orderId}`);
-    return { code: response.data.code, payment: response.data.data };
+    return { code: response.data.code, payment: response.data.data as Payment };
   } catch (error) {
     if (error instanceof axios.AxiosError) {
       return { code: error.response?.data.code };
@@ -67,4 +67,14 @@ const confirmPayment = async (
   return { code: res.code };
 };
 
-export { confirmCashPayment, getPaymentByOrderId };
+const vnpayConfirm = async (orderId: string): Promise<string> => {
+  const response = await instance.post(`/payment/vnpay-comfirm/${orderId}`);
+  return response.data.data.redirectUrl;
+};
+
+export {
+  confirmCashPayment,
+  getPaymentByOrderId,
+  confirmPayment,
+  vnpayConfirm,
+};

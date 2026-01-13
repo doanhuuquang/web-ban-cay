@@ -67,7 +67,7 @@ export default function AuthProvider({
         setIsAdmin(
           profile!.roles?.some((role) => role.roleName === "ADMIN") ?? false
         );
-      } catch (error) {
+      } catch {
         // ❌ Lỗi bất kỳ → coi như chưa đăng nhập
         setIsLoggedIn(false);
         setUser(null);
@@ -126,6 +126,14 @@ export default function AuthProvider({
       profile!.roles?.some((role) => role.roleName === "ADMIN") ?? false
     );
   };
+
+  React.useEffect(() => {
+    if (!isLoggedIn) {
+      setUser(null);
+      setNextTokenRefreshTime(null);
+      setIsAdmin(false);
+    }
+  }, [isLoggedIn]);
 
   return (
     <AuthContext.Provider
