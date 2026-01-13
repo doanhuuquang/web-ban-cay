@@ -64,75 +64,29 @@ function CategoriesSection() {
 
 function WelcomeSection() {
   return (
-    <div className="w-full max-w-[1400px] m-auto p-4 space-y-5">
-      <h1 className="font-bold text-2xl">Chào mừng đến với GPLANT</h1>
+    <div className="w-full h-full flex items-center justify-center p-4">
+      <Link
+        href={""}
+        className="w-full h-full relative flex items-center justify-center"
+      >
+        <video
+          src="/assets/webms/hero.webm"
+          autoPlay
+          loop
+          muted
+          className="w-full h-full object-cover absolute top-0 left-0 z-0"
+        ></video>
 
-      <div className="w-full md:min-h-screen min-h-auto grid md:grid-cols-2 grid-cols-1 md:grid-rows-1 grid-rows-none gap-4">
-        <Link
-          href={""}
-          className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
-        >
-          <video
-            src="/assets/webms/hero.webm"
-            autoPlay
-            loop
-            muted
-            className="w-full h-full absolute top-0 left-0 object-cover object-center z-0"
-          ></video>
-
-          <div className="w-full h-full absolute p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group z-1">
-            <div className="w-fit bg-blue-ocean px-2 py-1 md:text-sm text-xs text-white">
-              GPANT mua nhiều giảm sâu
-            </div>
-            <p className="group-hover:underline md:text-xl">
-              Giảm 15% giá trị đơn hàng đầu tiên
-            </p>
-            <ArrowRight className="md:block hidden" />
+        <div className="w-full h-full absolute p-4 flex flex-col items-center justify-center gap-6 bg-linear-to-t from-black/60 to-transparent text-white font-bold group z-10">
+          <div className="w-fit bg-blue-600 hover:bg-blue-700 transition px-4 py-2 md:text-base text-sm text-white font-semibold shadow-lg">
+            GPANT mua nhiều giảm sâu
           </div>
-        </Link>
-        <div className="grid md:grid-rows-2 grid-rows-1 md:grid-cols-1 grid-cols-2 gap-4">
-          <Link
-            href={""}
-            className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
-          >
-            <Image
-              src={"/assets/images/decorations/lotus.jpg"}
-              alt="Orange flower"
-              fill
-              className="absolute top-0 left-0 object-cover object-center z-0"
-            />
-
-            <div className="w-full h-full absolute z-1 p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group">
-              <div className="w-fit bg-orange-600 px-2 py-1 md:text-sm text-xs text-white">
-                Mới
-              </div>
-              <p className="group-hover:underline md:text-xl">
-                Thêm điểm nhấn, thêm sắc màu
-              </p>
-              <ArrowRight className="md:block hidden" />
-            </div>
-          </Link>
-
-          <Link
-            href={""}
-            className="w-full md:h-full h-auto md:aspect-auto aspect-square relative"
-          >
-            <Image
-              src={"/assets/images/decorations/livingroom-with-plants.jpg"}
-              alt="Bedroom with plants"
-              fill
-              className="absolute top-0 left-0 object-cover object-center z-0"
-            />
-
-            <div className="w-full h-full absolute z-1 p-4 grid content-end gap-2 bg-linear-to-t from-black/50 to-transparent text-white font-bold group">
-              <p className="group-hover:underline md:text-xl">
-                Cây xanh cho không gian sống
-              </p>
-              <ArrowRight className="md:block hidden" />
-            </div>
-          </Link>
+          <p className="group-hover:underline md:text-4xl text-2xl text-center max-w-md drop-shadow-2xl font-black">
+            Giảm 15% giá trị đơn hàng đầu tiên
+          </p>
+          <ArrowRight className="md:block hidden size-8 drop-shadow-lg animate-bounce" />
         </div>
-      </div>
+      </Link>
     </div>
   );
 }
@@ -486,33 +440,8 @@ export function SubscribeSection() {
 
 export default function Home() {
   return (
-    <main className="flex flex-col gap-5">
-      {/* Danh mục */}
-      <CategoriesSection />
-
-      {/* Chào mừng */}
+    <main className="w-full h-screen">
       <WelcomeSection />
-
-      {/* Offers */}
-      <GplantOffersSection />
-
-      {/* Best deals */}
-      <ToDayBestDealsSection />
-
-      {/* Trending */}
-      <WhatsTrendingSection />
-
-      {/* Sản phẩm mới */}
-      <DiscoverWhatsNewSection />
-
-      {/* Buy now pay later */}
-      <BuyNowPayLaterSection />
-
-      {/* Mẹo và ý tưởng */}
-      <TipsAndIdeasSection />
-
-      {/* Đăng ký nhận bản tin */}
-      <SubscribeSection />
     </main>
   );
 }
