@@ -88,15 +88,13 @@ function UpdateProduct({ product }: { product: Product }) {
 
   const [existingImages, setExistingImages] = React.useState<string[]>(() =>
     product.images
-      .map(i => i?.downloadUrl?.trim())
+      .map((i) => i?.downloadUrl?.trim())
       .filter((i): i is string => Boolean(i))
-      .map(i => `http://localhost:8080${i}`)
+      .map((i) => `http://localhost:8080${i}`)
   );
-
 
   const [newImages, setNewImages] = React.useState<File[]>([]);
   const [newImageFile, setNewImageFile] = React.useState<File | null>(null);
-
 
   const formSchema = z.object({
     productName: z.string().min(7).max(200),
@@ -159,16 +157,15 @@ function UpdateProduct({ product }: { product: Product }) {
 
       const formData = new FormData();
 
-      newImages.forEach(file => {
+      newImages.forEach((file) => {
         formData.append("files", file);
       });
 
-      existingImages.forEach(url => {
+      existingImages.forEach((url) => {
         formData.append("existingImages", url);
       });
 
       const addImagesCode = await addProductImage(product.productId, formData);
-
 
       if (code === 200 && addImagesCode === 200) {
         toast.success("Cập nhật thành công");
@@ -192,10 +189,9 @@ function UpdateProduct({ product }: { product: Product }) {
 
   const handleAddImages = () => {
     if (!newImageFile) return;
-    setNewImages(prev => [...prev, newImageFile]);
+    setNewImages((prev) => [...prev, newImageFile]);
     setNewImageFile(null);
   };
-
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -233,7 +229,7 @@ function UpdateProduct({ product }: { product: Product }) {
           <div className="flex items-center gap-4 flex-wrap">
             {/* Hiển thị ảnh cũ (từ server) */}
             {existingImages
-              .filter(src => typeof src === "string" && src.length > 0)
+              .filter((src) => typeof src === "string" && src.length > 0)
               .map((src, i) => (
                 <div
                   key={`existing-${i}`}
@@ -279,8 +275,6 @@ function UpdateProduct({ product }: { product: Product }) {
               </div>
             ))}
 
-
-
             <Dialog>
               <form>
                 <DialogTrigger asChild>
@@ -302,7 +296,6 @@ function UpdateProduct({ product }: { product: Product }) {
                         }
                       }}
                     />
-
                   </div>
                   <DialogFooter>
                     <DialogClose asChild>
@@ -316,7 +309,6 @@ function UpdateProduct({ product }: { product: Product }) {
                     >
                       Thêm
                     </Button>
-
                   </DialogFooter>
                 </DialogContent>
               </form>
@@ -606,7 +598,7 @@ function DeleteProduct({ product }: { product: Product }) {
               : DELETE_PRODUCT_SUCCESS_MESSAGE,
           action: {
             label: "Oke",
-            onClick: () => { },
+            onClick: () => {},
           },
         }
       );
@@ -625,10 +617,10 @@ function DeleteProduct({ product }: { product: Product }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
-              <Button onClick={() => { }} size={"icon"} variant="ghost">
+              <Button onClick={() => {}} size={"icon"} variant="ghost">
                 <Trash
                   className="size-5 cursor-pointer hover:text-red-600 transition"
-                  onClick={() => { }}
+                  onClick={() => {}}
                 />
               </Button>
             </DialogTrigger>
@@ -838,7 +830,6 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
   const [newImages, setNewImages] = React.useState<File[]>([]);
   const [newImageFile, setNewImageFile] = React.useState<File | null>(null);
 
-
   const formSchema = z.object({
     productName: z.string().min(7).max(200),
     description: z.string().min(2).max(100),
@@ -909,12 +900,11 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
 
       const formData = new FormData();
 
-      newImages.forEach(file => {
+      newImages.forEach((file) => {
         formData.append("files", file);
       });
 
       const addImagesCode = await addProductImage(product.productId, formData);
-
 
       if (code === 201 && addImagesCode === 200) {
         toast.success("Thêm sản phẩm thành công");
@@ -928,16 +918,14 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
   }
 
   const handleRemoveNew = (index: number) => {
-    setNewImages(prev => prev.filter((_, i) => i !== index));
+    setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
-
 
   const handleAddImages = () => {
     if (!newImageFile) return;
-    setNewImages(prev => [...prev, newImageFile]);
+    setNewImages((prev) => [...prev, newImageFile]);
     setNewImageFile(null);
   };
-
 
   return (
     <div

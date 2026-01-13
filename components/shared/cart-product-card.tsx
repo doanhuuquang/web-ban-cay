@@ -155,7 +155,9 @@ export default function CartItemCard({
       <div className="w-full max-w-25 relative aspect-3/4">
         <Image
           src={
-            product?.images[0]?.url ?? "/assets/images/products/placeholder.png"
+            product.images && product.images.length > 0
+              ? `http://localhost:8080${product.images[0].downloadUrl}`
+              : "/assets/images/products/placeholder.png"
           }
           alt={product.productName}
           fill

@@ -28,9 +28,10 @@ export default function ProductImagesShow({
     <div className="w-full h-fit flex lg:flex-col flex-row-reverse gap-4">
       <div className="grow relative aspect-3/4">
         <Image
-          src={imageUrls[currentImageIndex].url}
+          src={`http://localhost:8080${imageUrls[currentImageIndex].downloadUrl}`}
           alt={"Product Image"}
           fill
+          unoptimized
           className="absolute top-0 left-0 object-center object-cover"
         />
       </div>
@@ -43,9 +44,14 @@ export default function ProductImagesShow({
             onClick={() => setCurrentImageIndex(index)}
           >
             <Image
-              src={image.url}
+              src={
+                image && imageUrls.length > 0
+                  ? `http://localhost:8080${imageUrls[currentImageIndex].downloadUrl}`
+                  : "/assets/images/products/placeholder.png"
+              }
               alt={"Product Image"}
               fill
+              unoptimized
               className="absolute top-0 left-0 object-center object-cover"
             />
           </div>

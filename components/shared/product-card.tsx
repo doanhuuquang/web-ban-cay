@@ -72,16 +72,26 @@ export default function ProductCard({
         {product.images.length > 0 ? (
           <div className="w-full h-full relative aspect-3/4 overflow-hidden">
             <Image
-              src={product?.images?.[0]?.url ?? imgdefault}
+              src={
+                product.images && product.images.length > 0
+                  ? `http://localhost:8080${product.images[0].downloadUrl}`
+                  : "/assets/images/products/placeholder.png"
+              }
               alt="image"
               fill
+              unoptimized
               className="absolute top-0 left-0 z-1 object-center object-cover"
             />
 
             <Image
-              src={product?.images[1]?.url ?? imgdefault}
+              src={
+                product.images && product.images.length > 0
+                  ? `http://localhost:8080${product.images[0].downloadUrl}`
+                  : "/assets/images/products/placeholder.png"
+              }
               alt="image"
               fill
+              unoptimized
               className="absolute top-0 left-0 object-center object-cover z-2 opacity-0 hover:opacity-100 transition-all"
             />
           </div>

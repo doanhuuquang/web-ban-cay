@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.plantshop.me",
       },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8080",
+      },
     ],
   },
 };

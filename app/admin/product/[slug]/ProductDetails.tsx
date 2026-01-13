@@ -316,8 +316,13 @@ export default function ProductDetails({ slug }: { slug: string }) {
               className="w-full aspect-3/4 relative rounded-lg overflow-hidden border border-gray-200"
             >
               <Image
-                src={image.url}
+                src={
+                  product.images && product.images.length > 0
+                    ? `http://localhost:8080${product.images[0].downloadUrl}`
+                    : "/assets/images/products/placeholder.png"
+                }
                 alt={product.productName}
+                unoptimized
                 fill
                 className="object-cover"
               />
