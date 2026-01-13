@@ -9,3 +9,4 @@ export const COUPONS_PATH = "/account/coupons";
 export const ACCOUNT_ORDERS_PATH = "/account/orders";
 export const WHISHLIST_PATH = "/wishlist";
 export const ORDER_COMFIRMED_PATH = "/cart/checkout/order-confirmed";
+export const ADMIN_PRODUCT_PATH = "/admin/product";

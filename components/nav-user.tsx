@@ -25,6 +25,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/lib/contexts/auth-context";
+import { logout } from "@/lib/services/auth-service";
+import { API_SUCCESS_CODE } from "@/lib/constants/api-success-code";
+import { toast } from "sonner";
+import {
+  DEFAULT_ERROR_MESSAGE,
+  ERROR_MESSAGES,
+} from "@/lib/constants/error-messages";
+import { LOGOUT_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
 
 export function NavUser({
   user,
@@ -36,6 +45,29 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const { setIsLoggedIn } = useAuth();
+
+  const handleLogout = async () => {
+    const code = await logout();
+
+    if (code === API_SUCCESS_CODE.LOGOUT_SUCCESS) setIsLoggedIn(false);
+
+    toast(
+      code !== API_SUCCESS_CODE.LOGOUT_SUCCESS ? "Thất bại" : "Thành công",
+      {
+        description:
+          code !== API_SUCCESS_CODE.LOGOUT_SUCCESS
+            ? ERROR_MESSAGES[code]
+              ? ERROR_MESSAGES[code]
+              : DEFAULT_ERROR_MESSAGE
+            : LOGOUT_SUCCESS_MESSAGE,
+        action: {
+          label: "Oke",
+          onClick: () => {},
+        },
+      }
+    );
+  };
 
   return (
     <SidebarMenu>
@@ -91,7 +123,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Đăng xuất
             </DropdownMenuItem>

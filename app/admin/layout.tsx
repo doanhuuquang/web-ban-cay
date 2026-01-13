@@ -1,3 +1,5 @@
+"use client";
+
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   SidebarInset,
@@ -13,12 +15,25 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@radix-ui/react-separator";
+import { useAuth } from "@/lib/contexts/auth-context";
+import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const router = useRouter();
+  const { isLoading, isLoggedIn, isAdmin } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isLoggedIn || (isLoggedIn && !isAdmin)) {
+    return router.push("/");
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />

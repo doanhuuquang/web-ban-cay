@@ -33,7 +33,7 @@ function AddToCartButtons({
   product: Product;
   className?: string;
 }) {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const [quantity, setQuantity] = React.useState<number>(1);
   const [isAdding, setIsAdding] = React.useState<boolean>(false);
 
@@ -59,6 +59,10 @@ function AddToCartButtons({
         productId: product.productId,
         quantity: quantity,
       });
+
+      if (code === API_SUCCESS_CODE.ADD_ITEM_TO_CART_SUCCESS) {
+        await refreshUserProfile();
+      }
 
       if (code === API_SUCCESS_CODE.ADD_ITEM_TO_CART_SUCCESS) {
         toast(

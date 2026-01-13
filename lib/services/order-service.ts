@@ -18,6 +18,11 @@ const placeOrderFromCart = async (data: {
     const placeOrderFromCartUrl = "/orders/placeOrder";
     const response = await instance.post(placeOrderFromCartUrl, data);
 
+    // if (data.paymentMethod === "VNPAY") {
+    //   window.location.href = response.data.data;
+    //   return;
+    // }
+
     return {
       code: response.data.code,
       order: Order.fromJson(response.data.data),
@@ -79,7 +84,6 @@ const getOrderById = async ({
   }
 };
 
-
 const getOrderAll = async (): Promise<{
   code: number;
   order: Order[] | null;
@@ -89,7 +93,7 @@ const getOrderAll = async (): Promise<{
     const response = await instance.get(getOrderByIdUrl);
     return {
       code: 1,
-      order: response.data.data
+      order: response.data.data,
     };
   } catch {
     return {
@@ -99,23 +103,23 @@ const getOrderAll = async (): Promise<{
   }
 };
 
-
-const getOrderStatus = async (param: string): Promise<{
+const getOrderStatus = async (
+  param: string
+): Promise<{
   code: number;
   order: Order[] | null;
 }> => {
   try {
     const getOrderByIdUrl = `orders/status`;
     const response = await instance.get(getOrderByIdUrl, {
-      params: { orderStatus: param }
+      params: { orderStatus: param },
     });
 
     return {
       code: 1,
-      order: response.data.data
+      order: response.data.data,
     };
-  }
-  catch {
+  } catch {
     return {
       code: -1,
       order: null,
@@ -123,8 +127,9 @@ const getOrderStatus = async (param: string): Promise<{
   }
 };
 
-
-const getOrderId = async (orderId: string): Promise<{
+const getOrderId = async (
+  orderId: string
+): Promise<{
   code: number;
   order: Order | null;
 }> => {
@@ -134,10 +139,9 @@ const getOrderId = async (orderId: string): Promise<{
 
     return {
       code: 1,
-      order: response.data.data
+      order: response.data.data,
     };
-  }
-  catch {
+  } catch {
     return {
       code: -1,
       order: null,
@@ -145,7 +149,9 @@ const getOrderId = async (orderId: string): Promise<{
   }
 };
 
-const getPaymentById = async (paymentId: string): Promise<{
+const getPaymentById = async (
+  paymentId: string
+): Promise<{
   code: number;
   payment: Payment | null;
 }> => {
@@ -155,10 +161,9 @@ const getPaymentById = async (paymentId: string): Promise<{
 
     return {
       code: 1,
-      payment: response.data.data
+      payment: response.data.data,
     };
-  }
-  catch {
+  } catch {
     return {
       code: -1,
       payment: null,
@@ -166,23 +171,25 @@ const getPaymentById = async (paymentId: string): Promise<{
   }
 };
 
-const updateStatusOrder = async (orderId: string, orderStatus: string): Promise<{
+const updateStatusOrder = async (
+  orderId: string,
+  orderStatus: string
+): Promise<{
   code: number;
   order: Order | null;
 }> => {
   try {
-    console.log(orderId, orderStatus)
+    console.log(orderId, orderStatus);
     const getOrderByIdUrl = `orders/order/updateStatus`;
     const response = await instance.put(getOrderByIdUrl, null, {
-      params: { orderStatus: orderStatus, orderId: orderId }
+      params: { orderStatus: orderStatus, orderId: orderId },
     });
 
     return {
       code: 1,
-      order: response.data.data
+      order: response.data.data,
     };
-  }
-  catch {
+  } catch {
     return {
       code: -1,
       order: null,
@@ -190,8 +197,9 @@ const updateStatusOrder = async (orderId: string, orderStatus: string): Promise<
   }
 };
 
-
-const getOrderProfileId = async (profileId: string): Promise<{
+const getOrderProfileId = async (
+  profileId: string
+): Promise<{
   code: number;
   order: Order[] | null;
 }> => {
@@ -201,10 +209,9 @@ const getOrderProfileId = async (profileId: string): Promise<{
 
     return {
       code: 1,
-      order: response.data.data
+      order: response.data.data,
     };
-  }
-  catch {
+  } catch {
     return {
       code: -1,
       order: null,
@@ -271,8 +278,6 @@ const downloadOrderPdf = async (orderId: string): Promise<number> => {
   }
 };
 
-
-
 export {
   placeOrderFromCart,
   getOrdersByProfileId,
@@ -282,7 +287,8 @@ export {
   getOrderAll,
   getOrderStatus,
   getOrderId,
-  getOrderProfileId, updateStatusOrder,
+  getOrderProfileId,
+  updateStatusOrder,
   getPaymentById,
-  downloadOrderPdf
+  downloadOrderPdf,
 };

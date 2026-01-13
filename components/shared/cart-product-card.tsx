@@ -28,6 +28,7 @@ import { REMOVE_ITEM_FROM_CART_SUCCESS_MESSAGE } from "@/lib/constants/success-m
 import { updateCartItemQuantity } from "@/lib/services/cart-item-service";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { formatMoney } from "@/lib/helpers/format-money";
+import { useAuth } from "@/lib/contexts/auth-context";
 
 export default function CartItemCard({
   cartId,
@@ -36,6 +37,7 @@ export default function CartItemCard({
   cartId: string;
   cartItem: CartItem;
 }) {
+  const { refreshUserProfile } = useAuth();
   const [isShowDeleteDialog, setIsShowDeleteDialog] =
     React.useState<boolean>(false);
   const [isRemoving, setIsRemoving] = React.useState<boolean>(false);
@@ -84,6 +86,10 @@ export default function CartItemCard({
         cartId: cartId,
         cartItemId: cartItem.cartItemId,
       });
+
+      if (code === API_SUCCESS_CODE.ADD_ITEM_TO_CART_SUCCESS) {
+        await refreshUserProfile();
+      }
 
       toast(
         code !== API_SUCCESS_CODE.REMOVE_ITEM_FROM_CART_SUCCESS
