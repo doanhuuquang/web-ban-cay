@@ -10,6 +10,7 @@ type AuthContextProps = {
   isLoading: boolean;
   isLoggedIn: boolean;
   user: User | null;
+  isAdmin: boolean;
   setIsLoggedIn: (loggedIn: boolean) => void;
   refreshUserProfile: () => Promise<void>;
 };
@@ -34,6 +35,7 @@ export default function AuthProvider({
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false);
   const [user, setUser] = React.useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = React.useState<boolean>(false);
   const [nextTokenRefreshTime, setNextTokenRefreshTime] =
     React.useState<Date | null>(null);
 
@@ -109,6 +111,10 @@ export default function AuthProvider({
     try {
       setIsLoading(true);
 
+      console.log(user?.roles.map((role) => role.roleName));
+      if (user?.roles.map((role) => role.roleName).includes("ADMIN"))
+        setIsAdmin(true);
+
       if (isLoggedIn && !user) {
         refreshUserProfile();
         return;
@@ -127,6 +133,7 @@ export default function AuthProvider({
     if (!isLoggedIn) {
       setUser(null);
       setNextTokenRefreshTime(null);
+      setIsAdmin(false);
     }
   }, [isLoggedIn]);
 
@@ -141,6 +148,7 @@ export default function AuthProvider({
         isLoading,
         isLoggedIn,
         user,
+        isAdmin,
         setIsLoggedIn,
         refreshUserProfile,
       }}

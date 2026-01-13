@@ -25,6 +25,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ACCOUNT_PATH,
+  ADMIN_PRODUCT_PATH,
   CART_PATH,
   LOGIN_PATH,
   WHISHLIST_PATH,
@@ -99,20 +100,36 @@ function MenuMobile({ className }: { className?: string }) {
 }
 
 function AccountButton() {
-  const { isLoading, isLoggedIn, user } = useAuth();
+  const { isLoading, isLoggedIn, user, isAdmin } = useAuth();
+
+  let greeting;
+
+  if (isLoggedIn && isAdmin) {
+    greeting = "Hello Admin";
+  } else if (isLoggedIn && user?.userProfile?.username) {
+    greeting = user.userProfile.username;
+  } else if (isLoggedIn) {
+    greeting = "Hello! Người lạ";
+  } else {
+    greeting = "Hej! Đăng nhập";
+  }
 
   if (isLoading)
     return <Skeleton className="h-9 w-25 max-md:w-9 rounded-full" />;
 
   return (
-    <Link href={isLoggedIn ? ACCOUNT_PATH : LOGIN_PATH}>
+    <Link
+      href={
+        isLoggedIn && isAdmin
+          ? ADMIN_PRODUCT_PATH
+          : isLoggedIn
+          ? ACCOUNT_PATH
+          : LOGIN_PATH
+      }
+    >
       <Button variant={"ghost"} className="rounded-full">
         <UserRound className="size-5" />
-        <span className="text-sm font-medium hidden lg:inline">
-          {isLoggedIn && user && user.userProfile
-            ? user.userProfile.username || "Hello! Người lạ"
-            : "Hej! Đăng nhập"}
-        </span>
+        <span className="text-sm font-medium hidden lg:inline">{greeting}</span>
       </Button>
     </Link>
   );
