@@ -87,6 +87,7 @@ const getOrderAll = async (): Promise<{
   try {
     const getOrderByIdUrl = `orders/all`;
     const response = await instance.get(getOrderByIdUrl);
+    console.log(response.data.data)
     return {
       code: 1,
       order: response.data.data

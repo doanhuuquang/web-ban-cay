@@ -9,6 +9,8 @@ const getProducts = async (): Promise<{
   try {
     const getProductsUrl = `/products/all`;
     const response = await instance.get(getProductsUrl);
+
+    console.log(response.data.data)
     const products = response.data.data.map((product: Product) =>
       Product.fromJson(product)
     );
@@ -217,16 +219,15 @@ const addProduct = async ({
   }
 };
 
-const addProductImage = async ({
-  productId,
-  imageUrls,
-}: {
-  productId: string;
-  imageUrls: string[];
-}): Promise<number> => {
+const addProductImage = async (productId: number | string,
+  formData: FormData): Promise<number> => {
   try {
-    const addProductImageUrl = `/images/${productId}/images/url`;
-    const response = await instance.post(addProductImageUrl, imageUrls);
+    const url = `images/upload/product/${productId}`;
+    const response = await instance.post(url, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data.code;
   } catch (error) {
     if (error instanceof axios.AxiosError) {

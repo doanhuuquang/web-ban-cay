@@ -124,7 +124,7 @@ function OrderTable({ sort }: { sort: string }) {
           <thead className="bg-gray-100 border-b">
             <tr className="font-semibold text-gray-700">
               <th className="px-4 py-3">Id</th>
-              <th className="px-4 py-3">Mã thanh toán</th>
+              <th className="px-4 py-3">Phương thức</th>
               <th className="px-4 py-3">Mã khách hàng</th>
               <th className="px-4 py-3">Mã địa chỉ</th>
               <th className="px-4 py-3">Phí vận chuyển</th>
@@ -143,7 +143,7 @@ function OrderTable({ sort }: { sort: string }) {
                   className="border-b hover:bg-gray-50 transition"
                 >
                   <td className="px-4 py-3">{row.orderId}</td>
-                  <td className="px-4 py-3">{row.paymentId ?? "VNPay"}</td>
+                  <td className="px-4 py-3">{row.paymentId ? "CASH" :"VNPAY"}</td>
                   <td className="px-4 py-3">{row.profileId}</td>
                   <td className="px-4 py-3">{row.deliveryAddressId}</td>
                   <td className="px-4 py-3">{formatMoney(row.shippingFee)}</td>
