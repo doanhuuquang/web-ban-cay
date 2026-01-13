@@ -17,6 +17,8 @@ import {
 import { Separator } from "@radix-ui/react-separator";
 import { useAuth } from "@/lib/contexts/auth-context";
 import { useRouter } from "next/navigation";
+import React from "react";
+import { LOGIN_PATH } from "@/lib/constants/path";
 
 export default function DashboardLayout({
   children,
@@ -26,12 +28,17 @@ export default function DashboardLayout({
   const router = useRouter();
   const { isLoading, isLoggedIn, isAdmin } = useAuth();
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const isUnauthorized =
+    !isLoading && (!isLoggedIn || (isLoggedIn && !isAdmin));
 
-  if (!isLoggedIn || (isLoggedIn && !isAdmin)) {
-    return router.push("/");
+  React.useEffect(() => {
+    if (isUnauthorized) {
+      router.push(!isLoggedIn ? LOGIN_PATH : "/");
+    }
+  }, [isUnauthorized, isLoggedIn, router]);
+
+  if (isLoading || isUnauthorized) {
+    return <div>Loading...</div>;
   }
 
   return (

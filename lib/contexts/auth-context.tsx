@@ -1,16 +1,16 @@
 "use client";
 
+import React from "react";
 import { API_SUCCESS_CODE } from "@/lib/constants/api-success-code";
 import { User } from "@/lib/models/user";
 import { introspectToken, refreshToken } from "@/lib/services/auth-service";
 import { getCurrentUserProfile } from "@/lib/services/user-service";
-import React from "react";
 
 type AuthContextProps = {
   isLoading: boolean;
   isLoggedIn: boolean;
   user: User | null;
-  isAdmin: boolean;
+  isAdmin: boolean | null;
   setIsLoggedIn: (loggedIn: boolean) => void;
   refreshUserProfile: () => Promise<void>;
 };
@@ -19,11 +19,9 @@ const AuthContext = React.createContext<AuthContextProps | null>(null);
 
 export function useAuth() {
   const context = React.useContext(AuthContext);
-
   if (!context) {
-    throw new Error("useAuth must be used within a <UserProvider />");
+    throw new Error("useAuth must be used within an <AuthProvider />");
   }
-
   return context;
 }
 
@@ -32,52 +30,65 @@ export default function AuthProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
-  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>(false);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [user, setUser] = React.useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = React.useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
   const [nextTokenRefreshTime, setNextTokenRefreshTime] =
     React.useState<Date | null>(null);
 
-  /*
-  
-  Kiểm tra trạng thái đăng nhập
-
-  */
+  /* ======================================================
+     KHỞI TẠO AUTH: token → user → role
+     ====================================================== */
   React.useEffect(() => {
-    try {
+    const initAuth = async () => {
       setIsLoading(true);
 
-      const checkLoggedInStatus = async () => {
+      try {
         const { code, exp } = await introspectToken();
 
-        if (code === API_SUCCESS_CODE.INTROSPECT_TOKEN_SUCCESS && exp) {
-          setIsLoggedIn(true);
-          setNextTokenRefreshTime(exp);
-        } else {
-          setNextTokenRefreshTime(null);
+        // ❌ Không đăng nhập
+        if (code !== API_SUCCESS_CODE.INTROSPECT_TOKEN_SUCCESS || !exp) {
           setIsLoggedIn(false);
+          setUser(null);
+          setIsAdmin(false);
+          setNextTokenRefreshTime(null);
+          return;
         }
-      };
 
-      checkLoggedInStatus();
-    } finally {
-      setIsLoading(false);
-    }
+        // ✅ Đăng nhập hợp lệ
+        setIsLoggedIn(true);
+        setNextTokenRefreshTime(exp);
+
+        const res = await getCurrentUserProfile();
+        const profile = res.userProfile;
+
+        setUser(profile);
+        setIsAdmin(
+          profile!.roles?.some((role) => role.roleName === "ADMIN") ?? false
+        );
+      } catch (error) {
+        // ❌ Lỗi bất kỳ → coi như chưa đăng nhập
+        setIsLoggedIn(false);
+        setUser(null);
+        setIsAdmin(false);
+        setNextTokenRefreshTime(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
-  /*
-
-  Tự động làm mới token khi sắp hết hạn
-  
-  */
+  /* ======================================================
+     TỰ ĐỘNG REFRESH TOKEN
+     ====================================================== */
   React.useEffect(() => {
-    if (!isLoggedIn) return;
-    if (!nextTokenRefreshTime) return;
+    if (!isLoggedIn || !nextTokenRefreshTime) return;
 
     const refreshAndUpdate = async () => {
       await refreshToken();
-
       const { code, exp } = await introspectToken();
       if (code === API_SUCCESS_CODE.INTROSPECT_TOKEN_SUCCESS && exp) {
         setNextTokenRefreshTime(exp);
@@ -86,8 +97,7 @@ export default function AuthProvider({
 
     const now = new Date();
     const timeToExpiry = nextTokenRefreshTime.getTime() - now.getTime();
-    const refreshThreshold = 2 * 60 * 1000;
-
+    const refreshThreshold = 2 * 60 * 1000; // 2 phút
     const timeoutDuration =
       timeToExpiry > refreshThreshold ? timeToExpiry - refreshThreshold : 1000;
 
@@ -96,50 +106,25 @@ export default function AuthProvider({
         await refreshAndUpdate();
       } catch {
         setIsLoggedIn(false);
+        setUser(null);
+        setIsAdmin(false);
       }
     }, timeoutDuration);
 
     return () => clearTimeout(timeoutId);
   }, [isLoggedIn, nextTokenRefreshTime]);
 
-  /*
-  
-  Lấy thông tin người dùng khi đăng nhập
-  
-  */
-  React.useEffect(() => {
-    try {
-      setIsLoading(true);
-
-      console.log(user?.roles.map((role) => role.roleName));
-      if (user?.roles.map((role) => role.roleName).includes("ADMIN"))
-        setIsAdmin(true);
-
-      if (isLoggedIn && !user) {
-        refreshUserProfile();
-        return;
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoggedIn, user]);
-
-  /*
-
-  Xóa các giá trị khi đăng xuất
-
-  */
-  React.useEffect(() => {
-    if (!isLoggedIn) {
-      setUser(null);
-      setNextTokenRefreshTime(null);
-      setIsAdmin(false);
-    }
-  }, [isLoggedIn]);
-
+  /* ======================================================
+     HÀM LÀM MỚI USER PROFILE (dùng khi cần)
+     ====================================================== */
   const refreshUserProfile = async () => {
-    const user = (await getCurrentUserProfile()).userProfile;
-    setUser(user);
+    const res = await getCurrentUserProfile();
+    const profile = res.userProfile;
+
+    setUser(profile);
+    setIsAdmin(
+      profile!.roles?.some((role) => role.roleName === "ADMIN") ?? false
+    );
   };
 
   return (
