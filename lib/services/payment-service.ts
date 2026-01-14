@@ -69,6 +69,7 @@ const confirmPayment = async (
 
 const vnpayConfirm = async (orderId: string): Promise<string> => {
   const response = await instance.post(`/payment/vnpay-comfirm/${orderId}`);
+  console.log(response);
   return response.data.data.redirectUrl;
 };
 

@@ -48,13 +48,17 @@ import {
   getOrderById,
   updateOrderAddress,
 } from "@/lib/services/order-service";
-import { getPaymentByOrderId } from "@/lib/services/payment-service";
+import {
+  getPaymentByOrderId,
+  vnpayConfirm,
+} from "@/lib/services/payment-service";
 import { getProductById } from "@/lib/services/product-service";
 import { OrderStatusTypeLabel } from "@/lib/type/order-status";
 import { PaymenStatusTypeLabel } from "@/lib/type/payment-status";
 import { format } from "date-fns";
 import {
   ArrowLeft,
+  CreditCard,
   Download,
   LoaderCircle,
   Truck,
@@ -230,6 +234,13 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
     }
   };
 
+  const handlePayment = async () => {
+    if (!order || !payment) return;
+
+    const redirectUrl = await vnpayConfirm(order.orderId);
+    window.location.href = redirectUrl;
+  };
+
   const handleCancelOrder = async () => {
     if (!order) return;
 
@@ -337,9 +348,20 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                   }
                 })()}
               </p>
-              <p className="text-sm text-muted-foreground">
-                Chúng tôi sẽ cố gắng đưa đơn hàng tới tay bạn một cách sớm nhất
-              </p>
+
+              {order.orderStatus !== "CANCELLED" &&
+                order.orderStatus !== "DELIVERED" && (
+                  <p className="text-sm text-muted-foreground">
+                    Chúng tôi sẽ cố gắng đưa đơn hàng tới tay bạn một cách sớm
+                    nhất
+                  </p>
+                )}
+
+              {order.orderStatus === "DELIVERED" && (
+                <p className="text-sm text-muted-foreground">
+                  Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của chúng tôi!
+                </p>
+              )}
             </div>
           </div>
 
@@ -349,15 +371,16 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
               <span className="text-foreground">
                 {format(order.orderDate, "dd/MM/yyyy")}
               </span>
-              <span> và đang trong quá trình xử lý</span>
 
-              <OrderProgress
-                steps={orderSteps}
-                currentStep={orderSteps.findIndex(
-                  (step) => step.id === order.orderStatus
-                )}
-                className="mt-6"
-              />
+              {order.orderStatus !== "CANCELLED" && (
+                <OrderProgress
+                  steps={orderSteps}
+                  currentStep={orderSteps.findIndex(
+                    (step) => step.id === order.orderStatus
+                  )}
+                  className="mt-6"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -413,10 +436,11 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
             {orderItems.map((item, index) => (
               <div key={index} className="flex gap-4">
                 <Image
-                  src={item?.product?.images[0]?.url ?? imgDef}
+                  src={`http://localhost:8080${item?.product?.images[0]?.downloadUrl}`}
                   alt={item.product.productName}
                   width={50}
                   height={50}
+                  unoptimized
                 />
                 <div className="text-sm">
                   <p>{item.product.productName}</p>
@@ -477,7 +501,21 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
             </div>
           </div>
 
-          {order.orderStatus === "PENDING" && (
+          {(payment?.paymentStatus === "INIT" ||
+            payment?.paymentStatus === "UNPAID") &&
+            payment.paymentMethod === "VNPAY" &&
+            order.orderStatus !== "CANCELLED" && (
+              <Button
+                variant={"outline"}
+                onClick={() => handlePayment()}
+                className="w-full p-6 shadow-none border-none text-primary bg-background dark:bg-muted/50 hover:bg-background dark:hover:bg-muted/50"
+              >
+                <CreditCard /> Thanh toán ngay
+              </Button>
+            )}
+
+          {(order.orderStatus === "PENDING" ||
+            order.orderStatus === "CREATED") && (
             <Button
               variant={"outline"}
               onClick={() => setIsShowCancelOrderDialog(true)}

@@ -7,7 +7,7 @@ export type PaymenStatusType =
   | "EXPIRED";
 
 export const PaymenStatusTypeLabel: Record<PaymenStatusType, string> = {
-  INIT: "Khởi tạo",
+  INIT: "Chờ thanh toán",
   UNPAID: "Chưa thanh toán",
   PAID: "Đã thanh toán",
   PENDING: "Đang xử lý",
