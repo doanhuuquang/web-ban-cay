@@ -3,7 +3,7 @@
 import { AppLoadingIcon } from "@/components/shared/app-loading";
 import {
   OrderProgress,
-  OrderProgressStep,
+  type OrderProgressStep,
 } from "@/components/shared/order-progress";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,11 +34,11 @@ import {
   UPDATE_ADDRESS_SUCCESS_MESSAGE,
 } from "@/lib/constants/success-messages";
 import { formatMoney } from "@/lib/helpers/format-money";
-import { Address } from "@/lib/models/address";
-import { DeliveryAddress } from "@/lib/models/delivery-address";
-import { Order } from "@/lib/models/order";
-import { Payment } from "@/lib/models/payment";
-import { Product } from "@/lib/models/product";
+import type { Address } from "@/lib/models/address";
+import type { DeliveryAddress } from "@/lib/models/delivery-address";
+import type { Order } from "@/lib/models/order";
+import type { Payment } from "@/lib/models/payment";
+import type { Product } from "@/lib/models/product";
 import {
   getAddressByUserProfileId,
   getDeliveryAddressByOrderId,
@@ -65,7 +65,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
-import imgDef from "@/public/assets/images/products/hoacuc-1-gplant.jpg"
+import imgDef from "@/public/assets/images/products/hoacuc-1-gplant.jpg";
 
 export default function OrderDetail({ orderId }: { orderId: string }) {
   const [isLoadingOrder, setIsLoadingOrder] = React.useState<boolean>(true);
@@ -320,16 +320,18 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
               <p className="uppercase text-2xl font-semibold">
                 {(() => {
                   switch (order.orderStatus) {
+                    case "CREATED":
+                      return "Đã khởi tạo đơn hàng";
                     case "PENDING":
                       return "Đơn hàng đã được đặt thành công";
-                    case "DELIVERING":
-                      return "Đơn hàng đang được gửi đi";
-                    case "SHIPPING":
-                      return "Đơn hàng đang được shipper giao";
-                    case "COMPLETED":
+                    case "SHIPPED":
+                      return "Đơn hàng đang được vận chuyển";
+                    case "DELIVERED":
                       return "Đơn hàng đã được giao thành công";
                     case "CANCELLED":
                       return "Đã hủy đơn hàng";
+                    case "RETURNED":
+                      return "Đơn hàng đã được trả/hoàn tiền";
                     default:
                       return "Chưa cập nhật";
                   }
@@ -462,7 +464,8 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
                   (
                   {
                     PaymenStatusTypeLabel[
-                      payment ? payment.paymentStatus : "UNPAID"
+                      (payment?.paymentStatus ??
+                        "UNPAID") as keyof typeof PaymenStatusTypeLabel
                     ]
                   }
                   )

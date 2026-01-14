@@ -299,24 +299,6 @@ function AppHeaderContent() {
             <SearchBar onFocus={() => setIsShowSearchDropdown(true)} />
           </div>
         </div>
-
-        {/* Search dropdown */}
-        {isShowSearchDropdown && (
-          <div className="w-full min-h-full bg-background/60 backdrop-blur-xs flex-1 shadow-2xl flex flex-col">
-            <div className="w-full bg-background border-y overflow-hidden">
-              <div className="w-full max-w-[1400px] mx-auto">
-                <div className="max-h-[55vh] overflow-y-scroll scrollbar-hide">
-                  <SearchSuggestionsList />
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="w-full h-full p-4 grow"
-              onClick={() => setIsShowSearchDropdown(false)}
-            ></div>
-          </div>
-        )}
       </header>
     </AppSearch>
   );

@@ -161,6 +161,7 @@ export default function CartItemCard({
           }
           alt={product.productName}
           fill
+          unoptimized
           className="absolute top-0 left-0 object-center object-contain"
         />
       </div>
