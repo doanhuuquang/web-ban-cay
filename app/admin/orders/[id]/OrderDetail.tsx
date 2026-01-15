@@ -32,9 +32,8 @@ import { User } from "@/lib/models/user";
 import { DeliveryAddress } from "@/lib/models/delivery-address";
 import { getDeliveryAddressByOrderId } from "@/lib/services/address-service";
 import { Button } from "@/components/ui/button";
-import { confirmCashPayment } from "@/lib/services/payment-service";
+import { confirmCashPayment, confirmVnPayPayment } from "@/lib/services/payment-service";
 import { toast } from "sonner";
-import { da } from "zod/v4/locales";
 
 export default function OrderDetail({ id }: { id: string }) {
     const data = storeOrder((s) => s.orderOne)
@@ -62,8 +61,9 @@ export default function OrderDetail({ id }: { id: string }) {
                 setValueAddressId(res.address);
 
             const res1 = await getPaymentById(data?.paymentId)
-            if (res1.code === 1)
+            if (res1.code === 1) {
                 setValuePaymentId(res1.payment);
+            }
 
             const res2 = await getUserProfileById(data?.profileId)
             if (res2.code === 1)
@@ -82,6 +82,17 @@ export default function OrderDetail({ id }: { id: string }) {
         }
         else
             toast("tải file pdf thất bại")
+    }
+
+    const handleConfirmOrderPaymentVnpay = async () => {
+        if (!valuePaymentId) return
+        const res = await confirmVnPayPayment(valuePaymentId.orderId)
+        if (res.code === 1) {
+            toast("xác nhận thành công");
+            window.location.reload()
+        }
+        else
+            toast("xác nhận thất bại");
     }
 
     if (isLoading)
@@ -126,14 +137,17 @@ export default function OrderDetail({ id }: { id: string }) {
                                 {data.orderStatus}
                             </div>
 
-                            {(valuePaymentId?.paymentStatus === "PAID" || !data.paymentId) ? (
+                            {(valuePaymentId?.paymentStatus === "PAID") ? (
                                 <div className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 text-white text-sm font-semibold px-3 py-1 shadow-md">
                                     ✓ Đã thanh toán
                                 </div>
                             ) :
 
                                 (
-                                    <Button onClick={() => setModalOpenConfirmPayment(true)} className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-red-400 to-red-500 text-white text-sm font-semibold px-3 py-1 shadow-md">chưa thanh toán</Button>
+                                    <Button onClick={() => {
+                                        if (valuePaymentId?.paymentMethod === "VNPAY" || ["DELIVERED", "CANCELLED"].includes(data.orderStatus)) return;
+                                        setModalOpenConfirmPayment(true)
+                                    }} className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-red-400 to-red-500 text-white text-sm font-semibold px-3 py-1 shadow-md">chưa thanh toán</Button>
                                 )}
 
                         </div>
@@ -146,10 +160,19 @@ export default function OrderDetail({ id }: { id: string }) {
                             </div>
                         </div>
                     </div>
-                    <Button onClick={(e) => {
-                        e.preventDefault()
-                        handleDowloadPdf()
-                    }} className="rounded-md bg-amber-500 hover:bg-amber-500/85">Xuất đơn</Button>
+                    <div className="flex gap-x-2">
+                        {
+                            (data.orderStatus !== "DELIVERED" && valuePaymentId?.paymentStatus === "PAID") && (<Button className="rounded-sm" onClick={(e) => {
+                                e.preventDefault();
+                                handleConfirmOrderPaymentVnpay()
+                            }}>Xác nhận giao hàng</Button>)
+                        }
+                        <Button onClick={(e) => {
+                            e.preventDefault()
+                            handleDowloadPdf()
+                        }} className="rounded-md bg-amber-500 hover:bg-amber-500/85">Xuất đơn</Button>
+                    </div>
+
                 </div>
 
                 <div className="grid grid-cols-3 gap-6">
@@ -308,6 +331,13 @@ export default function OrderDetail({ id }: { id: string }) {
                                                 <span>{valuePaymentId?.cardType || "—"}</span>
                                             </div>
 
+                                            <div className="flex justify-between border-b py-2 mb-2">
+                                                <span className="flex items-center gap-2">
+                                                    <CreditCard className="w-5 h-5" /> Mã ngân hàng
+                                                </span>
+                                                <span>{valuePaymentId?.bankCode || "—"}</span>
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
@@ -432,7 +462,7 @@ export default function OrderDetail({ id }: { id: string }) {
                                             <FileText className="w-6 h-6 text-purple-600" />
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600">Mã vận đơn</p>
+                                            <p className="text-sm text-gray-600">Mã code vùng</p>
                                             <p className="text-gray-900 font-bold">#{valueAddressId?.postalCode}</p>
                                         </div>
                                     </div>
@@ -453,6 +483,7 @@ export default function OrderDetail({ id }: { id: string }) {
 }
 
 const styleStatus: Record<OrderStatusType, string> = {
+    CREATED: "bg-yellow-100 text-yellow-700 border-yellow-300",
     PENDING: "bg-yellow-100 text-yellow-700 border-yellow-300",
     SHIPPED: "bg-blue-100 text-blue-700 border-blue-300",
     DELIVERED: "bg-green-100 text-green-700 border-green-300",

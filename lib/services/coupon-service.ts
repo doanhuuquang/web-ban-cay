@@ -51,6 +51,7 @@ const getAllCouponsProductIds = async (
 
     const response = await instance.get("/products", { params });
 
+    //console.log(response)
 
     return response.data.data.map(Product.fromJson);
   } catch (error) {
@@ -115,8 +116,9 @@ const updateCouponSer = async (couponId: string, formdata: Coupon): Promise<{ co
     }
 
   } catch (err) {
+    console.log(err)
     return {
-      code: 1,
+      code: -1,
       data: null
     }
   }
