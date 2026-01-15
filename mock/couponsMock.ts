@@ -13,6 +13,8 @@ export async function getAllCouponsMock() {
         setAllCoupon(res);
     setLoading(false);
 }
+
+
 export async function getAvailableCouponsMock() {
     const { setLoading, setAllCoupon } = storeCoupon.getState();
     const res = await getAllAvailableCoupons();
@@ -76,7 +78,7 @@ export async function updateCouponMock(couponId: string, formdata: Coupon) {
     const { setLoading, updateCoupon } = storeCoupon.getState();
     setLoading(true);
     const res = await updateCouponSer(couponId, formdata);
-    if (res.code === 1 ) {
+    if (res.code === 1) {
         updateCoupon(couponId, formdata)
         toast("cập nhật mã giảm giá thành công")
     }

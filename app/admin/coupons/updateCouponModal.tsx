@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { X, Tag, Percent, DollarSign, Calendar, Users, Settings } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Tag, Percent, DollarSign, Calendar, Users, Settings, Slice } from 'lucide-react';
 import { Dialog } from '@/components/ui/dialog';
 import { Coupon } from '@/lib/models/coupon';
 import { updateCouponMock } from '@/mock/couponsMock';
+import { Product } from '@/lib/models/product';
+import { getAllCouponsCategoryIds, getAllCouponsProductIds } from '@/lib/services/coupon-service';
+import { Category } from '@/lib/models/category';
 
 export default function UpdateCouponModal({
     onClose,
@@ -12,6 +15,24 @@ export default function UpdateCouponModal({
     initialData: Coupon | null;
 }) {
     const [formData, setFormData] = useState<Coupon | null>(initialData);
+    const [formDataDetailProduct, setFormDataDetailProduct] = useState<Product[]>([]);
+    const [formDataDetailCategory, setFormDataDetailCategory] = useState<Category[]>([]);
+    console.log(initialData)
+
+
+    useEffect(() => {
+        const fetch = async () => {
+            if (initialData?.categoryIds.length) {
+                const res = await getAllCouponsCategoryIds(initialData.categoryIds)
+                setFormDataDetailCategory(res)
+            }
+            else if (initialData?.productIds.length) {
+                const res = await getAllCouponsProductIds(initialData.productIds)
+                setFormDataDetailProduct(res)
+            }
+        }
+        fetch()
+    }, [])
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -36,7 +57,6 @@ export default function UpdateCouponModal({
 
         // Gửi dữ liệu cập nhật (mock)
         await updateCouponMock(formData.couponId, formData);
-        console.log('Updated coupon:', formData);
         onClose();
     };
 
@@ -53,9 +73,10 @@ export default function UpdateCouponModal({
     return (
         <Dialog>
             <div className="fixed inset-0 bg-black/20 bg-opacity-50 z-50 flex items-center justify-center p-4 animate-fadeIn">
-                <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-slideUp">
+                <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-slideUp">
+
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 flex items-center justify-between">
+                    <div className="bg-primary text-white px-6 py-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <Tag className="w-6 h-6" />
                             <h2 className="text-2xl font-bold">Chỉnh Sửa Mã Giảm Giá</h2>
@@ -68,9 +89,32 @@ export default function UpdateCouponModal({
                         </button>
                     </div>
 
+
+
                     {/* Form */}
-                    <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="p-6 overflow-y-auto" style={{ maxHeight: 'calc(90vh - 200px)' }}>
+                        {(formDataDetailProduct.length > 0) && (
+
+                            <div className='flex flex-col border-b-2 pb-2'>
+                                <h3 className='font-bold text-2xl'>danh sách sản phẩm</h3>
+                                {
+                                    formDataDetailProduct.map((row) => (<p key={row.productId}>{row.productName}</p>))
+                                }
+                            </div>
+                        )
+                        }
+
+                        {(formDataDetailCategory.length > 0) && (
+
+                            <div className='flex flex-col border-b-2 pb-2'>
+                                <h3 className='font-bold text-2xl'>danh sách danh mục</h3>
+                                {
+                                    formDataDetailCategory.map((row) => (<p key={row.categoryId}>{row.categoryName}</p>))
+                                }
+                            </div>
+                        )
+                        }
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                             {/* Mã giảm giá - chỉ hiển thị (không cho sửa) */}
                             <div className="md:col-span-2">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -124,7 +168,6 @@ export default function UpdateCouponModal({
                                     value={formData.maxDiscountAmount || ''}
                                     onChange={handleInputChange}
                                     min="0"
-                                    placeholder="0 = không giới hạn"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                                 />
                             </div>

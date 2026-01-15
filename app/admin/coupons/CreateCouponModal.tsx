@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { X, Tag, Percent, DollarSign, Calendar, Users, Settings } from 'lucide-react';
+import { X, Tag, Percent, DollarSign, Calendar, Users, Settings, Earth } from 'lucide-react';
 import { Dialog } from '@/components/ui/dialog';
 import { createCouponMock } from '@/mock/couponsMock';
 import { createCou } from '@/lib/services/coupon-service';
+import { Category } from '@/lib/models/category';
+import CategorySelector from './CategorySelectorProps ';
+import { Product } from '@/lib/models/product';
+import ProductSelector from './ProductSelectorProps ';
 
 export default function CreateCouponModal({ onClose }: { onClose: () => void }) {
     const [formData, setFormData] = useState<createCou>({
@@ -17,7 +21,10 @@ export default function CreateCouponModal({ onClose }: { onClose: () => void }) 
         usageLimit: 0,
         limitPerUser: false,
         maxUsesPerUser: 0,
-        enabled: true
+        enabled: true,
+        scope: 'GLOBAL',
+        categoryIds: [],
+        productIds: []
     });
 
     const handleInputChange = (
@@ -34,6 +41,35 @@ export default function CreateCouponModal({ onClose }: { onClose: () => void }) 
                     : type === "number"
                         ? parseFloat(value) || 0
                         : value,
+        }));
+    };
+
+    // Handler cho ProductSelector
+    const handleProductsChange = (products: Product[]) => {
+        const productIds = products.map(prod => prod.productId);
+        setFormData(prev => ({
+            ...prev,
+            productIds: productIds
+        }));
+    };
+
+
+    const handleCategoriesChange = (categories: Category[]) => {
+        const categoryIds = categories.map(cat => cat.categoryId);
+        setFormData(prev => ({
+            ...prev,
+            categoryIds: categoryIds
+        }));
+    };
+
+    // Handler khi thay đổi scope
+    const handleScopeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newScope = e.target.value as 'GLOBAL' | 'CATEGORY' | 'PRODUCT';
+        setFormData(prev => ({
+            ...prev,
+            scope: newScope,
+            categoryIds: newScope === 'CATEGORY' ? prev.categoryIds : [],
+            productIds: newScope === 'PRODUCT' ? prev.productIds : []
         }));
     };
 
@@ -281,6 +317,52 @@ export default function CreateCouponModal({ onClose }: { onClose: () => void }) 
                                     Kích hoạt mã giảm giá
                                 </label>
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    <Earth className="w-4 h-4 inline mr-2" />
+                                    Phạm vi
+                                </label>
+                                <select
+                                    name="scope"
+                                    value={formData.scope}
+                                    onChange={handleScopeChange}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                >
+                                    <option value="GLOBAL">Tất cả SP</option>
+                                    <option value="CATEGORY">Loại SP</option>
+                                    <option value="PRODUCT">SP cụ thể</option>
+                                </select>
+                            </div>
+
+                            {/* Category Selector */}
+                            {formData.scope === 'CATEGORY' && (
+                                <div className="border-2 border-dashed border-blue-300 rounded-lg p-4 bg-blue-50">
+                                    <label className="block text-sm font-medium mb-3">
+                                        Chọn danh mục áp dụng <span className="text-red-500">*</span>
+                                    </label>
+                                    <CategorySelector
+                                        onSelectCategories={handleCategoriesChange}
+                                        selectedCategoryIds={formData.categoryIds || []}
+                                        multiSelect={true}
+                                    />
+                                </div>
+                            )}
+
+
+                            {/* Product Selector - Chỉ hiện khi scope là PRODUCT */}
+                            {formData.scope === 'PRODUCT' && (
+                                <div className="border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50">
+                                    <label className="block text-sm font-medium mb-3">
+                                        Chọn sản phẩm áp dụng <span className="text-red-500">*</span>
+                                    </label>
+                                    <ProductSelector
+                                        onSelectProducts={handleProductsChange}
+                                        selectedProductIds={formData.productIds || []}
+                                        multiSelect={true}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
 

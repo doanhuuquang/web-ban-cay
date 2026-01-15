@@ -4,6 +4,7 @@ export class Coupon {
   constructor(
     public couponId: string,
     public code: string,
+    public scope: string,
     public discountType: DiscountType,
     public discountPercent: number,
     public discountAmount: number,
@@ -15,12 +16,16 @@ export class Coupon {
     public usageLimit: number,
     public usedCount: number,
     public limitPerUser: boolean,
-    public maxUsesPerUser: number
-  ) {}
+    public maxUsesPerUser: number,
+    public categoryIds: number[],
+    public productIds: number[],
+
+  ) { }
 
   static fromJson(json: {
     couponId: string;
     code: string;
+    scope: string;
     discountType: DiscountType;
     discountPercent: number;
     discountAmount: number;
@@ -33,10 +38,13 @@ export class Coupon {
     usedCount: number;
     limitPerUser: boolean;
     maxUsesPerUser: number;
+    categoryIds: number[];
+    productIds: number[];
   }): Coupon {
     return new Coupon(
       json.couponId,
       json.code,
+      json.scope,
       json.discountType,
       json.discountPercent,
       json.discountAmount,
@@ -48,7 +56,9 @@ export class Coupon {
       json.usageLimit,
       json.usedCount,
       json.limitPerUser,
-      json.maxUsesPerUser
+      json.maxUsesPerUser,
+      json.categoryIds,
+      json.productIds,
     );
   }
 }

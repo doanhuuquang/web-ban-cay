@@ -1,5 +1,7 @@
 import { Coupon } from "@/lib/models/coupon";
 import instance from "@/lib/services/axios-config";
+import { Product } from "../models/product";
+import { Category } from "../models/category";
 
 const getAvailableCoupons = async ({
   orderTotal,
@@ -30,11 +32,55 @@ const getAllCoupons = async (): Promise<Coupon[]> => {
     const getAvailableCouponsUrl = `/coupons/all`;
     const response = await instance.get(getAvailableCouponsUrl);
 
+
     return response.data.data.map(Coupon.fromJson);
   } catch {
     return [];
   }
 };
+
+const getAllCouponsProductIds = async (
+  ids: number[]
+): Promise<Product[]> => {
+  try {
+    console.log(ids)
+    if (!ids.length) return [];
+
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append("productIds", id.toString()));
+
+    const response = await instance.get("/products", { params });
+
+    console.log(params,response)
+
+    return response.data.data.map(Product.fromJson);
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
+
+
+
+const getAllCouponsCategoryIds = async (
+  ids: number[]
+): Promise<Category[]> => {
+  try {
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append("categoryIds", id.toString()));
+
+    const response = await instance.get("/categories", {
+      params,
+    });
+
+    return response.data.data.map(Category.fromJson);
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+
 
 const getAllAvailableCoupons = async (): Promise<Coupon[]> => {
   try {
@@ -69,13 +115,15 @@ const updateCouponSer = async (couponId: string, formdata: Coupon): Promise<{ co
       data: res.data.data
     }
 
-  } catch(err) {
+  } catch (err) {
     return {
       code: 1,
       data: null
     }
   }
 };
+
+export type CouponScope = 'GLOBAL' | 'CATEGORY' | 'PRODUCT';
 
 export type createCou = {
   code: string;
@@ -90,7 +138,11 @@ export type createCou = {
   limitPerUser?: boolean;
   maxUsesPerUser?: number;
   enabled?: boolean;
+  scope: CouponScope,
+  categoryIds?: string[];
+  productIds?: string[];
 }
+
 
 const createCoupon = async (
   coupon: createCou
@@ -117,4 +169,4 @@ const createCoupon = async (
 
 
 
-export { getAvailableCoupons, getAllCoupons, getAllAvailableCoupons, createCoupon, deleteCoupon,updateCouponSer };
+export { getAvailableCoupons, getAllCoupons, getAllAvailableCoupons, createCoupon, deleteCoupon, updateCouponSer, getAllCouponsCategoryIds, getAllCouponsProductIds };

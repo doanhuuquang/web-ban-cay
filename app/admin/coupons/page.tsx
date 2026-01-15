@@ -39,6 +39,9 @@ function OrderTable({ sort }: { sort: string }) {
     const isLoading = storeCoupon((s) => s.loading);
     const currentPageRows = storeCoupon((s) => s.couponsAll);
 
+    //console.log(currentPageRows)
+
+
     //modal
     const [openModalDeleteCoupon, setOpenModalDeleteCoupon] = React.useState<boolean>(false);
     const [openModalUpdateCoupon, setOpenModalUpdateCoupon] = React.useState<boolean>(false);
@@ -58,6 +61,7 @@ function OrderTable({ sort }: { sort: string }) {
                         <tr className="font-semibold text-gray-700">
                             <th className="px-4 py-3">Id</th>
                             <th className="px-4 py-3">code</th>
+                            <th className="px-4 py-3">Phạm vi</th>
                             <th className="px-4 py-3">loại</th>
                             <th className="px-4 py-3">giảm</th>
                             <th className="px-4 py-3">giảm tối đa</th>
@@ -77,7 +81,8 @@ function OrderTable({ sort }: { sort: string }) {
                                     className="border-b hover:bg-gray-50 transition"
                                 >
                                     <td className="px-4 py-3">{row.couponId}</td>
-                                    <td className="px-4 py-3">{row.code ?? "VNPay"}</td>
+                                    <td className="px-4 py-3">{row.code}</td>
+                                    <td className="px-4 py-3">{row.scope}</td>
                                     <td className="px-4 py-3">{row.discountType === "PERCENTAGE" ? "%" : "₫"}</td>
                                     <td className="px-4 py-3">{row.discountPercent ? `${row.discountPercent}%` : formatMoney(row.discountAmount)}</td>
                                     <td className="px-4 py-3">{formatMoney(row.maxDiscountAmount)}</td>

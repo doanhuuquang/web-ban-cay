@@ -703,7 +703,7 @@ function ProductTable({ products }: { products: Product[] }) {
                     <Image
                       src={
                         product.images && product.images.length > 0
-                          ? `http://localhost:8080${product.images[0].downloadUrl}`
+                          ? `http://localhost:8080${product.images[product.images.length-1].downloadUrl}`
                           : "/assets/images/products/placeholder.png"
                       }
                       alt={product.productName}
