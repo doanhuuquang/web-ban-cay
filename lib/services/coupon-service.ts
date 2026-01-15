@@ -43,7 +43,6 @@ const getAllCouponsProductIds = async (
   ids: number[]
 ): Promise<Product[]> => {
   try {
-    console.log(ids)
     if (!ids.length) return [];
 
     const params = new URLSearchParams();
@@ -51,7 +50,6 @@ const getAllCouponsProductIds = async (
 
     const response = await instance.get("/products", { params });
 
-    console.log(params,response)
 
     return response.data.data.map(Product.fromJson);
   } catch (error) {
@@ -86,6 +84,8 @@ const getAllAvailableCoupons = async (): Promise<Coupon[]> => {
   try {
     const getAvailableCouponsUrl = `/coupons/coupon-available`;
     const response = await instance.get(getAvailableCouponsUrl);
+
+    console.log(response.data.data)
 
     return response.data.data.map(Coupon.fromJson);
   } catch {

@@ -17,7 +17,6 @@ export default function UpdateCouponModal({
     const [formData, setFormData] = useState<Coupon | null>(initialData);
     const [formDataDetailProduct, setFormDataDetailProduct] = useState<Product[]>([]);
     const [formDataDetailCategory, setFormDataDetailCategory] = useState<Category[]>([]);
-    console.log(initialData)
 
 
     useEffect(() => {

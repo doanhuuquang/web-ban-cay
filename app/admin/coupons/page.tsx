@@ -257,7 +257,6 @@ const OrderPage = () => {
                 <Button onClick={(e) => {
                     e.preventDefault()
                     setOpenModalCreateCoupon(true)
-                    console.log(openModalCreateCoupon)
                 }}
                     className="rounded-md"><Tag></Tag>Thêm mã giảm giá</Button>
                 <div className="flex gap-4 items-baseline">
