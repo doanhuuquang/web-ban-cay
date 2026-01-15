@@ -250,6 +250,9 @@ export default function CartPage() {
           });
 
           if (response.product) {
+            setTotalProductPrice(0);
+            setTotalDiscountPrice(0);
+
             setTotalProductPrice(
               (prev) => prev + response.product!.price * item.quantity
             );

@@ -202,6 +202,8 @@ const addProduct = async ({
     const addProductsUrl = `/products/product/add`;
     const response = await instance.post(addProductsUrl, data);
 
+    console.log("add product response", response.data);
+
     return {
       code: response.data.code,
       product: Product.fromJson(response.data.data),
@@ -218,8 +220,10 @@ const addProduct = async ({
   }
 };
 
-const addProductImage = async (productId: number | string,
-  formData: FormData): Promise<number> => {
+const addProductImage = async (
+  productId: number | string,
+  formData: FormData
+): Promise<number> => {
   try {
     const url = `images/upload/product/${productId}`;
     const response = await instance.post(url, formData, {

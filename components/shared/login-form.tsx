@@ -85,6 +85,7 @@ export default function LoginForm() {
       );
 
       if (code === 200) setIsLoggedIn(true);
+      window.location.reload();
     } finally {
       setLoading(false);
     }

@@ -45,6 +45,7 @@ import {
 } from "@/lib/services/address-service";
 import {
   cancelOrder,
+  downloadOrderPdf,
   getOrderById,
   updateOrderAddress,
 } from "@/lib/services/order-service";
@@ -69,7 +70,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
-import imgDef from "@/public/assets/images/products/hoacuc-1-gplant.jpg";
 
 export default function OrderDetail({ orderId }: { orderId: string }) {
   const [isLoadingOrder, setIsLoadingOrder] = React.useState<boolean>(true);
@@ -93,6 +93,8 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
   const [isShowCancelOrderDialog, setIsShowCancelOrderDialog] =
     React.useState<boolean>(false);
   const [payment, setPayment] = React.useState<Payment | null>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] =
+    React.useState<boolean>(false);
 
   const orderSteps: OrderProgressStep[] = [];
 
@@ -277,6 +279,19 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
     }
   };
 
+  const handleDowloadPdf = async () => {
+    if (!orderId) return;
+    try {
+      setIsDownloadingPdf(true);
+      const res = await downloadOrderPdf(orderId);
+      if (res === 1) {
+        toast("tải file pdf thành công");
+      } else toast("tải file pdf thất bại");
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
+
   if (isLoadingOrder) {
     return (
       <div className="w-full min-h-[50vh] flex items-center justify-center">
@@ -393,8 +408,18 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
               <p className="text-xl font-bold">#{order.orderId}</p>
             </div>
 
-            <Button size={"sm"} variant={"outline"}>
-              <Download /> Tải hóa đơn
+            <Button
+              disabled={isDownloadingPdf}
+              size={"sm"}
+              variant={"outline"}
+              onClick={handleDowloadPdf}
+            >
+              {isDownloadingPdf ? (
+                <LoaderCircle className="animate-spin" />
+              ) : (
+                <Download />
+              )}
+              Tải hóa đơn
             </Button>
           </div>
 

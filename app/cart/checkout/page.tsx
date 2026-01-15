@@ -340,7 +340,49 @@ function CheckoutSummary({
         orderTotal: cart.totalPrice,
       });
 
-      if (response.coupons) setCoupons(response.coupons);
+      const products: Product[] = [];
+
+      await Promise.all(
+        cart.items.map(async (item) => {
+          const response = await getProductById({
+            productId: item.productId,
+          });
+
+          if (response.product) {
+            products.push(Product.fromJson(response.product));
+          }
+        })
+      );
+
+      if (response.coupons) {
+        setCoupons(
+          response.coupons.filter((coupon) => coupon.scope === "GLOBAL")
+        );
+
+        setCoupons((prev) => [
+          ...prev,
+          ...response.coupons.filter(
+            (coupon) =>
+              coupon.scope === "CATEGORY" &&
+              coupon.categoryIds.some((categoryId) =>
+                products.some(
+                  (product) => product.category.categoryId === categoryId
+                )
+              )
+          ),
+        ]);
+
+        setCoupons((prev) => [
+          ...prev,
+          ...response.coupons.filter(
+            (coupon) =>
+              coupon.scope === "PRODUCT" &&
+              coupon.productIds.some((productId) =>
+                products.some((product) => product.productId === productId)
+              )
+          ),
+        ]);
+      }
     };
 
     fetchCoupons();
@@ -414,6 +456,7 @@ function CheckoutSummary({
         },
       });
 
+      setTotalShippingFee(0);
       setTotalShippingFee(response.total);
     };
 

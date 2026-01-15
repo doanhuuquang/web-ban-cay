@@ -17,10 +17,9 @@ export class Coupon {
     public usedCount: number,
     public limitPerUser: boolean,
     public maxUsesPerUser: number,
-    public categoryIds: number[],
-    public productIds: number[],
-
-  ) { }
+    public categoryIds: string[],
+    public productIds: string[]
+  ) {}
 
   static fromJson(json: {
     couponId: string;
@@ -38,8 +37,8 @@ export class Coupon {
     usedCount: number;
     limitPerUser: boolean;
     maxUsesPerUser: number;
-    categoryIds: number[];
-    productIds: number[];
+    categoryIds: string[];
+    productIds: string[];
   }): Coupon {
     return new Coupon(
       json.couponId,
@@ -58,7 +57,7 @@ export class Coupon {
       json.limitPerUser,
       json.maxUsesPerUser,
       json.categoryIds,
-      json.productIds,
+      json.productIds
     );
   }
 }

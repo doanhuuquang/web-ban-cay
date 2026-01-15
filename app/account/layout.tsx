@@ -60,6 +60,7 @@ export default function AccountLayout({
         profileId: user.userProfile!.profileId,
       });
 
+      setTotalSpent(0);
       setOrderCount(response.orders.length);
 
       response.orders.map((order) => {

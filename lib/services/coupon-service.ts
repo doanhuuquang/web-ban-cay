@@ -116,7 +116,7 @@ const updateCouponSer = async (couponId: string, formdata: Coupon): Promise<{ co
 
   } catch (err) {
     return {
-      code: 1,
+      code: -1,
       data: null
     }
   }
