@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
@@ -28,7 +28,7 @@ import {
   getProducts,
   updateProduct,
 } from "@/lib/services/product-service";
-import { Product } from "@/lib/models/product";
+import type { Product } from "@/lib/models/product";
 import {
   Sheet,
   SheetClose,
@@ -59,7 +59,7 @@ import {
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Category } from "@/lib/models/category";
+import type { Category } from "@/lib/models/category";
 import { getCategories } from "@/lib/services/category-service";
 import {
   Select,
@@ -87,14 +87,14 @@ function UpdateProduct({ product }: { product: Product }) {
   const [open, setOpen] = React.useState(false);
 
   const [existingImages, setExistingImages] = React.useState<string[]>(() =>
-    product.images
+    (product?.images ?? [])
       .map((i) => i?.downloadUrl?.trim())
       .filter((i): i is string => Boolean(i))
       .map((i) => `http://localhost:8080${i}`)
   );
 
   const [newImages, setNewImages] = React.useState<File[]>([]);
-  const [newImageFile, setNewImageFile] = React.useState<File | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const formSchema = z.object({
     productName: z.string().min(7).max(200),
@@ -187,10 +187,14 @@ function UpdateProduct({ product }: { product: Product }) {
     setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleAddImages = () => {
-    if (!newImageFile) return;
-    setNewImages((prev) => [...prev, newImageFile]);
-    setNewImageFile(null);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      setNewImages((prev) => [...prev, e.target.files![0]]);
+      // Reset input để có thể chọn file cùng tên lần tiếp theo
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   React.useEffect(() => {
@@ -242,7 +246,7 @@ function UpdateProduct({ product }: { product: Product }) {
                     <Trash className="text-white size-4" />
                   </div>
                   <Image
-                    src={src}
+                    src={src || "/placeholder.svg"}
                     width={50}
                     height={75}
                     alt={product.productName}
@@ -265,7 +269,7 @@ function UpdateProduct({ product }: { product: Product }) {
                   <Trash className="text-white size-4" />
                 </div>
                 <img
-                  src={URL.createObjectURL(file)}
+                  src={URL.createObjectURL(file) || "/placeholder.svg"}
                   alt={file.name}
                   className="w-full h-full object-cover"
                 />
@@ -275,44 +279,19 @@ function UpdateProduct({ product }: { product: Product }) {
               </div>
             ))}
 
-            <Dialog>
-              <form>
-                <DialogTrigger asChild>
-                  <div className="w-[50px] h-[75px] border flex items-center justify-center cursor-pointer hover:bg-muted/50 transition">
-                    <Plus />
-                  </div>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Thêm ảnh sản phẩm</DialogTitle>
-                  </DialogHeader>
-                  <div className="grid gap-4">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        if (e.target.files?.[0]) {
-                          setNewImageFile(e.target.files[0]);
-                        }
-                      }}
-                    />
-                  </div>
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline">Hủy</Button>
-                    </DialogClose>
-
-                    <Button
-                      type="button"
-                      disabled={!newImageFile}
-                      onClick={handleAddImages}
-                    >
-                      Thêm
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </form>
-            </Dialog>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <div
+              className="w-[50px] h-[75px] border flex items-center justify-center cursor-pointer hover:bg-muted/50 transition"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Plus />
+            </div>
           </div>
 
           <Form {...form}>
@@ -828,7 +807,7 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
 
   const [newImages, setNewImages] = React.useState<File[]>([]);
-  const [newImageFile, setNewImageFile] = React.useState<File | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const formSchema = z.object({
     productName: z.string().min(7).max(200),
@@ -921,10 +900,14 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
     setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleAddImages = () => {
-    if (!newImageFile) return;
-    setNewImages((prev) => [...prev, newImageFile]);
-    setNewImageFile(null);
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files?.[0]) {
+      setNewImages((prev) => [...prev, e.target.files![0]]);
+      // Reset input để có thể chọn file cùng tên lần tiếp theo
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   return (
@@ -944,50 +927,26 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
             <div key={index} onClick={() => handleRemoveNew(index)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={URL.createObjectURL(file)}
+                src={URL.createObjectURL(file) || "/placeholder.svg"}
                 alt=""
                 className="image-preview"
               />
             </div>
           ))}
 
-          <Dialog>
-            <form>
-              <DialogTrigger asChild>
-                <div className="w-[50px] h-[75px] border flex items-center justify-center cursor-pointer hover:bg-muted/50 transition">
-                  <Plus />
-                </div>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Thêm ảnh sản phẩm</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setNewImageFile(e.target.files[0]);
-                      }
-                    }}
-                  />
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Hủy</Button>
-                  </DialogClose>
-                  <Button
-                    type="button"
-                    disabled={!newImageFile}
-                    onClick={handleAddImages}
-                  >
-                    Thêm
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </form>
-          </Dialog>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+          <div
+            className="w-[50px] h-[75px] border flex items-center justify-center cursor-pointer hover:bg-muted/50 transition"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Plus />
+          </div>
         </div>
 
         <Form {...form}>

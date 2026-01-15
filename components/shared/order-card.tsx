@@ -9,6 +9,7 @@ import { Product } from "@/lib/models/product";
 import { getPaymentByOrderId } from "@/lib/services/payment-service";
 import { getProductById } from "@/lib/services/product-service";
 import { OrderStatusTypeLabel } from "@/lib/type/order-status";
+import { PaymenMethodTypeLabel } from "@/lib/type/payment-method";
 import { PaymenStatusTypeLabel } from "@/lib/type/payment-status";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -88,9 +89,10 @@ export default function OrderCard({ order }: { order: Order }) {
           <div key={index} className="flex gap-4">
             <div className="w-20 aspect-square relative">
               <Image
-                src={orderItem.product.images[0].url}
+                src={`http://localhost:8080${orderItem.product.images[0].downloadUrl}`}
                 alt={orderItem.product.productName}
                 fill
+                unoptimized
                 className="absolute top-0 left-0 object-center object-contain"
               />
             </div>
@@ -120,6 +122,13 @@ export default function OrderCard({ order }: { order: Order }) {
       <div className="w-full max-w-md text-end space-y-2">
         <p className="text-sm text-muted-foreground">
           {OrderStatusTypeLabel[order.orderStatus]}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          {
+            PaymenMethodTypeLabel[
+              payment?.paymentMethod as keyof typeof PaymenMethodTypeLabel
+            ]
+          }
         </p>
         <div className="text-sm">
           <span>Tổng giá tiền: </span>

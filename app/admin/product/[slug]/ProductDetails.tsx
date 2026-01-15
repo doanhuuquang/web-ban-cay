@@ -317,8 +317,8 @@ export default function ProductDetails({ slug }: { slug: string }) {
             >
               <Image
                 src={
-                  product.images && product.images.length > 0
-                    ? `http://localhost:8080${product.images[0].downloadUrl}`
+                  product.images
+                    ? `http://localhost:8080${image.downloadUrl}`
                     : "/assets/images/products/placeholder.png"
                 }
                 alt={product.productName}

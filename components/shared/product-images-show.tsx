@@ -45,8 +45,8 @@ export default function ProductImagesShow({
           >
             <Image
               src={
-                image && imageUrls.length > 0
-                  ? `http://localhost:8080${imageUrls[currentImageIndex].downloadUrl}`
+                image
+                  ? `http://localhost:8080${image.downloadUrl}`
                   : "/assets/images/products/placeholder.png"
               }
               alt={"Product Image"}
