@@ -21,17 +21,18 @@ export default function UpdateCouponModal({
 
     useEffect(() => {
         const fetch = async () => {
-            if (initialData?.categoryIds.length) {
+            if (initialData?.categoryIds?.length) {
                 const res = await getAllCouponsCategoryIds(initialData.categoryIds)
                 setFormDataDetailCategory(res)
             }
-            else if (initialData?.productIds.length) {
+            else if (initialData?.productIds?.length) {
                 const res = await getAllCouponsProductIds(initialData.productIds)
                 setFormDataDetailProduct(res)
             }
+
         }
         fetch()
-    }, [])
+    }, [initialData?.categoryIds, initialData?.productIds])
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>

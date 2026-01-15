@@ -15,6 +15,7 @@ const getAvailableCoupons = async ({
     const getAvailableCouponsUrl = `/coupons/get-available-coupons/${orderTotal}`;
     const response = await instance.get(getAvailableCouponsUrl);
 
+
     return {
       code: response.data.code,
       coupons: response.data.data.map(Coupon.fromJson),
@@ -84,8 +85,6 @@ const getAllAvailableCoupons = async (): Promise<Coupon[]> => {
   try {
     const getAvailableCouponsUrl = `/coupons/coupon-available`;
     const response = await instance.get(getAvailableCouponsUrl);
-
-    console.log(response.data.data)
 
     return response.data.data.map(Coupon.fromJson);
   } catch {
