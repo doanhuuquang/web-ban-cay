@@ -47,25 +47,26 @@ const confirmCashPayment = async (
     return {
       code: 1,
     };
-  } catch {
+  } catch(err) {
+    console.log(err)
     return {
       code: -1,
     };
   }
 };
 
-const confirmPayment = async (
-  orderId: string,
-  isCash: boolean
-): Promise<{
-  code: number;
-}> => {
-  let res;
-  if (isCash) res = await confirmCashPayment(orderId);
-  else res = await confirmVnPayPayment(orderId);
+// const confirmPayment = async (
+//   orderId: string,
+//   isCash: boolean
+// ): Promise<{
+//   code: number;
+// }> => {
+//   let res;
+//   if (isCash) res = await confirmCashPayment(orderId);
+//   else res = await confirmVnPayPayment(orderId);
 
-  return { code: res.code };
-};
+//   return { code: res.code };
+// };
 
 const vnpayConfirm = async (orderId: string): Promise<string> => {
   const response = await instance.post(`/payment/vnpay-comfirm/${orderId}`);
@@ -76,6 +77,6 @@ const vnpayConfirm = async (orderId: string): Promise<string> => {
 export {
   confirmCashPayment,
   getPaymentByOrderId,
-  confirmPayment,
   vnpayConfirm,
+  confirmVnPayPayment
 };

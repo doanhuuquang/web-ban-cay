@@ -42,8 +42,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Order } from "@/lib/models/order";
 import Link from "next/link";
-import { confirmCashPayment } from "@/lib/services/payment-service";
+import { confirmCashPayment, confirmVnPayPayment, vnpayConfirm } from "@/lib/services/payment-service";
 import { toast } from "sonner";
+import { Payment } from "@/lib/models/payment";
+import { getPaymentById } from "@/lib/services/order-service";
 
 function OrderStatsList() {
   const F = storeOrder((s) => s.orderAll);
@@ -66,6 +68,11 @@ function OrderStatsList() {
       countStats: stats?.shipping ?? 0,
       icon: Package,
     },
+    {
+      title: "Đã tạo đơn",
+      countStats: stats?.created ?? 0,
+      icon: Package,
+    },
     { title: "Đã hủy", countStats: stats?.cancelled ?? 0, icon: XCircle },
     { title: "Hoàn trả", countStats: stats?.returned ?? 0, icon: RefreshCcw },
   ];
@@ -77,9 +84,9 @@ function OrderStatsList() {
         return (
           <div
             key={os.title}
-            className="flex flex-col gap-y-3 items-end justify-end h-fit py-5 px-4 bg-white border-r-2 last:border-r-0"
+            className="flex flex-col gap-y-3 items-end justify-end h-fit py-4 px-4 bg-white border-r-2 last:border-r-0"
           >
-            <div className="flex rounded-xl bg-gray-100 px-2 py-0.5">
+            <div className="flex rounded-xl bg-gray-100 px-1 py-0.5">
               <Icon className="text-gray-600" />
               <p className="text-sm text-gray-500">{os.title}</p>
             </div>
@@ -124,7 +131,7 @@ function OrderTable({ sort }: { sort: string }) {
           <thead className="bg-gray-100 border-b">
             <tr className="font-semibold text-gray-700">
               <th className="px-4 py-3">Id</th>
-              <th className="px-4 py-3">Phương thức</th>
+              <th className="px-4 py-3">Id thanh toán</th>
               <th className="px-4 py-3">Mã khách hàng</th>
               <th className="px-4 py-3">Mã địa chỉ</th>
               <th className="px-4 py-3">Phí vận chuyển</th>
@@ -143,7 +150,7 @@ function OrderTable({ sort }: { sort: string }) {
                   className="border-b hover:bg-gray-50 transition"
                 >
                   <td className="px-4 py-3">{row.orderId}</td>
-                  <td className="px-4 py-3">{row.paymentId ? "CASH" :"VNPAY"}</td>
+                  <td className="px-4 py-3">{row.paymentId}</td>
                   <td className="px-4 py-3">{row.profileId}</td>
                   <td className="px-4 py-3">{row.deliveryAddressId}</td>
                   <td className="px-4 py-3">{formatMoney(row.shippingFee)}</td>
@@ -175,7 +182,7 @@ function OrderTable({ sort }: { sort: string }) {
                         <p>Xem chi tiết</p>
                       </TooltipContent>
                     </Tooltip>
-                    {row.orderStatus !== "DELIVERED" &&
+                    {( !["DELIVERED","CANCELLED"].includes(row.orderStatus)) &&
                       (<Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -404,6 +411,19 @@ function EditCategoryModal({
     initialData ? initialData.orderStatus : ""
   );
   const [loading, setLoading] = React.useState(false);
+  const [valuePaymentId, setValuePaymentId] = React.useState<Payment | null>(null)
+
+  React.useEffect(() => {
+        const fetchProduct1 = async () => {
+            if(!initialData?.orderStatus) return
+            const res1 = await getPaymentById(initialData?.paymentId)
+            if (res1.code === 1) {
+              console.log(res1)
+                setValuePaymentId(res1.payment);
+            }}
+
+        fetchProduct1();
+    }, [initialData]);
 
   if (!initialData) return null;
 
@@ -411,8 +431,19 @@ function EditCategoryModal({
     if (!initialData || !selectStatus) return;
     try {
       setLoading(true);
-      if (selectStatus === "DELIVERED" && !initialData.paymentId) {
+      if (selectStatus === "DELIVERED" && valuePaymentId?.paymentMethod==="CASH") {
         const res = await confirmCashPayment(initialData.orderId)
+        if (res.code === 1) {
+          toast("xác nhận thành công");
+          window.location.reload()
+        }
+        else
+          toast("xác nhận thất bại");
+        close();
+      }
+
+      if (selectStatus === "DELIVERED" && valuePaymentId?.paymentMethod==="VNPAY") {
+        const res = await confirmVnPayPayment(initialData.orderId)
         if (res.code === 1) {
           toast("xác nhận thành công");
           window.location.reload()
@@ -468,7 +499,7 @@ function EditCategoryModal({
             <SelectContent>
               <SelectGroup>
                 <SelectLabel>Trạng thái</SelectLabel>
-                {Object.entries(OrderStatusTypeLabel)
+                { (valuePaymentId?.paymentStatus==="INIT" ? Object.entries(OrderStatusTypeLabel).filter(([e])=>(["CREATED","CANCELLED"].includes(e))) :  Object.entries(OrderStatusTypeLabel))
                   .filter(([value]) => (value !== "RETURNED"))
                   .map(
                     ([key, label], index) => (

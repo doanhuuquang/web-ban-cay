@@ -118,6 +118,9 @@ export function summaryOrders(orders: Order[]): OrderSummary {
             case "RETURNED":
                 acc.returned++;
                 break;
+            case "CREATED":
+                acc.created++;
+                break;
         }
 
         return acc;
@@ -127,7 +130,8 @@ export function summaryOrders(orders: Order[]): OrderSummary {
         pending: 0,
         shipping: 0,
         cancelled: 0,
-        returned: 0
+        returned: 0,
+        created:0
     });
 }
 

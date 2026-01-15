@@ -91,7 +91,7 @@ const getOrderAll = async (): Promise<{
   try {
     const getOrderByIdUrl = `orders/all`;
     const response = await instance.get(getOrderByIdUrl);
-    console.log(response.data.data)
+    //console.log(response.data.data)
     return {
       code: 1,
       order: response.data.data,
@@ -180,7 +180,7 @@ const updateStatusOrder = async (
   order: Order | null;
 }> => {
   try {
-    console.log(orderId, orderStatus);
+    //console.log(orderId, orderStatus);
     const getOrderByIdUrl = `orders/order/updateStatus`;
     const response = await instance.put(getOrderByIdUrl, null, {
       params: { orderStatus: orderStatus, orderId: orderId },

@@ -9,6 +9,7 @@ export type OrderSummary = {
     shipping: number;
     cancelled: number;
     returned: number;
+    created: number;
 };
 
 interface OderState {
