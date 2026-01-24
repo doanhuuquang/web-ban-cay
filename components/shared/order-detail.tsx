@@ -148,6 +148,8 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
     const orderItems: { product: Product; quantity: number }[] = [];
 
     const calculatePrices = async () => {
+      setTotalProductsPrice(0)
+
       await Promise.all(
         order.orderItemResponses.map(async (item) => {
           const response = await getProductById({ productId: item.productId });
@@ -161,6 +163,7 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
             setTotalProductsPrice(
               (prev) => prev + response.product!.price * item.quantity
             );
+
             setTotalProductDiscountPrice(
               (prev) =>
                 prev +
@@ -274,6 +277,8 @@ export default function OrderDetail({ orderId }: { orderId: string }) {
           },
         }
       );
+
+      window.location.reload();
     } finally {
       setIsCancelingOrder(false);
     }

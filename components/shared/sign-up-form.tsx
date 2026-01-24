@@ -202,25 +202,6 @@ export default function SignupForm() {
               {loading ? "Đang kiểm tra thông tin..." : "Xác nhận đăng ký"}
             </p>
           </Button>
-
-          <div className="w-full flex items-center gap-5 text-muted-foreground text-sm">
-            <div className="grow bg-accent h-px"></div>
-            <p>Hoặc</p>
-            <div className="grow bg-accent h-px"></div>
-          </div>
-
-          <Button
-            variant={"outline"}
-            className="w-full py-5 hover:cursor-pointer flex items-center gap-3"
-          >
-            <Image
-              src="/assets/icons/google/google.svg"
-              alt="Google Icon"
-              width={20}
-              height={20}
-            />
-            <p className="uppercase">Đăng ký bằng tài khoản Google</p>
-          </Button>
         </div>
       </form>
     </Form>

@@ -1,7 +1,7 @@
 import storeCoupon from "@/store/storeCoupons"
-import { createCou, createCoupon, deleteCoupon, getAllAvailableCoupons, getAllCoupons, getAvailableCoupons, updateCouponSer } from "@/lib/services/coupon-service"
+import { createCou, createCoupon, deleteCoupon, getAllCoupons, getAvailableCoupons, updateCouponSer } from "@/lib/services/coupon-service"
 import { toast } from "sonner";
-import { Coupon } from "@/lib/models/coupon";
+import { UpdateCouponDTO } from "@/lib/models/coupon";
 
 export async function getAllCouponsMock() {
     const { setLoading, setAllCoupon } = storeCoupon.getState();
@@ -17,7 +17,7 @@ export async function getAllCouponsMock() {
 
 export async function getAvailableCouponsMock() {
     const { setLoading, setAllCoupon } = storeCoupon.getState();
-    const res = await getAllAvailableCoupons();
+    const res = await getAllCoupons();
 
     setLoading(true);
 
@@ -74,7 +74,7 @@ export async function deleteCouponMock(couponId: string) {
     setLoading(false);
 }
 
-export async function updateCouponMock(couponId: string, formdata: Coupon) {
+export async function updateCouponMock(couponId: string, formdata: UpdateCouponDTO) {
     const { setLoading, updateCoupon } = storeCoupon.getState();
     setLoading(true);
     const res = await updateCouponSer(couponId, formdata);

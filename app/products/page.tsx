@@ -66,20 +66,6 @@ function CategoriesSeclector({
   );
 }
 
-function Stars({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-2">
-      {Array.from({ length: 5 }).map((_, index) => (
-        <Star
-          key={index}
-          size={15}
-          className={cn("text-amber-500", index < rating && "fill-amber-500")}
-        />
-      ))}
-    </div>
-  );
-}
-
 function SortProducts({
   currentSort,
   setCurrentSort,
@@ -376,32 +362,6 @@ export default function ProductsPage() {
               >
                 Áp dụng
               </Button>
-            </div>
-
-            {/* Lọc theo đánh giá */}
-            <div className="p-4 space-y-3">
-              <p>Đánh giá</p>
-
-              <div className="w-full space-y-2">
-                {[5, 4, 3, 2, 1].map((rating) => {
-                  const count = getRatingCount(rating);
-                  return (
-                    <div
-                      key={rating}
-                      onClick={() => handleRatingFilter(rating)}
-                      className={cn(
-                        "flex gap-2 items-center cursor-pointer hover:bg-accent p-2 transition-colors",
-                        selectedRating === rating && "bg-yellow-500/10"
-                      )}
-                    >
-                      <Stars rating={rating} />
-                      <p className="text-sm">
-                        {rating === 5 ? `(${count})` : `Trở lên (${count})`}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>

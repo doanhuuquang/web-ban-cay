@@ -131,8 +131,7 @@ export default function OrderDetail({ id }: { id: string }) {
                                 <span className="text-blue-600 font-bold">#{data.orderId}</span>
                             </div>
                             <div
-                                className={`rounded-xl font-semibold border-2  text-sm px-3 flex justify-center items-center ${styleStatus[data.status]
-                                    }`}
+                                className={`rounded-xl font-semibold border-2  text-sm px-3 flex justify-center items-center ${styleStatus[data.orderStatus]}`}
                             >
                                 {data.orderStatus}
                             </div>

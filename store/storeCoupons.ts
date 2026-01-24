@@ -1,4 +1,4 @@
-import { Coupon } from "@/lib/models/coupon";
+import { Coupon, UpdateCouponDTO } from "@/lib/models/coupon";
 import { create } from "zustand";
 
 interface CouponsState {
@@ -9,7 +9,7 @@ interface CouponsState {
     setAllCoupon: (details: Coupon[] | null) => void
     addCoupon: (Coupon: Coupon) => void;
     removeCoupon: (CouponId: string) => void;
-    updateCoupon: (CouponId: string, upData: Coupon) => void;
+    updateCoupon: (CouponId: string, upData: UpdateCouponDTO) => void;
     filterCouponsByDateEnd: (time: string) => Coupon[]
 }
 
@@ -55,7 +55,7 @@ const storeCoupon = create<CouponsState>((set, get) => ({
         });
     },
 
-    updateCoupon: (couponIdx: string, upData: Coupon) => set((s) => ({
+    updateCoupon: (couponIdx: string, upData: UpdateCouponDTO) => set((s) => ({
         couponsAll: s.couponsAll?.map(row =>
             row.couponId === couponIdx
                 ? { ...row, ...upData }

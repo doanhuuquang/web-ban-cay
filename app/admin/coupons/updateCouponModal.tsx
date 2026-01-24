@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { X, Tag, Percent, DollarSign, Calendar, Users, Settings, Slice } from 'lucide-react';
+import { X, Tag, Percent, DollarSign, Calendar, Settings } from 'lucide-react';
 import { Dialog } from '@/components/ui/dialog';
-import { Coupon } from '@/lib/models/coupon';
+import { Coupon, UpdateCouponDTO } from '@/lib/models/coupon';
 import { updateCouponMock } from '@/mock/couponsMock';
 import { Product } from '@/lib/models/product';
 import { getAllCouponsCategoryIds, getAllCouponsProductIds } from '@/lib/services/coupon-service';
@@ -14,10 +14,15 @@ export default function UpdateCouponModal({
     onClose: () => void;
     initialData: Coupon | null;
 }) {
-    const [formData, setFormData] = useState<Coupon | null>(initialData);
+    const [formData, setFormData] = useState<UpdateCouponDTO | null>({
+        enabled: initialData?.enabled ?? false,
+        maxDiscountAmount: initialData?.maxDiscountAmount ?? 0,
+        minOrderValue: initialData?.minOrderValue ?? 0,
+        startDate: initialData?.startDate ?? new Date(),
+        expiryDate: initialData?.expiryDate ?? new Date(),
+    });
     const [formDataDetailProduct, setFormDataDetailProduct] = useState<Product[]>([]);
     const [formDataDetailCategory, setFormDataDetailCategory] = useState<Category[]>([]);
-
 
     useEffect(() => {
         const fetch = async () => {
@@ -33,6 +38,13 @@ export default function UpdateCouponModal({
         }
         fetch()
     }, [initialData?.categoryIds, initialData?.productIds])
+
+    // useEffect(() => {
+    //     const fetch = () => {
+    //         console.log(formData?.startDate)
+    //     }
+    //     fetch()
+    // }, [formData?.startDate])
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -52,11 +64,12 @@ export default function UpdateCouponModal({
         }));
     };
 
+
     const handleSubmit = async () => {
-        if (!formData || !formData.couponId) return;
+        if (!formData || !initialData?.couponId) return;
 
         // Gửi dữ liệu cập nhật (mock)
-        await updateCouponMock(formData.couponId, formData);
+        await updateCouponMock(initialData?.couponId, formData);
         onClose();
     };
 
@@ -121,7 +134,7 @@ export default function UpdateCouponModal({
                                     Mã Giảm Giá <span className="text-red-500">*</span>
                                 </label>
                                 <div className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-900 font-medium">
-                                    {formData.code}
+                                    {initialData.code}
                                 </div>
                             </div>
 
@@ -131,18 +144,18 @@ export default function UpdateCouponModal({
                                     <Percent className="w-4 h-4 inline mr-1" /> Loại Giảm Giá
                                 </label>
                                 <div className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg font-medium">
-                                    {formData.discountType === 'PERCENTAGE' ? 'Phần trăm (%)' : 'Số tiền cố định'}
+                                    {initialData.discountType === 'PERCENTAGE' ? 'Phần trăm (%)' : 'Số tiền cố định'}
                                 </div>
                             </div>
 
                             {/* Giá trị giảm - chỉ hiển thị */}
-                            {formData.discountType === 'PERCENTAGE' ? (
+                            {initialData.discountType === 'PERCENTAGE' ? (
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                                         Phần Trăm Giảm (%)
                                     </label>
                                     <div className="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg font-medium">
-                                        {formData.discountPercent}%
+                                        {initialData.discountPercent}%
                                     </div>
                                 </div>
                             ) : (
@@ -158,19 +171,21 @@ export default function UpdateCouponModal({
 
                             {/* Giảm tối đa (nếu là phần trăm) */}
 
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    Giảm Tối Đa
-                                </label>
-                                <input
-                                    type="number"
-                                    name="maxDiscountAmount"
-                                    value={formData.maxDiscountAmount || ''}
-                                    onChange={handleInputChange}
-                                    min="0"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                />
-                            </div>
+                            {
+                                initialData.discountType === "PERCENTAGE" &&
+                                (<div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        Giảm Tối Đa
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="maxDiscountAmount"
+                                        value={formData.maxDiscountAmount || ''}
+                                        onChange={handleInputChange}
+                                        min="0"
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    />
+                                </div>)}
 
                             {/* Giá trị đơn hàng tối thiểu */}
                             <div>

@@ -1,7 +1,8 @@
-import { Coupon } from "@/lib/models/coupon";
+import { Coupon, UpdateCouponDTO } from "@/lib/models/coupon";
 import instance from "@/lib/services/axios-config";
 import { Product } from "../models/product";
 import { Category } from "../models/category";
+import { parseLocalDateTime } from "../helpers/format-date";
 
 const getAvailableCoupons = async ({
   orderTotal,
@@ -18,7 +19,7 @@ const getAvailableCoupons = async ({
 
     return {
       code: response.data.code,
-      coupons: response.data.data.map(Coupon.fromJson),
+      coupons: response.data.data,
     };
   } catch {
     return {
@@ -33,15 +34,14 @@ const getAllCoupons = async (): Promise<Coupon[]> => {
     const getAvailableCouponsUrl = `/coupons/all`;
     const response = await instance.get(getAvailableCouponsUrl);
 
-
-    return response.data.data.map(Coupon.fromJson);
+    return response.data.data;
   } catch {
     return [];
   }
 };
 
 const getAllCouponsProductIds = async (
-  ids: number[]
+  ids: string[]
 ): Promise<Product[]> => {
   try {
     if (!ids.length) return [];
@@ -51,8 +51,6 @@ const getAllCouponsProductIds = async (
 
     const response = await instance.get("/products", { params });
 
-    //console.log(response)
-
     return response.data.data.map(Product.fromJson);
   } catch (error) {
     console.error(error);
@@ -60,11 +58,8 @@ const getAllCouponsProductIds = async (
   }
 };
 
-
-
-
 const getAllCouponsCategoryIds = async (
-  ids: number[]
+  ids: string[]
 ): Promise<Category[]> => {
   try {
     const params = new URLSearchParams();
@@ -81,18 +76,16 @@ const getAllCouponsCategoryIds = async (
   }
 };
 
-
 const getAllAvailableCoupons = async (): Promise<Coupon[]> => {
   try {
     const getAvailableCouponsUrl = `/coupons/coupon-available`;
     const response = await instance.get(getAvailableCouponsUrl);
 
-    return response.data.data.map(Coupon.fromJson);
+    return response.data.data;
   } catch {
     return [];
   }
 };
-
 
 const deleteCoupon = async (couponId: string): Promise<number> => {
   try {
@@ -105,8 +98,10 @@ const deleteCoupon = async (couponId: string): Promise<number> => {
   }
 };
 
-const updateCouponSer = async (couponId: string, formdata: Coupon): Promise<{ code: number, data: Coupon | null }> => {
+const updateCouponSer = async (couponId: string, formdata: UpdateCouponDTO): Promise<{ code: number, data: Coupon | null }> => {
   try {
+
+    console.log(formdata)
     const getAvailableCouponsUrl = `coupons/${couponId}`;
     const res = await instance.put(getAvailableCouponsUrl, formdata);
 
@@ -156,7 +151,7 @@ const createCoupon = async (
 
     return {
       code: 1,
-      data: Coupon.fromJson(response.data.data),
+      data: response.data.data,
     };
   } catch (err) {
     console.error(err);

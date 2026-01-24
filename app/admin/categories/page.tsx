@@ -93,11 +93,11 @@ function CategoryTable({ sort }: { sort: string }) {
               </td>
               <td className="p-4 text-center text-gray-600 font-medium">
                 {/* {row.createAt.toString()} */}
-                {row.createAt ? new Date(row.createAt).toLocaleString() : "-"}
+                {row.createAt ? new Date(row.createAt).toLocaleDateString() : "-"}
               </td>
               <td className="p-4 text-center text-gray-600 font-medium">
                 {/* {row.updateAt.toString()} */}
-                {row.updateAt ? new Date(row.updateAt).toLocaleString() : "-"}
+                {row.updateAt ? new Date(row.updateAt).toLocaleDateString() : "-"}
               </td>
 
               <td className="p-4">

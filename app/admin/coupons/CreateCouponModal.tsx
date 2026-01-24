@@ -96,7 +96,9 @@ export default function CreateCouponModal({ onClose }: { onClose: () => void }) 
         };
 
         console.log(payload)
+
         await createCouponMock(payload);
+       // window.location.reload();
         onClose();
     };
 
