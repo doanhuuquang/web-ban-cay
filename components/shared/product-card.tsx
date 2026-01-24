@@ -17,7 +17,6 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { toast } from "sonner";
-import imgdefault from "@/public/assets/images/products/hoacuc-1-gplant.jpg";
 
 export default function ProductCard({
   product,
@@ -26,7 +25,7 @@ export default function ProductCard({
   product: Product;
   className?: string;
 }) {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const [isAdding, setIsAdding] = React.useState<boolean>(false);
 
   const handleAddToCart = async () => {
@@ -58,6 +57,8 @@ export default function ProductCard({
           }
         );
       }
+
+      refreshUserProfile();
     } finally {
       setIsAdding(false);
     }
@@ -132,11 +133,6 @@ export default function ProductCard({
               {formatMoney(product.price)}
             </span>
           )}
-        </div>
-
-        <div className="flex items-center gap-1">
-          <Star size={16} className="fill-amber-400 text-transparent" />
-          <p className="text-sm">{product.avgRating}</p>
         </div>
 
         <div className="flex items-center flex-wrap gap-2">

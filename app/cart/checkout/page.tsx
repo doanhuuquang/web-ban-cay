@@ -284,7 +284,7 @@ function CheckoutSummary({
   selectedAddress: Address | null;
 }) {
   const router = useRouter();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, refreshUserProfile } = useAuth();
   const { selectedProvince, selectedDistrict, selectedWard } =
     useAddressSelector();
 
@@ -562,6 +562,8 @@ function CheckoutSummary({
       ) {
         router.push(`/cart/checkout/order-confirmed/${response.order.orderId}`);
       }
+
+      refreshUserProfile();
     } finally {
       setIsOrderPlacing(false);
     }

@@ -155,13 +155,6 @@ function ProductInfo({ product }: { product: Product }) {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-3 text-sm">
-          <div className="flex items-center gap-1">
-            <Star size={14} className="fill-yellow-500 text-yellow-500" />
-            <p>{product.avgRating}</p>
-          </div>
-          <p className="text-muted-foreground">({product.reviewCount})</p>
-        </div>
 
         <div>
           <span className="text-muted-foreground">Đã bán: </span>

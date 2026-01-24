@@ -28,9 +28,9 @@ import {
 
 const data = {
   user: {
-    name: "sanbatcaobang",
-    email: "sbcb@osisa.sumxue",
-    avatar: "/assets/avatar/sisa.png",
+    name: "Admin",
+    email: "admin@gplant.com",
+    avatar: "",
   },
   logo: [
     {

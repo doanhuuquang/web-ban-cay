@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { User } from "@/lib/models/user"; // Declare User type
 
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
@@ -13,6 +14,8 @@ import {
   ChevronsRight,
   Eye,
   Plus,
+  Filter,
+  X,
 } from "lucide-react";
 import {
   Tooltip,
@@ -20,7 +23,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useAuth } from "@/lib/contexts/auth-context";
 import {
   addProduct,
   addProductImage,
@@ -81,6 +83,7 @@ import {
 } from "@/lib/constants/error-messages";
 import { DELETE_PRODUCT_SUCCESS_MESSAGE } from "@/lib/constants/success-messages";
 import Image from "next/image";
+import { formatMoney } from "@/lib/helpers/format-money";
 
 function UpdateProduct({ product }: { product: Product }) {
   const [categories, setCategories] = React.useState<Category[]>([]);
@@ -131,6 +134,25 @@ function UpdateProduct({ product }: { product: Product }) {
     },
   });
 
+  // Khi product prop thay đổi, cập nhật form với dữ liệu mới
+  React.useEffect(() => {
+    form.reset({
+      productName: product.productName,
+      description: product.description,
+      bio: product.bio,
+      price: product.price,
+      discount: product.discount,
+      specialPrice: product.specialPrice,
+      quantity: product.inventory.available,
+      origin: product.origin,
+      categoryId: product.category.categoryId,
+      height: product.height,
+      length: product.length,
+      weight: product.weight,
+      width: product.width,
+    });
+  }, [product, form]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const code = await updateProduct({
@@ -167,7 +189,7 @@ function UpdateProduct({ product }: { product: Product }) {
 
       const addImagesCode = await addProductImage(product.productId, formData);
 
-      if (code === 200 && addImagesCode === 200) {
+      if (code === 200) {
         toast.success("Cập nhật thành công");
         setOpen(false);
         window.location.reload();
@@ -196,6 +218,21 @@ function UpdateProduct({ product }: { product: Product }) {
       }
     }
   };
+
+  // Khi modal được mở/đóng, reset ảnh về trạng thái ban đầu
+  React.useEffect(() => {
+    if (open) {
+      // Khi mở modal, tải lại ảnh cũ từ product
+      setExistingImages(
+        (product?.images ?? [])
+          .map((i) => i?.downloadUrl?.trim())
+          .filter((i): i is string => Boolean(i))
+          .map((i) => `http://localhost:8080${i}`)
+      );
+      // Xóa ảnh mới (ảnh chưa upload)
+      setNewImages([]);
+    }
+  }, [open, product]);
 
   React.useEffect(() => {
     const fetchCategories = async () => {
@@ -577,7 +614,7 @@ function DeleteProduct({ product }: { product: Product }) {
               : DELETE_PRODUCT_SUCCESS_MESSAGE,
           action: {
             label: "Oke",
-            onClick: () => {},
+            onClick: () => { },
           },
         }
       );
@@ -596,10 +633,10 @@ function DeleteProduct({ product }: { product: Product }) {
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
-              <Button onClick={() => {}} size={"icon"} variant="ghost">
+              <Button onClick={() => { }} size={"icon"} variant="ghost">
                 <Trash
                   className="size-5 cursor-pointer hover:text-red-600 transition"
-                  onClick={() => {}}
+                  onClick={() => { }}
                 />
               </Button>
             </DialogTrigger>
@@ -629,6 +666,175 @@ function DeleteProduct({ product }: { product: Product }) {
         </DialogContent>
       </form>
     </Dialog>
+  );
+}
+
+type SortType = "name-asc" | "name-desc" | "price-asc" | "price-desc" | "qty-asc" | "qty-desc" | "newest";
+type StockFilter = "all" | "inStock" | "outOfStock";
+
+interface FilterState {
+  categoryId: string | null;
+  minPrice: number | null;
+  maxPrice: number | null;
+  stock: StockFilter;
+  sort: SortType;
+}
+
+function FilterPanel({
+  categories,
+  filters,
+  onFilterChange,
+}: {
+  categories: Category[];
+  filters: FilterState;
+  onFilterChange: (filters: FilterState) => void;
+}) {
+  const [minPrice, setMinPrice] = React.useState<string>("");
+  const [maxPrice, setMaxPrice] = React.useState<string>("");
+
+  const handleCategoryChange = (categoryId: string) => {
+    onFilterChange({
+      ...filters,
+      categoryId: categoryId === "all" ? null : categoryId,
+    });
+  };
+
+  const handlePriceChange = () => {
+    onFilterChange({
+      ...filters,
+      minPrice: minPrice ? parseFloat(minPrice) : null,
+      maxPrice: maxPrice ? parseFloat(maxPrice) : null,
+    });
+  };
+
+  const handleStockChange = (stock: StockFilter) => {
+    onFilterChange({ ...filters, stock });
+  };
+
+  const handleSortChange = (sort: SortType) => {
+    onFilterChange({ ...filters, sort });
+  };
+
+  const handleReset = () => {
+    setMinPrice("");
+    setMaxPrice("");
+    onFilterChange({
+      categoryId: null,
+      minPrice: null,
+      maxPrice: null,
+      stock: "all",
+      sort: "newest",
+    });
+  };
+
+  const hasActiveFilters =
+    filters.categoryId ||
+    filters.minPrice ||
+    filters.maxPrice ||
+    filters.stock !== "all";
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Filter size={18} className="text-gray-600" />
+          <span className="font-semibold text-gray-700">Lọc & Sắp xếp</span>
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex items-center gap-2">
+          <select
+            value={filters.categoryId || "all"}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px]"
+          >
+            <option value="all">Tất cả danh mục</option>
+            {categories.map((cat) => (
+              <option key={cat.categoryId} value={cat.categoryId.toString()}>
+                {cat.categoryName}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Price Range Filter */}
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            placeholder="Giá tối thiểu"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-[110px]"
+          />
+          <span className="text-gray-400">-</span>
+          <input
+            type="number"
+            placeholder="Giá tối đa"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-[110px]"
+          />
+          <button
+            onClick={handlePriceChange}
+            className="bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition whitespace-nowrap"
+          >
+            Áp dụng
+          </button>
+        </div>
+
+        {/* Stock Status Filter */}
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-gray-700">Kho:</span>
+          {[
+            { value: "all", label: "Tất cả" },
+            { value: "inStock", label: "Còn" },
+            { value: "outOfStock", label: "Hết" },
+          ].map((option) => (
+            <label key={option.value} className="flex items-center gap-1 cursor-pointer">
+              <input
+                type="radio"
+                name="stock"
+                value={option.value}
+                checked={filters.stock === option.value}
+                onChange={(e) =>
+                  handleStockChange(e.target.value as StockFilter)
+                }
+                className="w-4 h-4"
+              />
+              <span className="text-sm text-gray-700">{option.label}</span>
+            </label>
+          ))}
+        </div>
+
+        {/* Sorting */}
+        <div className="flex items-center gap-2">
+          <select
+            value={filters.sort}
+            onChange={(e) => handleSortChange(e.target.value as SortType)}
+            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]"
+          >
+            <option value="newest">Mới nhất</option>
+            <option value="name-asc">Tên (A → Z)</option>
+            <option value="name-desc">Tên (Z → A)</option>
+            <option value="price-asc">Giá (Thấp → Cao)</option>
+            <option value="price-desc">Giá (Cao → Thấp)</option>
+            <option value="qty-asc">Số lượng (Ít → Nhiều)</option>
+            <option value="qty-desc">Số lượng (Nhiều → Ít)</option>
+          </select>
+        </div>
+
+        {/* Reset Button */}
+        {hasActiveFilters && (
+          <button
+            onClick={handleReset}
+            className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 px-3 py-2 hover:bg-blue-50 rounded transition"
+          >
+            <X size={16} />
+            Xóa
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -682,7 +888,7 @@ function ProductTable({ products }: { products: Product[] }) {
                     <Image
                       src={
                         product.images && product.images.length > 0
-                          ? `http://localhost:8080${product.images[product.images.length-1].downloadUrl}`
+                          ? `http://localhost:8080${product.images[product.images.length - 1].downloadUrl}`
                           : "/assets/images/products/placeholder.png"
                       }
                       alt={product.productName}
@@ -694,7 +900,7 @@ function ProductTable({ products }: { products: Product[] }) {
                   <td className="px-4 py-3">{product.productName}</td>
                   <td className="px-4 py-3">{product.description}</td>
                   <td className="px-4 py-3">{product.category.categoryName}</td>
-                  <td className="px-4 py-3">{product.price}</td>
+                  <td className="px-4 py-3">{formatMoney(product.price)}</td>
                   <td className="px-4 py-3">{product.inventory.available}</td>
                   <td className="px-4 py-3">{product.origin}</td>
                   <td className="px-4 py-3">{product.height}</td>
@@ -885,7 +1091,7 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
 
       const addImagesCode = await addProductImage(product.productId, formData);
 
-      if (code === 201 && addImagesCode === 200) {
+      if (code === 201) {
         toast.success("Thêm sản phẩm thành công");
         window.location.reload();
       } else {
@@ -928,8 +1134,10 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={URL.createObjectURL(file) || "/placeholder.svg"}
+                width={50}
+                height={100}
                 alt=""
-                className="image-preview"
+                className="image-preview object-cover"
               />
             </div>
           ))}
@@ -1201,59 +1409,211 @@ function AddProduct({ closeModal }: { closeModal: () => void }) {
 }
 
 export default function ProductPage() {
-  const { user } = useAuth();
-  const [products, setProducts] = React.useState<Product[]>([]);
+  const [allProducts, setAllProducts] = React.useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = React.useState<Product[]>([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
   const [modalOpen, setModalOpen] = React.useState<boolean>(false);
-
-  // lấy danh sách sản phẩm từ api
-  React.useEffect(() => {
-    if (!user) return;
-
-    const fetchProducts = async () => {
-      const response = await getProducts();
-
-      if (response.products.length > 0) setProducts(response.products);
-    };
-
-    fetchProducts();
-  }, [user]);
+  const [searchQuery, setSearchQuery] = React.useState<string>("");
+  const [filters, setFilters] = React.useState<FilterState>({
+    categoryId: null,
+    minPrice: null,
+    maxPrice: null,
+    stock: "all",
+    sort: "newest",
+  });
 
   function removeVNTones(str: string) {
     return str
-      .normalize("NFD") // tách dấu
-      .replace(/[\u0300-\u036f]/g, "") // xoá dấu
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/đ/g, "d")
       .replace(/Đ/g, "D")
       .toLowerCase();
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = removeVNTones(e.target.value);
-    const records = products.filter((item) =>
+  // Fetch products and categories
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const [productsRes, categoriesRes] = await Promise.all([
+        getProducts(),
+        getCategories(),
+      ]);
+
+      if (productsRes.products.length > 0) {
+        setAllProducts(productsRes.products);
+      }
+      if (categoriesRes.categories.length > 0) {
+        setCategories(categoriesRes.categories);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  /**
+   * Hàm lọc sản phẩm theo tìm kiếm
+   * - Loại bỏ dấu tiếng Việt để tìm kiếm chính xác hơn
+   * - So sánh không phân biệt chữ hoa/thường
+   */
+  const filterBySearch = (items: Product[]): Product[] => {
+    if (!searchQuery) return items;
+
+    return items.filter((item) =>
       removeVNTones(item.productName.toLowerCase()).includes(
-        query.toLowerCase()
+        removeVNTones(searchQuery.toLowerCase())
       )
     );
-    setProducts(records);
   };
 
+  /**
+   * Hàm lọc sản phẩm theo danh mục
+   * - Nếu không chọn danh mục => trả về toàn bộ
+   * - Nếu có chọn => lọc sản phẩm thuộc danh mục đó
+   */
+  const filterByCategory = (items: Product[]): Product[] => {
+    if (!filters.categoryId) return items;
+
+    return items.filter(
+      (item) => item.category.categoryId.toString() === filters.categoryId
+    );
+  };
+
+  /**
+   * Hàm lọc sản phẩm theo khoảng giá
+   * - Lọc theo giá tối thiểu (nếu có)
+   * - Lọc theo giá tối đa (nếu có)
+   */
+  const filterByPrice = (items: Product[]): Product[] => {
+    let result = items;
+
+    // Lọc theo giá tối thiểu
+    if (filters.minPrice !== null) {
+      result = result.filter((item) => item.price >= filters.minPrice!);
+    }
+
+    // Lọc theo giá tối đa
+    if (filters.maxPrice !== null) {
+      result = result.filter((item) => item.price <= filters.maxPrice!);
+    }
+
+    return result;
+  };
+
+  /**
+   * Hàm lọc sản phẩm theo trạng thái kho
+   * - "all" => không lọc, hiện tất cả
+   * - "inStock" => chỉ hiện sản phẩm còn hàng
+   * - "outOfStock" => chỉ hiện sản phẩm hết hàng
+   */
+  const filterByStock = (items: Product[]): Product[] => {
+    switch (filters.stock) {
+      case "inStock":
+        return items.filter((item) => item.inventory.available > 0);
+      case "outOfStock":
+        return items.filter((item) => item.inventory.available === 0);
+      case "all":
+      default:
+        return items; // Không lọc, trả về toàn bộ
+    }
+  };
+
+  /**
+   * Hàm sắp xếp sản phẩm
+   * - name-asc/desc: sắp xếp theo tên (A→Z hoặc Z→A)
+   * - price-asc/desc: sắp xếp theo giá (thấp→cao hoặc cao→thấp)
+   * - qty-asc/desc: sắp xếp theo số lượng (ít→nhiều hoặc nhiều→ít)
+   * - newest: sắp xếp theo ngày tạo (mới nhất trước)
+   */
+  const sortProducts = (items: Product[]): Product[] => {
+    const sorted = [...items]; // Tạo bản sao để không thay đổi mảng gốc
+
+    switch (filters.sort) {
+      // Sắp xếp tên A → Z
+      case "name-asc":
+        sorted.sort((a, b) =>
+          removeVNTones(a.productName).localeCompare(
+            removeVNTones(b.productName)
+          )
+        );
+        break;
+
+      // Sắp xếp tên Z → A
+      case "name-desc":
+        sorted.sort((a, b) =>
+          removeVNTones(b.productName).localeCompare(
+            removeVNTones(a.productName)
+          )
+        );
+        break;
+
+      // Sắp xếp giá từ thấp đến cao
+      case "price-asc":
+        sorted.sort((a, b) => a.price - b.price);
+        break;
+
+      // Sắp xếp giá từ cao đến thấp
+      case "price-desc":
+        sorted.sort((a, b) => b.price - a.price);
+        break;
+
+      // Sắp xếp số lượng từ ít đến nhiều
+      case "qty-asc":
+        sorted.sort((a, b) => a.inventory.available - b.inventory.available);
+        break;
+
+      // Sắp xếp số lượng từ nhiều đến ít
+      case "qty-desc":
+        sorted.sort((a, b) => b.inventory.available - a.inventory.available);
+        break;
+
+      // Sắp xếp theo ngày tạo (mới nhất trước)
+      case "newest":
+      default:
+        sorted.sort(
+          (a, b) =>
+            new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
+        );
+    }
+
+    return sorted;
+  };
+
+  // Áp dụng tất cả các bộ lọc và sắp xếp
+  React.useEffect(() => {
+    // Bắt đầu với toàn bộ sản phẩm
+    let results = [...allProducts];
+
+    // Áp dụng các bộ lọc theo thứ tự
+    results = filterBySearch(results);
+    results = filterByCategory(results);
+    results = filterByPrice(results);
+    results = filterByStock(results);
+
+    // Áp dụng sắp xếp cuối cùng
+    results = sortProducts(results);
+
+    // Cập nhật danh sách sản phẩm đã lọc
+    setFilteredProducts(results);
+  }, [allProducts, searchQuery, filters]);
+
   return (
-    <div className="container mx-auto px-5 pb-10 space-y-2">
+    <div className="container mx-auto px-5 pb-10 space-y-4">
       <div className="font-semibold text-3xl">Sản phẩm</div>
-      {/* top table */}
-      <div className="flex items-center p-3 shadow-2xs mb-2 rounded-md justify-end gap-2">
-        {/* search input */}
+
+      {/* Search and Add Button */}
+      <div className="flex items-center p-3 shadow-sm mb-2 rounded-lg justify-between gap-2 bg-white">
         <Input
           placeholder="Tìm kiếm sản phẩm..."
           className="max-w-sm rounded-md p-5"
-          onChange={handleChange}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
 
-        {/* button add  */}
         <Button
           className="text-white px-8 py-5 rounded-md text-sm font-medium flex gap-2 bg-blue-600/90 hover:bg-blue-700"
           onClick={() => setModalOpen(true)}
         >
+          <Plus size={18} />
           Thêm sản phẩm
         </Button>
         {modalOpen && (
@@ -1265,8 +1625,24 @@ export default function ProductPage() {
         )}
       </div>
 
-      {/* Data table */}
-      <ProductTable products={products} />
+      {/* Filter Panel on Top */}
+      <div className="mb-4">
+        <FilterPanel
+          categories={categories}
+          filters={filters}
+          onFilterChange={setFilters}
+        />
+      </div>
+
+      {/* Products Table */}
+      <div className="bg-white rounded-lg p-4">
+        <div className="flex items-center justify-between mb-3 text-sm text-gray-600">
+          <span>
+            Hiển thị {filteredProducts.length} trên {allProducts.length} sản phẩm
+          </span>
+        </div>
+        <ProductTable products={filteredProducts} />
+      </div>
     </div>
   );
 }

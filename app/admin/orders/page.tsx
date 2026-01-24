@@ -74,7 +74,6 @@ function OrderStatsList() {
       icon: Package,
     },
     { title: "Đã hủy", countStats: stats?.cancelled ?? 0, icon: XCircle },
-    { title: "Hoàn trả", countStats: stats?.returned ?? 0, icon: RefreshCcw },
   ];
 
   return (
@@ -126,19 +125,17 @@ function OrderTable({ sort }: { sort: string }) {
   return (
     <div className="space-y-4">
       {/* table */}
-      <div className="w-full overflow-x-auto rounded-xl border border-gray-200 shadow-sm h-150">
+      <div className="w-full overflow-x-auto rounded-lg border border-gray-200">
         <table className="w-full border-collapse text-left text-sm">
-          <thead className="bg-gray-100 border-b">
+          <thead className="bg-gray-50 border-b border-gray-200">
             <tr className="font-semibold text-gray-700">
-              <th className="px-4 py-3">Id</th>
-              <th className="px-4 py-3">Id thanh toán</th>
-              <th className="px-4 py-3">Mã khách hàng</th>
-              <th className="px-4 py-3">Mã địa chỉ</th>
-              <th className="px-4 py-3">Phí vận chuyển</th>
-              <th className="px-4 py-3">Giá tiền</th>
-              <th className="px-4 py-3">ngày đặt</th>
-              <th className="px-4 py-3">Trạng thái</th>
-              <th className="px-4 py-3">Cài đặt</th>
+              <th className="px-6 py-3">Mã đơn</th>
+              <th className="px-6 py-3">Mã khách</th>
+              <th className="px-6 py-3">Tổng tiền</th>
+              <th className="px-6 py-3">Phí vận chuyển</th>
+              <th className="px-6 py-3">Ngày đặt</th>
+              <th className="px-6 py-3">Trạng thái</th>
+              <th className="px-6 py-3 text-center">Hành động</th>
             </tr>
           </thead>
 
@@ -147,60 +144,68 @@ function OrderTable({ sort }: { sort: string }) {
               return (
                 <tr
                   key={row.orderId}
-                  className="border-b hover:bg-gray-50 transition"
+                  className="border-b border-gray-100 hover:bg-gray-50 transition"
                 >
-                  <td className="px-4 py-3">{row.orderId}</td>
-                  <td className="px-4 py-3">{row.paymentId}</td>
-                  <td className="px-4 py-3">{row.profileId}</td>
-                  <td className="px-4 py-3">{row.deliveryAddressId}</td>
-                  <td className="px-4 py-3">{formatMoney(row.shippingFee)}</td>
-                  <td className="px-4 py-3">{formatMoney(row.totalAmount)}</td>
-                  <td className="px-4 py-3">{row.orderDate.toString()}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-6 py-3 font-medium text-gray-900">{row.orderId}</td>
+                  <td className="px-6 py-3 text-gray-600">{row.profileId}</td>
+                  <td className="px-6 py-3 font-semibold text-blue-600">{formatMoney(row.totalAmount)}</td>
+                  <td className="px-6 py-3 text-gray-600">{formatMoney(row.shippingFee)}</td>
+                  <td className="px-6 py-3 text-gray-600">{new Date(row.orderDate).toLocaleDateString("vi-VN")}</td>
+                  <td className="px-6 py-3">
                     <span
-                      className={`px-2 py-1 rounded-md text-xs font-medium "bg-gray-100 text-gray-700"
-                        }`}
+                      className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                        row.orderStatus === "DELIVERED"
+                          ? "bg-green-100 text-green-700"
+                          : row.orderStatus === "CANCELLED"
+                          ? "bg-red-100 text-red-700"
+                          : row.orderStatus === "PENDING"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
                     >
                       {OrderStatusTypeLabel[row.orderStatus]}
                     </span>
                   </td>
 
-                  <td className="px-4 py-3">
-
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Link href={`/admin/orders/${row.orderId}`}>
-                          <Button
-                            size={"icon"}
-                            variant="ghost"
-                          >
-                            <Eye className="size-5 " />
-                          </Button>
-                        </Link>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Xem chi tiết</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    {( !["DELIVERED","CANCELLED"].includes(row.orderStatus)) &&
-                      (<Tooltip>
+                  <td className="px-6 py-3">
+                    <div className="flex items-center justify-center gap-2">
+                      <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handlerUpdateStatusOrder(row);
-                            }}
-                            size={"icon"}
-                            variant="ghost"
-                          >
-                            <SquarePen className="size-5 " />
-                          </Button>
+                          <Link href={`/admin/orders/${row.orderId}`}>
+                            <Button
+                              size={"icon"}
+                              variant="ghost"
+                              className="hover:bg-blue-50"
+                            >
+                              <Eye className="size-4 text-blue-600" />
+                            </Button>
+                          </Link>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Sửa trạng thái</p>
+                          <p>Xem chi tiết</p>
                         </TooltipContent>
-                      </Tooltip>)}
-
+                      </Tooltip>
+                      {(!["DELIVERED", "CANCELLED"].includes(row.orderStatus)) && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlerUpdateStatusOrder(row);
+                              }}
+                              size={"icon"}
+                              variant="ghost"
+                              className="hover:bg-orange-50"
+                            >
+                              <SquarePen className="size-4 text-orange-600" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Sửa trạng thái</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
@@ -272,43 +277,45 @@ const OrderPage = () => {
   }, [selectedOrderStatus]);
 
   return (
-    <div className="container mx-auto px-15 pb-10 space-y-6">
+    <div className="container mx-auto px-5 pb-10 space-y-4">
       <div className="font-semibold text-3xl">Đơn hàng</div>
       <OrderStatsList />
 
-      <div className="flex items-center justify-between w-full gap-4">
-        <div className="flex items-center gap-4">
-          <Input
-            placeholder="Tìm kiếm đơn hàng"
-            className="max-w-sm rounded-md"
-            value={valueFindOrder}
-            onChange={(e) => setValueFindOrder(e.target.value)}
-          />
+      {/* Filter Bar */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
+        {/* Row 1: Search and Basic Filters */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 flex-1 min-w-[250px]">
+            <Input
+              placeholder="Tìm kiếm đơn hàng..."
+              className="rounded-md"
+              value={valueFindOrder}
+              onChange={(e) => setValueFindOrder(e.target.value)}
+            />
+          </div>
 
           <Select
             value={selectedOrderId}
             onValueChange={(value) => setSelectedOrderId(value)}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="min-w-[140px]">
               <SelectValue placeholder="Tìm kiếm theo..." />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value={"all"}>tất cả</SelectItem>
+                <SelectItem value={"all"}>Tất cả</SelectItem>
                 <SelectItem value={"userId"}>Mã khách hàng</SelectItem>
                 <SelectItem value={"orderId"}>Mã đơn hàng</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
-        </div>
 
-        <div className="flex gap-x-2">
           <Select
             value={selectedSort}
             onValueChange={(value) => setSelectedSort(value)}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sắp xếp theo..." />
+            <SelectTrigger className="min-w-[130px]">
+              <SelectValue placeholder="Sắp xếp" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -319,8 +326,8 @@ const OrderPage = () => {
           </Select>
 
           <Select onValueChange={(value) => setSelectedOrderStatus(value)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Chọn trạng thái đơn hàng" />
+            <SelectTrigger className="min-w-[140px]">
+              <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -333,64 +340,53 @@ const OrderPage = () => {
                       {label}
                     </SelectItem>
                   ))}
-
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
-      </div>
-
-      <div className="flex justify-end">
-        <div className="flex gap-4 items-baseline">
-          <label>Từ ngày</label>
-
-          <div className="flex flex-col">
-            <input
-              type="date"
-              className="border rounded px-2 py-1"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-            />
-          </div>
-
-          <label>Đến ngày</label>
-
-          <div className="flex flex-col">
-            <input
-              type="date"
-              className="border rounded px-2 py-1"
-              value={to}
-              min={from} // chặn chọn ngày nhỏ hơn from
-              onChange={(e) => setTo(e.target.value)}
-            />
-          </div>
+        {/* Row 2: Date Range Filter */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-sm font-medium text-gray-600">Từ</span>
+          <input
+            type="date"
+            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+          />
+          <span className="text-sm font-medium text-gray-600">Đến</span>
+          <input
+            type="date"
+            className="border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={to}
+            min={from}
+            onChange={(e) => setTo(e.target.value)}
+          />
           <Button
             onClick={(e) => {
               e.preventDefault();
               handlerSearchDate();
             }}
-            className="bg-blue-500/100 hover:bg-blue-500/90 rounded-sm"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium"
             variant="default"
           >
-            tìm kiếm
+            Tìm kiếm
           </Button>
-
           <Button
             onClick={(e) => {
               e.preventDefault();
               handlerResetDate();
             }}
-            className="rounded-sm"
-            variant="destructive"
+            className="px-4 py-2 rounded text-sm font-medium border border-gray-200 hover:bg-gray-50"
+            variant="outline"
           >
             Xóa
           </Button>
         </div>
       </div>
 
-      {/* table order */}
-      <div>
+      {/* Orders Table */}
+      <div className="bg-white rounded-lg border border-gray-200">
         <OrderTable sort={selectedSort} />
       </div>
     </div>

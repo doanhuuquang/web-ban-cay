@@ -6,6 +6,7 @@ import {
     Edit,
     Trash,
     Tag,
+    Lock,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -26,7 +27,6 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { Order } from "@/lib/models/order";
 import { getAllCouponsMock, getAvailableCouponsByDateEnd, getAvailableCouponsByPriceMock, getAvailableCouponsMock } from "@/mock/couponsMock";
 import storeCoupon from "@/store/storeCoupons";
 import CreateCouponModal from "./CreateCouponModal";
@@ -39,9 +39,6 @@ function OrderTable({ sort }: { sort: string }) {
     const isLoading = storeCoupon((s) => s.loading);
     const currentPageRows = storeCoupon((s) => s.couponsAll);
 
-    //console.log(currentPageRows)
-
-
     //modal
     const [openModalDeleteCoupon, setOpenModalDeleteCoupon] = React.useState<boolean>(false);
     const [openModalUpdateCoupon, setOpenModalUpdateCoupon] = React.useState<boolean>(false);
@@ -51,6 +48,8 @@ function OrderTable({ sort }: { sort: string }) {
 
     if (!currentPageRows)
         return <div className="text-center">Không có dữ liệu</div>;
+
+
 
     return (
         <div className="space-y-4">
@@ -90,7 +89,7 @@ function OrderTable({ sort }: { sort: string }) {
                                     <td className="px-4 py-3">{row.startDate ? new Date(row.startDate).toLocaleDateString("vi-VN") : ""}</td>
                                     <td className="px-4 py-3">{row.expiryDate ? new Date(row.expiryDate).toLocaleDateString("vi-VN") : ""}</td>
                                     <td className="px-4 py-3">
-                                        {row.enabled &&
+                                        {row.enabled ?
                                             (
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
@@ -100,25 +99,20 @@ function OrderTable({ sort }: { sort: string }) {
                                                         <p>đã kích hoạt</p>
                                                     </TooltipContent>
                                                 </Tooltip>
+                                            ) : (
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Lock className="size-5 " />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Chưa kích hoạt</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
                                             )}
                                     </td>
 
                                     <td className="px-4 py-3 flex gap-x-2">
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="outline" onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setSelectItemCoupon(row);
-                                                    setOpenModalUpdateCoupon(true)
-                                                }}>
-                                                    <Edit className="size-5 " />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>chỉnh sửa</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-
+                                        {new Date(row.startDate) > new Date()  &&
                                         <Tooltip>
                                             <TooltipTrigger asChild>
                                                 <Button variant="outline" onClick={(e) => {
@@ -133,6 +127,24 @@ function OrderTable({ sort }: { sort: string }) {
                                                 <p>xóa</p>
                                             </TooltipContent>
                                         </Tooltip>
+                                        }
+
+                                        {new Date(row.startDate) > new Date()  && (
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="outline" onClick={(e) => {
+                                                        e.preventDefault();
+                                                        setSelectItemCoupon(row);
+                                                        setOpenModalUpdateCoupon(true)
+                                                    }}>
+                                                        <Edit className="size-5 " />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>chỉnh sửa</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        )}
                                     </td>
                                 </tr>
                             );
@@ -182,7 +194,7 @@ const OrderPage = () => {
             fetchFindCouponsByPrice();
         }, 300);
 
-        return ()=>clearTimeout(timeout);
+        return () => clearTimeout(timeout);
 
     }, [valueFindCouponsByPrice]);
 
