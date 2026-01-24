@@ -68,6 +68,7 @@ export default function OrderDetail({ id }: { id: string }) {
             const res2 = await getUserProfileById(data?.profileId)
             if (res2.code === 1)
                 setValueProfileId(res2.account);
+
         };
 
         fetchProduct1();
